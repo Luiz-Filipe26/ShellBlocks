@@ -16,7 +16,7 @@ import * as ShellBlocks from "shellblocks";
 import { MAIN_WORKSPACE_ID } from "./features/constants/constants";
 import { getPageElements } from "./features/ui/DOMProvider";
 import { GameData } from "@/types/api";
-import { setupSidebarResizer } from "./features/ui/sidebarResizer";
+import { SidebarResizer } from "./features/ui/SidebarResizer";
 import { setupSidebarToggle } from "./features/ui/sidebarController";
 import { setupHelpGuide } from "./features/ui/helpController";
 
@@ -27,7 +27,10 @@ export const IS_EXPERIMENT_MODE =
 start();
 
 async function start(): Promise<void> {
-    setupSidebarResizer(pageElements.sidebarResizer, pageElements.sidebar);
+    new SidebarResizer(
+        pageElements.sidebarResizerGutter,
+        pageElements.sidebar,
+    ).start();
     setupSidebarToggle(pageElements.btnToggleSidebar, pageElements.sidebar);
     setupHelpGuide({
         btnHelpGuide: pageElements.btnHelpGuide,
@@ -122,7 +125,11 @@ function registerButtonListeners(workspace: Blockly.WorkspaceSvg) {
             )
         ) {
             PersistenceManager.resetToFactorySettings(workspace, async () => {
-                await setupLevelSelector(gameData, pageElements, IS_EXPERIMENT_MODE);
+                await setupLevelSelector(
+                    gameData,
+                    pageElements,
+                    IS_EXPERIMENT_MODE,
+                );
                 pageElements.levelSelect.selectedIndex = 0;
                 pageElements.levelSelect.dispatchEvent(new Event("change"));
             });

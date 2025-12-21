@@ -1,4 +1,4 @@
-.resizer-gutter {
+.sidebar-resizer-gutter {
     width: 6px;
     cursor: col-resize;
     background-color: var(--color-border-default);
@@ -8,7 +8,7 @@
     position: relative;
 }
 
-.resizer-gutter::after {
+.sidebar-resizer-gutter::after {
     content: "";
     position: absolute;
     top: 0;
@@ -17,11 +17,14 @@
     right: -4px;
 }
 
-.resizer-gutter:hover,
-body.is-resizing .resizer-gutter {
+.sidebar-resizer-gutter:hover {
     background-color: var(--color-accent);
 }
 
-.sidebar.is-collapsed + .resizer-gutter {
+body.layout-drag-resizing .sidebar-resizer-gutter {
+    background-color: var(--color-accent);
+}
+
+.sidebar.is-collapsed + .sidebar-resizer-gutter {
     display: none;
 }

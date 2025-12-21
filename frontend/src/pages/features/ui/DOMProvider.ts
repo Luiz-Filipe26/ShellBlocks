@@ -25,7 +25,7 @@ const pageElements = {
     btnLoadGame: getElement<HTMLButtonElement>("btn-load-game"),
     btnResetDefs: getElement<HTMLButtonElement>("btn-reset-defs"),
     sidebar: getElement<HTMLElement>("sidebar"),
-    sidebarResizer: getElement<HTMLDivElement>("sidebar-resizer"),
+    sidebarResizerGutter: getElement<HTMLDivElement>("sidebar-resizer-gutter"),
     btnToggleSidebar: getElement<HTMLButtonElement>("btn-toggle-sidebar"),
     btnHelpGuide: getElement<HTMLButtonElement>("btn-help-guide"),
     helpModal: getElement<HTMLDialogElement>("help-modal"),

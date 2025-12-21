@@ -18,6 +18,11 @@ body {
     flex-direction: column;
 }
 
+body.layout-drag-resizing {
+    user-select: none;
+    cursor: col-resize;
+}
+
 code {
     font-family: var(--font-mono) !important;
     color: #2c3e50 !important;

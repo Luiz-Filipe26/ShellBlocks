@@ -14,7 +14,7 @@
     position: relative;
 }
 
-body.is-resizing .sidebar {
+body.layout-drag-resizing .sidebar {
     transition: none;
     cursor: col-resize;
 }
