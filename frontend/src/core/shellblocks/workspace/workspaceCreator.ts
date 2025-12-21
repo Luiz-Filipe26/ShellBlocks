@@ -67,9 +67,8 @@ export async function setupWorkspace(
     setLoggerForWorkspace(workspace, config.externalLogger);
     disableOrphanBlocks(workspace);
 
-    let restored = false;
     if (config.shouldSetupAutosave)
-        restored = loadSession(workspace, config.workspaceId);
+        loadSession(workspace, config.workspaceId);
 
     if (!findScriptRoot(workspace)) createScriptRoot(workspace);
 

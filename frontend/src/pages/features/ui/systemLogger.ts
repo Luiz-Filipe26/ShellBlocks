@@ -1,15 +1,11 @@
-import * as Blockly from "blockly";
 import * as ShellBlocks from "shellblocks"
 
 let logContainer: HTMLDivElement | null = null;
-let activeWorkspace: Blockly.WorkspaceSvg | null = null;
 
 export function initSystemLogger(
     container: HTMLDivElement,
-    workspace: Blockly.WorkspaceSvg | null,
 ): void {
     logContainer = container;
-    activeWorkspace = workspace;
     log("Logger do Sistema inicializado.", ShellBlocks.LogLevel.INFO);
 }
 

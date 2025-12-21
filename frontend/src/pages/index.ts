@@ -48,7 +48,7 @@ async function start(): Promise<void> {
             shouldSetupAutosave: true,
         },
     );
-    Logger.initSystemLogger(pageElements.systemLogContainer, workspace);
+    Logger.initSystemLogger(pageElements.systemLogContainer);
 
     if (workspace == null) {
         Logger.log(
