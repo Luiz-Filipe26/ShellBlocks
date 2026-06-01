@@ -10,12 +10,15 @@
         "preview": "vite preview"
     },
     "devDependencies": {
-        "@types/node": "^25.0.1",
+        "@types/node": "^25.9.1",
         "typescript": "^5.9.3",
-        "vite": "^6.4.1",
+        "vite": "^8.0.16",
         "vite-tsconfig-paths": "^5.1.4"
     },
     "dependencies": {
-        "blockly": "^12.3.0"
+        "blockly": "^12.5.1"
+    },
+    "overrides": {
+        "ws": "^8.21.0"
     }
 }
