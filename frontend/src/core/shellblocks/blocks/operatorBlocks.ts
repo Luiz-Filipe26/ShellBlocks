@@ -22,7 +22,7 @@ export function createOperatorBlock(operatorDefinition: CLI.CLIOperator): void {
                 name: operatorDefinition.id,
                 bindings: operatorDefinition.slots.map((slot) => ({
                     key: slot.name,
-                    source: "input",
+                    source: slot.type === "value" ? "field" : "input",
                     name: slot.name,
                 })),
 
@@ -80,19 +80,29 @@ function appendOperatorSlots(
     block: Blockly.BlockSvg,
 ): void {
     operatorDefinition.slots.forEach((slot) => {
-        const input = block
-            .appendStatementInput(slot.name)
-            .setCheck(slot.check);
+        let input: Blockly.Input;
 
-        if (slot.symbol) {
-            if (slot.symbolPlacement === "before") {
-                input.appendField(slot.symbol);
-                if (slot.label) input.appendField(slot.label);
-            } else {
-                if (slot.label) input.appendField(slot.label);
-            }
-        } else if (slot.label) {
+        if (slot.type === "value") {
+            input = block.appendDummyInput(slot.name);
+        } else {
+            input = block.appendStatementInput(slot.name).setCheck(slot.check);
+        }
+
+        if (slot.symbol && slot.symbolPlacement === "before") {
+            input.appendField(slot.symbol);
+            if (slot.label) input.appendField(slot.label);
+        } else if (!slot.symbol && slot.label) {
             input.appendField(slot.label);
+        }
+
+        if (slot.type === "value") {
+            const textField = new Blockly.FieldTextInput("");
+            input.appendField(textField, slot.name);
+        }
+
+        if (slot.symbol && slot.symbolPlacement === "after") {
+            if (slot.label) input.appendField(slot.label);
+            input.appendField(slot.symbol);
         }
     });
 }

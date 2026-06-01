@@ -11,7 +11,7 @@ import br.edu.ifmg.cli.models.ExecutionResult;
 
 public class SandboxRunner {
 
-    private static final int TIMEOUT_SECONDS = 10;
+    private static final int TIMEOUT_SECONDS = 30;
     private static final Logger logger = LoggerFactory.getLogger(SandboxRunner.class);
     private static final String LOG_FILE = "/tmp/last_cmd_out"; 
 

@@ -56,8 +56,8 @@ export interface CLICommand {
 
 export interface CLIControlSlot {
     name: string;
-    type: "statement";
-    check: "command";
+    type: "statement" | "value";
+    check: string;
     label?: string;
     symbol?: string;
     symbolPlacement?: "before" | "after";

@@ -57,12 +57,7 @@
                     }
                 }
             ],
-            "exclusiveOptions": [
-                [
-                    "-t",
-                    "-S"
-                ]
-            ],
+            "exclusiveOptions": [["-t", "-S"]],
             "operands": [
                 {
                     "id": "file",
@@ -529,33 +524,6 @@
             ]
         },
         {
-            "id": "file_target",
-            "shellCommand": "",
-            "label": "arquivo...",
-            "description": "Indica o arquivo de destino para o redirecionamento ou saída.",
-            "color": "#a67f5f",
-            "operands": [
-                {
-                    "id": "filename",
-                    "label": "Nome do Arquivo",
-                    "description": "Nome do arquivo de destino (ex: log.txt).",
-                    "color": "#888888",
-                    "type": "file",
-                    "defaultValue": "saida.txt",
-                    "cardinality": {
-                        "min": 1,
-                        "max": 1
-                    },
-                    "validations": [
-                        {
-                            "regex": "^[^/\\0;]+$",
-                            "errorMessage": "Nome de arquivo inválido."
-                        }
-                    ]
-                }
-            ]
-        },
-        {
             "id": "ps",
             "shellCommand": "ps",
             "label": "ps",
@@ -656,7 +624,7 @@
     "operators": [
         {
             "id": "pipe",
-            "label": "pipe",
+            "label": "| (Pipe)",
             "description": "Redireciona a saída do comando anterior para a entrada do próximo (Pipe).",
             "color": "#b1745b",
             "slots": [
@@ -673,13 +641,11 @@
                     "symbolPlacement": "before"
                 }
             ],
-            "slotsWithImplicitData": [
-                "B"
-            ]
+            "slotsWithImplicitData": ["B"]
         },
         {
             "id": "redirect_out",
-            "label": "redirect_out",
+            "label": "> (Redirecionar)",
             "description": "Salva a saída do comando em um arquivo (sobrescreve).",
             "color": "#b1745b",
             "slots": [
@@ -690,8 +656,8 @@
                 },
                 {
                     "name": "B",
-                    "type": "statement",
-                    "check": "command",
+                    "type": "value",
+                    "check": "file",
                     "symbol": ">",
                     "symbolPlacement": "before"
                 }
@@ -699,7 +665,7 @@
         },
         {
             "id": "redirect_append",
-            "label": "redirect_append",
+            "label": ">> (Append)",
             "description": "Adiciona a saída do comando ao final de um arquivo (append).",
             "color": "#b1745b",
             "slots": [
@@ -719,7 +685,7 @@
         },
         {
             "id": "and",
-            "label": "and",
+            "label": "&& (E lógico)",
             "description": "Executa o próximo comando apenas se o anterior tiver sucesso.",
             "color": "#b1745b",
             "slots": [
@@ -739,7 +705,7 @@
         },
         {
             "id": "or",
-            "label": "or",
+            "label": "|| (Ou lógico)",
             "description": "Executa o próximo comando apenas se o anterior falhar.",
             "color": "#b1745b",
             "slots": [
@@ -840,41 +806,23 @@
     "categories": [
         {
             "name": "Diretórios",
-            "commands": [
-                "ls",
-                "cd",
-                "mkdir"
-            ]
+            "commands": ["ls", "cd", "mkdir"]
         },
         {
             "name": "Arquivos",
-            "commands": [
-                "cp",
-                "mv",
-                "rm",
-                "touch"
-            ]
+            "commands": ["cp", "mv", "rm", "touch"]
         },
         {
-            "name": "Impressão de Texto",
-            "commands": [
-                "cat",
-                "echo"
-            ]
+            "name": "Saída",
+            "commands": ["cat", "echo"]
         },
         {
             "name": "Filtros",
-            "commands": [
-                "grep"
-            ]
+            "commands": ["grep"]
         },
         {
-            "name": "Rede e Sistema",
-            "commands": [
-                "ps",
-                "ping",
-                "curl"
-            ]
+            "name": "Sistema",
+            "commands": ["ps", "ping", "curl"]
         },
         {
             "name": "Fluxo",
@@ -882,18 +830,12 @@
                 "pipe",
                 "redirect_out",
                 "redirect_append",
-                "background",
-                "file_target"
+                "background"
             ]
         },
         {
             "name": "Lógica",
-            "commands": [
-                "and",
-                "or",
-                "if_statement",
-                "while_loop"
-            ]
+            "commands": ["and", "or", "if_statement", "while_loop"]
         }
     ]
 }

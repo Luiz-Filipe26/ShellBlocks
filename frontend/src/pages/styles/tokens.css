@@ -4,7 +4,8 @@
     --header-context-height: 60px;
     --header-height-collapsed: calc(var(--header-brand-height) + var(--header-context-height));
 
-    --sidebar-width: 480px;
+    --sidebar-width: 380px;
+    --sidebar-left-width: 240px;
     --bottom-panel-height: 150px;
 
     --level-details-max-width: 900px;

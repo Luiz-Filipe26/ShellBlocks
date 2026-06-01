@@ -104,6 +104,8 @@ export interface SelectorDependencies {
     levelSelect: HTMLSelectElement;
     levelSummaryText: HTMLElement;
     levelFullDetails: HTMLElement;
+    progressBarFill: HTMLElement;
+    progressLabel: HTMLElement;
 }
 
 export async function setupLevelSelector(
@@ -113,6 +115,7 @@ export async function setupLevelSelector(
 ): Promise<void> {
     const { levelSelect, levelSummaryText, levelFullDetails } =
         selectorDependencies;
+
     if (!data) {
         levelSelect.innerHTML = "<option>Erro ao carregar níveis</option>";
         levelSummaryText.textContent = "Erro de conexão com o servidor.";
@@ -143,14 +146,21 @@ export async function setupLevelSelector(
         isExperimentMode,
     );
 
-    registerLevelSelectorEvents(
-        levelSelect,
-        levelSummaryText,
-        levelFullDetails,
-    );
+    registerLevelSelectorEvents(selectorDependencies);
 
     levelSelect.value = SANDBOX_LEVEL_ID;
     levelSelect.dispatchEvent(new Event("change"));
+}
+
+function updateProgressBar(
+    currentIndex: number,
+    total: number,
+    deps: SelectorDependencies
+): void {
+    const { progressBarFill, progressLabel } = deps;
+    progressBarFill.style.width = `${total > 0 ? (currentIndex / total) * 100 : 0}%`;
+    progressLabel.textContent =
+        currentIndex > 0 ? `Nível ${currentIndex}/${total}` : `Modo Livre`;
 }
 
 function modifyOptionsToDisplayProgress(
@@ -185,24 +195,26 @@ function createOption(value: string, text?: string): HTMLOptionElement {
     return option;
 }
 
-function registerLevelSelectorEvents(
-    selectElement: HTMLSelectElement,
-    summaryElement: HTMLElement,
-    detailsElement: HTMLElement,
-): void {
-    selectElement.addEventListener("change", () => {
-        currentLevelId = selectElement.value;
+function registerLevelSelectorEvents(deps: SelectorDependencies): void {
+    const { levelSelect, levelSummaryText, levelFullDetails } = deps;
+
+    levelSelect.addEventListener("change", () => {
+        currentLevelId = levelSelect.value;
 
         if (currentLevelId === SANDBOX_LEVEL_ID) {
-            renderSandboxMode(summaryElement, detailsElement);
+            updateProgressBar(0, orderedLevels.length, deps);
+            renderSandboxMode(levelSummaryText, levelFullDetails);
             return;
         }
 
         const level = levelsCache.get(currentLevelId);
         if (level) {
-            renderLevelMode(level, summaryElement, detailsElement);
+            const index =
+                orderedLevels.findIndex((l) => l.id === currentLevelId) + 1;
+            updateProgressBar(index, orderedLevels.length, deps);
+            renderLevelMode(level, levelSummaryText, levelFullDetails);
         } else {
-            renderErrorState(currentLevelId, summaryElement, detailsElement);
+            renderErrorState(currentLevelId, levelSummaryText, levelFullDetails);
         }
     });
 }

@@ -108,35 +108,43 @@ public class ScriptGenerator {
 		return sb.toString();
 	}
 
-	private String generateOperator(AstNode node) {
-		if (node.operatorConfig() == null)
-			return "";
+    private String generateOperator(AstNode node) {
+        if (node.operatorConfig() == null)
+            return "";
 
-		var sb = new StringBuilder();
-		var config = node.operatorConfig();
+        var sb = new StringBuilder();
+        var config = node.operatorConfig();
 
-		for (var slot : config.slots()) {
-			node.getParameter(slot.key()).ifPresent(parameter -> {
-				String content = renderParameter(parameter, "\n");
-				if (content.isBlank())
-					return;
+        for (var slot : config.slots()) {
+            node.getParameter(slot.key()).ifPresent(parameter -> {
+                String content;
+                if (parameter.isContainer()) {
+                    content = renderChildren(parameter, "\n");
+                } else {
+                    String rawValue = parameter.value();
+                    if (rawValue == null || rawValue.isBlank()) return;
+                    content = quoteArgumentIfUnsafe(rawValue);
+                }
 
-				if (sb.length() > 0)
-					sb.append(" ");
+                if (content.isBlank())
+                    return;
 
-				if (slot.symbol() != null) {
-					if (AstVocabulary.Values.PLACEMENT_BEFORE.equals(slot.symbolPlacement())) {
-						sb.append(slot.symbol()).append(" ").append(content);
-					} else {
-						sb.append(content).append(" ").append(slot.symbol());
-					}
-				} else {
-					sb.append(content);
-				}
-			});
-		}
-		return sb.toString();
-	}
+                if (sb.length() > 0)
+                    sb.append(" ");
+
+                if (slot.symbol() != null) {
+                    if (AstVocabulary.Values.PLACEMENT_BEFORE.equals(slot.symbolPlacement())) {
+                        sb.append(slot.symbol()).append(" ").append(content);
+                    } else {
+                        sb.append(content).append(" ").append(slot.symbol());
+                    }
+                } else {
+                    sb.append(content);
+                }
+            });
+        }
+        return sb.toString();
+    }
 
 	private String generateOption(AstNode node) {
 		String flag = node.getParameter(AstVocabulary.Keys.FLAG).map(AstParameter::value).orElse("");

@@ -29,27 +29,33 @@
                         <img src="/icons/lucid/info.svg" class="icon-inline" alt="" />
                         <p id="level-summary-text" class="summary-text"></p>
                     </div>
+                    <div class="progress-bar-container">
+                        <span id="progress-label">Nível 1/19</span>
+                        <div class="progress-bar-track">
+                            <div id="progress-bar-fill" class="progress-bar-fill" style="width: 5%"></div>
+                        </div>
+                    </div>
 
                     <label for="level-select" class="input-label">Missão:</label>
                     <select id="level-select" class="level-select">
                         <option value="">Carregando...</option>
                     </select>
                 </div>
-
-                <button id="header-toggle-btn" class="btn-details-toggle" title="Ler guia completo">
-                    <span class="btn-label">Guia Completo</span>
-                    <img src="/icons/lucid/chevron-down.svg" class="btn-icon" alt="" />
-                </button>
-            </div>
-
-            <div class="header-details-panel">
-                <div class="details-content-wrapper">
-                    <article id="level-full-details" class="level-full-details"></article>
-                </div>
             </div>
         </header>
 
         <main class="main-layout" id="workspace-area">
+            <aside id="instructions-sidebar" class="sidebar-left instructions-sidebar">
+                <div class="panel-header">
+                    <h2>Missão Atual</h2>
+                </div>
+                <div class="sidebar-content">
+                    <article id="level-full-details" class="level-full-details"></article>
+                </div>
+            </aside>
+
+            <div id="instructions-resizer-gutter" class="sidebar-resizer-gutter resizer-left"></div>
+
             <div class="editor-column">
                 <div class="editor-toolbar">
                     <div class="toolbar-group">

@@ -10,7 +10,6 @@ import { runScript } from "./features/execution/scriptRunner";
 import * as Blockly from "blockly";
 import * as Logger from "./features/ui/systemLogger";
 import * as PersistenceManager from "./features/session/persistenceManager";
-import { setupHeaderBehavior } from "./features/ui/headerController";
 import { getDefinitions, getGameData } from "./features/session/dataManager";
 import * as ShellBlocks from "shellblocks";
 import { MAIN_WORKSPACE_ID } from "./features/constants/constants";
@@ -30,6 +29,12 @@ async function start(): Promise<void> {
     new SidebarResizer(
         pageElements.sidebarResizerGutter,
         pageElements.sidebar,
+        "right"
+    ).start();
+    new SidebarResizer(
+        pageElements.instructionsResizerGutter,
+        pageElements.instructionsSidebar,
+        "left",
     ).start();
     setupSidebarToggle(pageElements.btnToggleSidebar, pageElements.sidebar);
     setupHelpGuide({
@@ -61,8 +66,6 @@ async function start(): Promise<void> {
     if (IS_EXPERIMENT_MODE) {
         enforceExperimentRestrictions();
     }
-
-    setupHeaderBehavior(pageElements.appHeader, pageElements.headerToggleBtn);
 
     gameData = await getGameData();
     await setupLevelSelector(gameData, pageElements, IS_EXPERIMENT_MODE);

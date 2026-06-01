@@ -63,7 +63,7 @@
         },
         "type": {
           "type": "string",
-          "enum": ["statement", "value", "dummy"]
+          "enum": ["statement", "value"]
         },
         "check": {
           "type": "string"
