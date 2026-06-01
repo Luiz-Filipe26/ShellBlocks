@@ -1,12 +1,14 @@
 import { defineConfig, loadEnv } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 import path from "path";
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), "");
 
     return {
-        plugins: [tsconfigPaths()],
+        resolve: {
+            tsconfigPaths: true,
+        },
+        plugins: [],
         root: "src/pages",
         envDir: path.resolve(__dirname),
         publicDir: path.resolve(__dirname, "public"),
@@ -29,8 +31,10 @@ export default defineConfig(({ mode }) => {
             chunkSizeWarningLimit: 1000,
             rollupOptions: {
                 output: {
-                    manualChunks: {
-                        vendor: ["blockly"],
+                    manualChunks(id: string) {
+                        if (id.includes("blockly")) {
+                            return "vendor";
+                        }
                     },
                 },
             },
