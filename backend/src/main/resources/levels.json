@@ -4,7 +4,7 @@
             "id": "01_ls_basics",
             "title": "Primeiro contato",
             "summary": "Veja o que existe na pasta atual.",
-            "fullGuideHtml": "<h1>Bem-vindo ao terminal</h1><p>O terminal é como uma conversa: você escreve um comando, e o computador responde em texto.</p><h3>Sua Ferramenta: ls</h3><p>O comando <strong>ls</strong> (do inglês <em>list</em>) serve para perguntar: <em>'O que tem nesta pasta?'</em></p><h3>Sua Missão</h3><p>1. Arraste o bloco <strong>ls</strong> para dentro do <strong>Script Principal</strong>.<br>2. Clique no botão <strong>Executar</strong>.<br>3. Observe a resposta na saída do terminal.</p>",
+            "fullGuideHtml": "<h1>Bem-vindo ao Terminal</h1><p>O terminal é como uma conversa: você escreve um comando, e o computador responde em texto.</p><h3>Sua Ferramenta: ls</h3><p>O comando <strong>ls</strong> (do inglês <em>list</em>) serve para perguntar: <em>'O que tem nesta pasta?'</em></p><div class=\"terminal-display\">$ ls<br>fotos_viagem relatorio.txt</div><h3>Sua Missão</h3><ol><li>Abra a categoria <strong>Sistema</strong> e arraste o bloco <strong>ls</strong> para o Script Principal.</li><li>Clique no botão <strong>Executar</strong>.</li><li>Observe a lista de arquivos na saída do console.</li></ol>",
             "setupCommands": [
                 "rm -rf *",
                 "touch relatorio.txt",
@@ -18,7 +18,7 @@
             "id": "02_ls_options",
             "title": "Opções (Flags)",
             "summary": "Use opções para alterar o comportamento do comando.",
-            "fullGuideHtml": "<h1>Modificando o Comando</h1><p>O <code>ls</code> sozinho funciona, mas às vezes queremos mudar <strong>como</strong> ele funciona.</p><h3>O que é uma Opção?</h3><p>Opções (ou flags) são códigos que adicionamos para ativar 'poderes especiais'.</p><ul><li>Elas <strong>sempre</strong> começam com um traço (<code>-</code>).</li><li>Exemplo: <code>-l</code> (long) ativa o modo detalhado.</li><li>Exemplo: <code>-h</code> (human) deixa o tamanho legível.</li></ul><h3>Comparação Visual</h3><div style=\"background:#1e1e1e; color:#d4d4d4; padding:15px; border-radius:6px; font-family:'Courier New', monospace; font-size:0.85em; margin: 10px 0;\"><div style=\"margin-bottom:10px;\"><span style=\"color:#569cd6\">$</span> ls<br><span>backup.data</span></div><div style=\"border-top:1px solid #444; padding-top:10px;\"><span style=\"color:#569cd6\">$</span> ls -lh<br><span>-rw-r--r-- 1 user <strong>2.5K</strong> Dez 19 backup.data</span></div></div><h3>Sua Missão</h3><p>Queremos ver o tamanho do arquivo. Arraste o bloco <strong>ls</strong> e adicione as opções <strong>-l</strong> e <strong>-h</strong>.</p>",
+            "fullGuideHtml": "<h1>Modificando o Comando</h1><p>O <code>ls</code> sozinho funciona, mas podemos alterar <strong>como</strong> ele funciona usando Opções (Flags).</p><h3>O que é uma Opção?</h3><p>Opções ativam 'poderes especiais' e <strong>sempre</strong> começam com um traço (<code>-</code>).</p><ul><li><code>-l</code> (long): Ativa o modo detalhado (tamanho, datas).</li><li><code>-h</code> (human): Deixa o tamanho legível (Ex: 2.5K em vez de 2560 bytes).</li></ul><div class=\"terminal-display\">$ ls -lh<br>-rw-r--r-- 1 user 2.5K Dez 19 backup.data</div><h3>Sua Missão</h3><ol><li>Arraste o bloco <strong>ls</strong>.</li><li>Adicione um bloco de opção com <strong>-l</strong> e outro com <strong>-h</strong>.</li><li>Execute para ver o tamanho legível do arquivo de backup.</li></ol>",
             "setupCommands": [
                 "rm -rf *",
                 "dd if=/dev/zero of=backup.data bs=1024 count=3 2>/dev/null",
@@ -31,10 +31,8 @@
             "id": "03_mkdir",
             "title": "Operandos (Alvos)",
             "summary": "Crie uma nova pasta definindo um operando.",
-            "fullGuideHtml": "<h1>Ação e Reação</h1><p>Alguns comandos, como o <code>ls</code>, funcionam sozinhos. Outros precisam de um <strong>alvo</strong> para funcionar.</p><h3>O que é um operando?</h3><p>É a informação que você dá para o comando saber <strong>onde</strong> ou <strong>com quem</strong> agir. Pense nisso como um verbo que precisa de um complemento:</p><ul><li><em>Comando:</em> \"Crie uma pasta\" (mkdir)</li><li><em>Operando:</em> \"...com o nome <strong>projetos</strong>\"</li></ul><h3>Sua Missão</h3><p>Use o bloco <strong>mkdir</strong>. Note que ele tem um espaço vazio: isso é o operando. Escreva <code>projetos</code> nele para criar sua pasta.</p>",
-            "setupCommands": [
-                "rm -rf *"
-            ],
+            "fullGuideHtml": "<h1>Ação e Reação (Operandos)</h1><p>Alguns comandos funcionam sozinhos (como o <code>ls</code>). Outros precisam de um <strong>alvo</strong>, chamado de Operando.</p><h3>O que é um Operando?</h3><p>É o complemento do verbo. Se o comando é \"Crie uma pasta\", o operando responde \"Com qual nome?\".</p><h3>Sua Missão</h3><ol><li>Use o bloco <strong>mkdir</strong> (Make Directory).</li><li>Note que ele tem um espaço vazio na frente. Encaixe um bloco de <strong>Texto/Valor</strong> com a palavra <code>projetos</code>.</li><li>Execute para criar sua pasta.</li></ol>",
+            "setupCommands": ["rm -rf *"],
             "verificationScript": "if [ -d projetos ]; then echo 'OK'; exit 0; elif [ -d Projetos ] || [ -d PROJETOS ]; then echo 'Atenção: O Linux diferencia maiúsculas de minúsculas. Você criou Projetos, mas pedimos projetos.'; exit 1; else echo 'A pasta projetos não foi encontrada. Você preencheu o operando com o nome correto?'; exit 1; fi",
             "difficulty": "tutorial"
         },
@@ -43,10 +41,7 @@
             "title": "Entrando em Pastas",
             "summary": "Mude seu local de trabalho para a pasta 'projetos'.",
             "fullGuideHtml": "<h1>Navegação (GPS)</h1><p>Criar a pasta não significa que você está <em>dentro</em> dela. O terminal tem um 'foco' chamado diretório de trabalho.</p><h3>O Comando cd</h3><p>Significa <em>Change Directory</em> (Mudar Diretório). É o equivalente a dar um clique duplo em uma pasta no Windows.</p><h3>Sua Missão</h3><p>Use o bloco <strong>cd</strong> com o nome <code>projetos</code> para entrar na pasta que você criou.</p><p><em>Dica: Se funcionar, o comando pwd (que roda internamente) vai mostrar que o caminho mudou.</em></p>",
-            "setupCommands": [
-                "rm -rf *",
-                "mkdir -p projetos"
-            ],
+            "setupCommands": ["rm -rf *", "mkdir -p projetos"],
             "verificationScript": "if pwd | grep -q '/projetos$'; then echo 'OK'; exit 0; else echo 'Você ainda não está dentro da pasta projetos.'; exit 1; fi",
             "difficulty": "tutorial"
         },
@@ -55,10 +50,7 @@
             "title": "Clonando Arquivos",
             "summary": "Faça uma cópia de segurança do arquivo.",
             "fullGuideHtml": "<h1>A Arte de Copiar</h1><p>O comando <strong>cp</strong> (Copy) é o nosso copiador. Diferente do 'Mover', o arquivo original permanece lá.</p><h3>Dois Operandos</h3><p>Este comando precisa de duas informações, nesta ordem exata:</p><ol><li><strong>Origem:</strong> O que você quer copiar? (<code>plano.txt</code>)</li><li><strong>Destino:</strong> Qual será o nome da cópia? (<code>backup.txt</code>)</li></ol><h3>Sua Missão</h3><p>Configure o bloco <strong>cp</strong> para copiar o arquivo <code>plano.txt</code> e criar o <code>backup.txt</code>.</p>",
-            "setupCommands": [
-                "rm -rf *",
-                "echo 'Dominar o mundo' > plano.txt"
-            ],
+            "setupCommands": ["rm -rf *", "echo 'Dominar o mundo' > plano.txt"],
             "verificationScript": "if [ ! -f plano.txt ]; then echo 'O arquivo original sumiu! Você usou mv (mover) em vez de cp (copiar)?'; exit 1; fi; if [ -f backup.txt ]; then echo 'OK'; exit 0; else echo 'O arquivo backup.txt não foi criado.'; exit 1; fi",
             "difficulty": "tutorial"
         },
@@ -94,7 +86,7 @@
             "id": "08_redirect",
             "title": "Salvando Resultados (>)",
             "summary": "Grave a lista de arquivos dentro de um novo arquivo.",
-            "fullGuideHtml": "<h1>Persistência</h1><p>Normalmente, o resultado de um comando aparece na tela e desaparece logo depois. E se quisermos salvar?</p><h3>O Operador Maior Que (>)</h3><p>Esse símbolo pega o resultado do comando e <strong>escreve em um arquivo</strong>.</p><p><code>comando > arquivo.txt</code></p><h3>Sua Missão</h3><p>Liste os arquivos com <strong>ls</strong> e use o operador <strong>></strong> para salvar essa lista num arquivo chamado <code>inventario.txt</code>.</p>",
+            "fullGuideHtml": "<h1>Persistência de Dados</h1><p>Normalmente, o resultado de um comando aparece na tela e desaparece logo depois. E se quisermos salvar essa resposta?</p><h3>O Operador Maior Que (>)</h3><p>Esse símbolo pega o resultado do que está à esquerda e <strong>salva dentro de um arquivo</strong> à direita.</p><div class=\"terminal-display\">$ ls > inventario.txt</div><h3>Sua Missão</h3><ol><li>Coloque o comando <strong>ls</strong>.</li><li>Encaixe o operador <strong>> (Redirecionar)</strong> logo abaixo dele.</li><li>Na própria caixinha de texto do operador <code>></code>, digite o nome do arquivo: <code>inventario.txt</code>.</li><li>Execute para salvar a lista de arquivos!</li></ol>",
             "setupCommands": [
                 "rm -rf *",
                 "touch caixa_A.doc",
@@ -107,7 +99,7 @@
             "id": "09_pipe",
             "title": "Conectando Comandos (|)",
             "summary": "Use a saída de um comando como entrada de outro.",
-            "fullGuideHtml": "<h1>Encanamento de Dados</h1><p>No terminal, os comandos não precisam trabalhar sozinhos. Você pode conectá-los para criar soluções poderosas.</p><h3>Como o Pipe funciona?</h3><p>O operador <strong>|</strong> (Pipe ou Cano) funciona como um encanamento real:</p><ul><li>Ele pega o texto que <strong>sai</strong> do primeiro comando...</li><li>...e o empurra para que ele <strong>entre</strong> como informação no segundo comando.</li></ul><p>Em vez do texto aparecer na tela após o primeiro comando, ele viaja pelo 'cano' invisível até o próximo bloco.</p><h3>Sua Missão</h3><p>Vamos fazer o texto fluir: use o <strong>cat</strong> para ler o arquivo, mas não deixe o texto parar por ali. Conecte um <strong>pipe</strong> para que esse texto entre no <strong>grep</strong> e seja filtrado.</p><ol><li>Bloco <strong>cat</strong> (lendo <code>nomes.txt</code>)</li><li>Conecte o <strong>| (pipe)</strong></li><li>Bloco <strong>grep</strong> (buscando <code>Ana</code>)</li></ol>",
+            "fullGuideHtml": "<h1>Encanamento de Dados (|)</h1><p>No terminal, você pode conectar comandos para criar soluções poderosas usando o <strong>| (Pipe)</strong>.</p><h3>Como o Pipe funciona?</h3><p>Ele funciona como um cano invisível: pega o texto que <strong>sai</strong> do primeiro comando e o empurra para <strong>entrar</strong> no segundo comando, em vez de jogar na tela.</p><div class=\"terminal-display\">$ cat nomes.txt | grep \"Ana\"</div><h3>Sua Missão</h3><ol><li>Use o <strong>cat</strong> para ler o arquivo <code>nomes.txt</code>.</li><li>Conecte o operador <strong>| (Pipe)</strong> abaixo dele.</li><li>Conecte o comando <strong>grep</strong> buscando pela palavra <code>Ana</code>.</li><li>Execute para ver o texto fluir e ser filtrado!</li></ol>",
             "setupCommands": [
                 "rm -rf *",
                 "echo 'Carlos' > nomes.txt",
@@ -115,7 +107,6 @@
                 "echo 'Pedro' >> nomes.txt",
                 "echo 'Ana Paula' >> nomes.txt"
             ],
-            "verificationScript": "if grep -q 'Ana Maria' /tmp/last_cmd_out && ! grep -q 'Carlos' /tmp/last_cmd_out; then exit 0; else echo 'O fluxo de dados falhou. Certifique-se de que o cat está enviando os dados para o grep através do pipe.'; exit 1; fi",
             "difficulty": "tutorial"
         },
         {
@@ -123,9 +114,7 @@
             "title": "Sonar de Rede (Ping)",
             "summary": "Verifique se um endereço de rede está ativo.",
             "fullGuideHtml": "<h1>O Infinito e Além</h1><p>No Linux, o comando <strong>ping</strong> roda para sempre! Se você não limitá-lo, ele nunca para.</p><h3>A Opção de Contagem (-c)</h3><p>Para evitar que o terminal fique preso eternamente, usamos a opção <strong>-c</strong> (count) para definir quantas vezes queremos testar.</p><h3>Sua Missão</h3><p>Use o bloco <strong>ping</strong>:</p><ol><li>No campo de opções, ative a flag <strong>-c</strong> e digite <strong>4</strong> na contagem.</li><li>Defina o endereço como <code>127.0.0.1</code>.</li></ol>",
-            "setupCommands": [
-                "rm -rf *"
-            ],
+            "setupCommands": ["rm -rf *"],
             "verificationScript": "if grep -q '64 bytes from 127.0.0.1' /tmp/last_cmd_out; then exit 0; else echo 'O ping falhou. Verifique o endereço e se você limitou a contagem.'; exit 1; fi",
             "difficulty": "tutorial"
         },
@@ -160,10 +149,8 @@
             "id": "13_background",
             "title": "Multitarefa (&)",
             "summary": "Execute comandos em segundo plano.",
-            "fullGuideHtml": "<h1>Primeiro Desafio de Treino</h1><p>Agora que você conhece os comandos, vamos aprender a controlar como eles rodam.</p><h3>O que é o Segundo Plano?</h3><p>O símbolo <strong>&amp;</strong> no final de um comando avisa ao sistema: <em>\"Rode isso escondido e me devolva o controle do terminal agora\"</em>.</p><p>Isso é útil para comandos que nunca param, como o <code>ping</code>.</p><h3>Sua Missão</h3><p>Execute o comando <code>ping 127.0.0.1</code>, mas use o operador <strong>&amp;</strong> no final para que ele rode em segundo plano e não trave sua tela.</p>",
-            "setupCommands": [
-                "rm -rf *"
-            ],
+            "fullGuideHtml": "<h1>Multitarefa (&)</h1><p>Alguns comandos demoram muito ou nunca param de rodar (como o <code>ping</code>). Para não travar o terminal, podemos enviá-los para o segundo plano.</p><h3>O Operador E-Comercial (&)</h3><p>Colocar um <code>&</code> no final avisa ao sistema: <em>\"Rode isso de forma invisível e me devolva o controle agora\"</em>.</p><h3>Sua Missão</h3><ol><li>Configure o comando <code>ping</code> com o destino <code>127.0.0.1</code>.</li><li>Adicione o operador <strong>& (Background)</strong>.</li><li>Execute. O sistema vai confirmar que o processo começou a rodar em segundo plano!</li></ol>",
+            "setupCommands": ["rm -rf *"],
             "verificationScript": "sleep 0.5; if ps aux | grep -v grep | grep -q 'ping'; then exit 0; else echo 'O ping não está rodando em segundo plano. Você usou o & no final?'; exit 1; fi",
             "difficulty": "training"
         },
@@ -230,7 +217,7 @@
             "id": "18_challenge_security",
             "title": "Desafio: O Keylogger",
             "summary": "Identifique o malware, extraia a prova e elimine a ameaça.",
-            "fullGuideHtml": "<h1>Investigação Digital 🕵️‍♂️</h1><p>Um programa espião (Keylogger) está rodando no servidor e gravando tudo o que digitamos no arquivo <code>teclado.log</code>.</p><h3>Sua Missão</h3><ol><li><strong>Identificar:</strong> Use o <strong>ps aux</strong> para descobrir o nome do arquivo Python do espião (algo como <code>keylogger.py</code>).</li><li><strong>Extrair a Prova:</strong> O arquivo <code>teclado.log</code> está cheio de lixo, mas tem uma linha contendo a palavra <strong>SENHA</strong>. Use o <strong>grep</strong> para pegar essa linha e salve-a em <code>evidencia.txt</code> (use o redirecionador <code>></code>).</li><li><strong>Eliminar:</strong> Use o <strong>rm</strong> para apagar o arquivo do script espião que você descobriu no passo 1.</li></ol>",
+            "fullGuideHtml": "<h1>Investigação Digital 🕵️‍♂️</h1><p>Alerta! Um programa espião (Keylogger) está rodando no servidor e gravando tudo o que digitamos no arquivo <code>teclado.log</code>.</p><h3>Relatório da Missão</h3><ol><li><strong>Identificar:</strong> Use o comando <strong>ps</strong> para descobrir o nome do arquivo Python do espião (será algo como <code>keylogger_vX.py</code>).</li><li><strong>Extrair a Prova:</strong> O arquivo <code>teclado.log</code> está cheio de lixo, mas tem uma linha contendo a palavra <code>SENHA</code>. Use o <strong>grep</strong> para isolar essa linha e use o operador <strong>> (Redirecionar)</strong> para salvá-la em <code>evidencia.txt</code>.</li><li><strong>Eliminar:</strong> Use o comando <strong>rm</strong> para apagar definitivamente o script do espião que você descobriu no passo 1.</li></ol>",
             "setupCommands": [
                 "pkill -f keylogger_v3.py || true",
                 "rm -rf *",
@@ -250,7 +237,7 @@
             "id": "19_challenge_deploy",
             "title": "Desafio Final: O Grande Deploy",
             "summary": "Prepare o ambiente e coloque a aplicação no ar.",
-            "fullGuideHtml": "<h1>Teste Final de SysAdmin 🎓</h1><p>O time de desenvolvimento terminou a nova API, mas eles não sabem colocar no ar. É com você.</p><h3>Especificações do Deploy</h3><ol><li>Crie a estrutura de pastas: uma pasta <code>app</code> e dentro dela uma pasta <code>logs</code>.</li><li>Baixe o código fonte <code>server.py</code> que está disponível em <code>http://127.0.0.1:8000/server.py</code>.</li><li>Mova o arquivo baixado para dentro da pasta <code>app</code>.</li><li>Execute o servidor (<code>python3 app/server.py</code>) em <strong>segundo plano</strong>.</li></ol>",
+            "fullGuideHtml": "<h1>Teste Final de SysAdmin 🎓</h1><p>O time de desenvolvimento terminou a nova aplicação, mas não sabem colocá-la no ar. O servidor é todo seu.</p><h3>Especificações do Deploy</h3><ol><li>Crie a estrutura de pastas usando <code>mkdir</code>: crie uma pasta chamada <code>app</code>.</li><li>Baixe o código fonte usando o comando <strong>curl</strong> no endereço <code>http://127.0.0.1:8000/server.py</code> e use o operador <strong>> (Redirecionar)</strong> para salvar isso em <code>server.py</code>.</li><li>Use o comando <strong>mv</strong> para mover o <code>server.py</code> recém-criado para dentro da pasta <code>app</code>.</li><li><strong>Atenção:</strong> Execute o servidor usando o bloco específico de controle Python (<code>python3 app/server.py</code>) e coloque-o em <strong>segundo plano (&)</strong> para não travar a máquina.</li></ol><p><em>Boa sorte! Se você passar daqui, está pronto para o mundo real.</em></p>",
             "setupCommands": [
                 "rm -rf *",
                 "pkill -9 -f http.server || true",
