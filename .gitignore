@@ -1,6 +1,7 @@
 # Arquivos executáveis gerados na raiz
 *.jar
 *.exe
+/*.js
 
 # Arquivos de configuração de IDEs
 .idea/
