@@ -1,40 +1,33 @@
 #!/bin/bash
-
 set -e
 
-echo "--- [1/3] Construindo o Frontend ---"
+echo "--- [1/3] Compilando o Frontend (Single File) ---"
 cd frontend
 npm install --silent --no-fund
 npm run build --silent
 cd ..
 
-echo "--- [2/3] Integrando Frontend ao Backend ---"
-rm -rf backend/src/main/resources/public
-mkdir -p backend/src/main/resources/public
-cp -r frontend/dist/* backend/src/main/resources/public/
+echo "--- [2/3] Integrando artefatos do Frontend ao Backend ---"
+cp frontend/dist/index.html backend/src/index.html
 
-echo "--- [3/3] Compilando e Gerando JAR ---"
+echo "--- [3/3] Gerando artefato final do servidor (Bundler) ---"
 cd backend
-mvn -B clean package
-
-JAR_PATH=$(ls target/*.jar | grep -v "original-" | head -n 1)
-JAR_FILE=$(basename "$JAR_PATH")
-
+npm install --silent --no-fund
+npm run build --silent
 cd ..
 
-cp "backend/$JAR_PATH" .
-chmod +x "$JAR_FILE"
+cp backend/dist/server.js ./shellblocks-server.js
 
 if [ -n "$GITHUB_ENV" ]; then
-    echo "GENERATED_JAR_NAME=$JAR_FILE" >> "$GITHUB_ENV"
-    echo "⚙️ Enviando nome do JAR para o ambiente do GitHub Actions."
+    echo "GENERATED_FILE_NAME=shellblocks-server.js" >> "$GITHUB_ENV"
+    echo "Registro de variável no GITHUB_ENV concluído."
 fi
 
 echo ""
-echo "✅ SUCESSO!"
+echo "✅ Build finalizado com sucesso."
 echo "------------------------------------------------------"
-echo "O executável foi gerado na raiz do projeto:"
-echo "> ./$JAR_FILE"
+echo "Artefato consolidado gerado na raiz do projeto:"
+echo "> ./shellblocks-server.js"
 echo "------------------------------------------------------"
-echo "Para rodar, apenas digite:"
-echo "java -jar $JAR_FILE"
+echo "Para iniciar o servidor, execute:"
+echo "$ node shellblocks-server.js"

@@ -1,47 +1,37 @@
-# Equivalente ao 'set -e' (para o script parar se algum comando falhar)
+# Configura o PowerShell para interromper a execução imediatamente caso ocorra qualquer erro (equivalente ao set -e)
 $ErrorActionPreference = "Stop"
 
-Write-Host "--- [1/3] Construindo o Frontend ---"
+Write-Host "--- [1/3] Compilando o Frontend (Single File) ---" -ForegroundColor Cyan
 Set-Location frontend
-npm install --silent --no-fund
-npm run build --silent
-if ($LASTEXITCODE -ne 0) { throw "O build do Frontend falhou!" }
+& npm install --silent --no-fund
+& npm run build --silent
 Set-Location ..
 
-Write-Host "--- [2/3] Integrando Frontend ao Backend ---"
-# Remove a pasta public se ela existir e cria uma nova limpa
-if (Test-Path "backend/src/main/resources/public") {
-    Remove-Item -Recurse -Force "backend/src/main/resources/public"
-}
-New-Item -ItemType Directory -Force -Path "backend/src/main/resources/public" | Out-Null
-Copy-Item -Recurse -Force "frontend/dist/*" "backend/src/main/resources/public/"
+Write-Host "--- [2/3] Integrando artefatos do Frontend ao Backend ---" -ForegroundColor Cyan
+# Força a criação do diretório destino caso não exista e copia o index.html
+$null = New-Item -ItemType Directory -Force -Path "backend/src"
+Copy-Item -Path "frontend/dist/index.html" -Destination "backend/src/index.html" -Force
 
-Write-Host "--- [3/3] Compilando e Gerando JAR ---"
+Write-Host "--- [3/3] Gerando artefato final do servidor (Bundler) ---" -ForegroundColor Cyan
 Set-Location backend
-mvn -B clean package
-
-# Busca o arquivo JAR ignorando o "original-"
-$JarPath = Get-ChildItem "target/*.jar" | Where-Object { $_.Name -notmatch "original-" } | Select-Object -First 1
-$JarFile = $JarPath.Name
-
+& npm install --silent --no-fund
+& npm run build --silent
 Set-Location ..
 
-# Copia o JAR para a raiz
-Copy-Item $JarPath.FullName .
+# Move o executável único consolidado para a raiz do projeto
+Copy-Item -Path "backend/dist/server.js" -Destination "./shellblocks-server.js" -Force
 
-# Nota: Windows/PowerShell não usa 'chmod +x'. O arquivo já é executável via java.
-
-# Integração com o GitHub Actions
+# Verifica se está rodando no ambiente do GitHub Actions para registrar a variável
 if ($env:GITHUB_ENV) {
-    Add-Content -Path $env:GITHUB_ENV -Value "GENERATED_JAR_NAME=$JarFile"
-    Write-Host "⚙️ Enviando nome do JAR para o ambiente do GitHub Actions."
+    Add-Content -Path $env:GITHUB_ENV -Value "GENERATED_FILE_NAME=shellblocks-server.js"
+    Write-Host "Registro de variável no GITHUB_ENV concluído." -ForegroundColor Green
 }
 
 Write-Host ""
-Write-Host "✅ SUCESSO!"
+Write-Host "✅ Build finalizado com sucesso." -ForegroundColor Green
 Write-Host "------------------------------------------------------"
-Write-Host "O executável foi gerado na raiz do projeto:"
-Write-Host "> ./$JarFile"
+Write-Host "Artefato consolidado gerado na raiz do projeto:"
+Write-Host "> ./shellblocks-server.js" -ForegroundColor Yellow
 Write-Host "------------------------------------------------------"
-Write-Host "Para rodar, apenas digite:"
-Write-Host "java -jar $JarFile"
+Write-Host "Para iniciar o servidor, execute:"
+Write-Host "$ node shellblocks-server.js" -ForegroundColor Cyan

@@ -22,19 +22,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Configurar JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: "17"
-          distribution: "temurin"
-          cache: "maven"
-
       - name: Configurar Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: '**/package-lock.json'
 
       - name: Dar permissão de execução ao script
         run: chmod +x build_project.sh
@@ -42,36 +35,36 @@ jobs:
       - name: Executar Build Completo
         run: ./build_project.sh
 
-      - name: Verificar JAR Gerado
+      - name: Verificar Artefato Gerado
         run: |
-          JAR_NAME="${{ env.GENERATED_JAR_NAME }}"
+          FILE_NAME="${{ env.GENERATED_FILE_NAME }}"
 
-          if [ -z "$JAR_NAME" ]; then
-            echo "❌ GENERATED_JAR_NAME não definido."
+          if [ -z "$FILE_NAME" ]; then
+            echo "❌ GENERATED_FILE_NAME não definido."
             exit 1
           fi
 
-          if [ ! -f "$JAR_NAME" ]; then
-            echo "❌ JAR '$JAR_NAME' não encontrado."
+          if [ ! -f "$FILE_NAME" ]; then
+            echo "❌ Artefato '$FILE_NAME' não encontrado."
             exit 1
           fi
 
-          echo "✅ JAR '$JAR_NAME' validado."
+          echo "✅ Artefato '$FILE_NAME' validado com sucesso."
 
       - name: Upload Artifact (Dev)
         if: "!startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v4
         with:
           name: shellblocks-dev-build
-          path: ${{ env.GENERATED_JAR_NAME }}
+          path: ${{ env.GENERATED_FILE_NAME }}
           retention-days: 3
 
       - name: Preparar Asset da Release
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          RELEASE_NAME="shellblocks-${VERSION}.jar"
-          mv "${{ env.GENERATED_JAR_NAME }}" "$RELEASE_NAME"
+          RELEASE_NAME="shellblocks-${VERSION}.js"
+          mv "${{ env.GENERATED_FILE_NAME }}" "$RELEASE_NAME"
           echo "RELEASE_ASSET=$RELEASE_NAME" >> $GITHUB_ENV
 
       - name: Criar Release Oficial
@@ -81,5 +74,7 @@ jobs:
           files: ${{ env.RELEASE_ASSET }}
           body: |
             Release automática gerada pelo pipeline de integração contínua.
+            Para executar o projeto, basta ter o Node.js instalado e rodar:
+            `node ${{ env.RELEASE_ASSET }}`
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
