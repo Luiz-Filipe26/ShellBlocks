@@ -1,0 +1,28 @@
+{
+    "name": "shell-blocks-backend",
+    "private": true,
+    "version": "1.0.0",
+    "main": "dist/server.js",
+    "type": "module",
+    "scripts": {
+        "dev": "tsx watch --env-file=.env src/server.ts",
+        "build": "esbuild src/server.ts --bundle --platform=node --target=node20 --loader:.html=text --outfile=dist/server.js",
+        "start": "node --env-file=.env dist/server.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "cors": "^2.8.6",
+        "express": "^5.2.1"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.6",
+        "@types/node": "^25.9.1",
+        "esbuild": "^0.28.0",
+        "tsx": "^4.22.4",
+        "typescript": "^6.0.3"
+    }
+}

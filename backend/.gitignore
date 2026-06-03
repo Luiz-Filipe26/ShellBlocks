@@ -1,27 +1,22 @@
-# --- Build e Logs ---
-target/
-bin/
-*.class
-*.jar
-*.war
-*.log
+# Dependências locais do Node
+node_modules/
 
-# --- Maven (Temporários) ---
-pom.xml.*
-dependency-reduced-pom.xml
+# Pasta de saída do compilador local (o esbuild gera aqui antes de mover)
+dist/
 
-# --- Frontend Build (Arquivos Gerados) ---
-src/main/resources/public/
+# Arquivos de configuração de ambiente (segurança e portas locais)
+.env
+.env.local
 
-# --- IDEs (Eclipse, IntelliJ, VSCode) ---
-.classpath
-.project
-.settings/
-.factorypath
-.vscode/
-.idea/
-*.iml
+# O arquivo do Frontend copiado dinamicamente pelo script de build
+# Ignorado para não sujar o histórico do Git com código gerado automaticamente
+src/index.html
 
-# --- Sistema Operacional ---
+# Logs de erro do NPM
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Arquivos temporários do sistema operacional
 .DS_Store
 Thumbs.db
