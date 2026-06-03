@@ -128,20 +128,20 @@ export function uploadDefinitions(workspace: Blockly.WorkspaceSvg): void {
  */
 export async function resetToFactorySettings(
     workspace: Blockly.WorkspaceSvg,
-    onLevelsReset: () => Promise<void>,
+    onLevelsReset: () => void,
 ): Promise<void> {
     try {
         Logger.log("Iniciando reset de fábrica...", ShellBlocks.LogLevel.INFO);
 
-        const defaultDefs = await DataManager.resetDefinitions();
+        const defaultDefs = DataManager.resetDefinitions();
         if (defaultDefs) {
             ShellBlocks.refreshWorkspaceDefinitions(workspace, defaultDefs);
         } else {
             throw new Error("Falha ao baixar definições padrão.");
         }
 
-        await DataManager.resetGameData();
-        await onLevelsReset();
+        DataManager.resetGameData();
+        onLevelsReset();
 
         ShellBlocks.showToast(
             workspace,

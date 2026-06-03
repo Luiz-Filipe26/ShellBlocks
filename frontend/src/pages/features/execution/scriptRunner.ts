@@ -6,6 +6,7 @@ import { ApiRoutes } from "@/config/apiRoutes";
 import * as Logger from "../ui/systemLogger";
 import * as Blockly from "blockly";
 import { getCachedLevelData, SANDBOX_LEVEL_ID } from "../session/levelLoader";
+import { generateShellScript } from "@/core/shellblocks/generation/scriptGenerator";
 
 interface RunDependencies {
     cliOutput: HTMLPreElement;
@@ -44,6 +45,15 @@ export async function runScript(
         return;
     }
 
+    let userScript = "";
+    try {
+        userScript = generateShellScript(ast);
+    } catch (error) {
+        Logger.log(`Erro ao gerar script localmente: ${error}`, ShellBlocks.LogLevel.ERROR);
+        cliOutput.textContent += "[ERRO DE GERAÇÃO INTERNA]\n$";
+        return;
+    }
+
     cliOutput.textContent += " executar-script-atual\n";
 
     runBtn.disabled = true;
@@ -51,10 +61,14 @@ export async function runScript(
     cliOutput.scrollTop = cliOutput.scrollHeight;
 
     try {
+        const level = getCachedLevelData(currentLevelId);
+
         const payload: API.RunRequest = {
-            ast,
-            level: getCachedLevelData(currentLevelId) || null,
+            userScript: userScript,
+            setupCommands: level?.setupCommands || [],
+            verificationScript: level?.verificationScript || "",
         };
+
         const result = await requestExecution(payload);
         renderExecutionOutput(
             result,

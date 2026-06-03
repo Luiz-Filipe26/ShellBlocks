@@ -1,0 +1,841 @@
+{
+    "$schema": "./cli_schema.json",
+    "commands": [
+        {
+            "id": "ls",
+            "shellCommand": "ls",
+            "label": "ls",
+            "description": "Lista o conteúdo de diretórios. Mostra informações sobre arquivos e pastas.",
+            "color": "#5b80a5",
+            "optionColor": "#7fbf7f",
+            "options": [
+                {
+                    "flag": "-l",
+                    "description": "Usa o formato de listagem longa, mostrando detalhes."
+                },
+                {
+                    "flag": "-a",
+                    "longFlag": "--all",
+                    "description": "Mostra todas as entradas, incluindo as ocultas (que começam com '.')."
+                },
+                {
+                    "flag": "-h",
+                    "longFlag": "--human-readable",
+                    "description": "Com -h, mostra os tamanhos de forma legível (ex: 1K, 234M, 2G)."
+                },
+                {
+                    "flag": "-t",
+                    "description": "Ordena pela data de modificação, com os mais recentes primeiro."
+                },
+                {
+                    "flag": "-S",
+                    "description": "Ordena por tamanho de arquivo, com os maiores primeiro."
+                },
+                {
+                    "flag": "-r",
+                    "longFlag": "--reverse",
+                    "description": "Inverte a ordem da ordenação."
+                },
+                {
+                    "flag": "-R",
+                    "longFlag": "--recursive",
+                    "description": "Lista os subdiretórios recursivamente."
+                },
+                {
+                    "flag": "--width",
+                    "description": "Controla a largura da saída, em caracteres.",
+                    "argument": {
+                        "type": "number",
+                        "label": "Largura da tela",
+                        "defaultValue": "80",
+                        "validations": [
+                            {
+                                "regex": "^[1-9][0-9]*$",
+                                "errorMessage": "A largura deve ser um número inteiro positivo."
+                            }
+                        ]
+                    }
+                }
+            ],
+            "exclusiveOptions": [["-t", "-S"]],
+            "operands": [
+                {
+                    "id": "file",
+                    "label": "Arquivo",
+                    "description": "Um arquivo específico a ser listado.",
+                    "color": "#a67f5f",
+                    "type": "file",
+                    "defaultValue": "arquivo.txt",
+                    "cardinality": {
+                        "min": 0,
+                        "max": "unlimited"
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^/\\0;]*$",
+                            "errorMessage": "Nome de arquivo inválido (não pode conter '/')."
+                        }
+                    ]
+                },
+                {
+                    "id": "folder",
+                    "label": "Pasta",
+                    "description": "Um diretório a ser listado. Se omitido, usa o diretório atual.",
+                    "color": "#a67f5f",
+                    "type": "folder",
+                    "defaultValue": ".",
+                    "cardinality": {
+                        "min": 0,
+                        "max": "unlimited"
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^;\\0]*$",
+                            "errorMessage": "Caminho de pasta contém caracteres inválidos."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "cd",
+            "shellCommand": "cd",
+            "label": "cd",
+            "description": "Altera o diretório de trabalho atual.",
+            "color": "#7fc37f",
+            "optionColor": "#7fbf7f",
+            "options": [],
+            "operands": [
+                {
+                    "id": "directory",
+                    "label": "Diretório",
+                    "description": "Diretório para o qual navegar.",
+                    "color": "#a67f5f",
+                    "type": "folder",
+                    "defaultValue": "~",
+                    "cardinality": {
+                        "min": 1,
+                        "max": 1
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^\\0;]+$",
+                            "errorMessage": "Caminho de diretório inválido."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "mkdir",
+            "shellCommand": "mkdir",
+            "label": "mkdir",
+            "description": "Cria diretórios.",
+            "color": "#8e44ad",
+            "optionColor": "#7fbf7f",
+            "options": [
+                {
+                    "flag": "-p",
+                    "longFlag": "--parents",
+                    "description": "Cria diretórios pais conforme necessário e não gera erro se já existirem."
+                },
+                {
+                    "flag": "-v",
+                    "longFlag": "--verbose",
+                    "description": "Exibe uma mensagem para cada diretório criado."
+                },
+                {
+                    "flag": "-m",
+                    "longFlag": "--mode",
+                    "description": "Define as permissões do diretório usando notação octal (por exemplo: 755)."
+                }
+            ],
+            "operands": [
+                {
+                    "id": "directories",
+                    "label": "Diretórios",
+                    "description": "Diretórios a serem criados.",
+                    "color": "#a67f5f",
+                    "type": "folder",
+                    "defaultValue": "nova_pasta",
+                    "cardinality": {
+                        "min": 1,
+                        "max": "unlimited"
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^\\0;]+$",
+                            "errorMessage": "Nome de diretório inválido."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "cp",
+            "shellCommand": "cp",
+            "label": "cp",
+            "description": "Copia arquivos e diretórios.",
+            "color": "#6a9fb5",
+            "optionColor": "#7fbf7f",
+            "options": [
+                {
+                    "flag": "-r",
+                    "longFlag": "--recursive",
+                    "description": "Copia diretórios recursivamente."
+                },
+                {
+                    "flag": "-v",
+                    "longFlag": "--verbose",
+                    "description": "Exibe o que está sendo copiado."
+                },
+                {
+                    "flag": "-f",
+                    "longFlag": "--force",
+                    "description": "Força a cópia sobrescrevendo arquivos existentes."
+                }
+            ],
+            "operands": [
+                {
+                    "id": "source",
+                    "label": "Origem",
+                    "description": "Arquivo ou diretório de origem.",
+                    "color": "#a67f5f",
+                    "type": "file",
+                    "defaultValue": "origem.txt",
+                    "cardinality": {
+                        "min": 1,
+                        "max": "unlimited"
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^\\0;]*$",
+                            "errorMessage": "Caminho inválido."
+                        }
+                    ]
+                },
+                {
+                    "id": "destination",
+                    "label": "Destino",
+                    "description": "Arquivo ou diretório de destino.",
+                    "color": "#a67f5f",
+                    "type": "file",
+                    "defaultValue": "destino.txt",
+                    "cardinality": {
+                        "min": 1,
+                        "max": 1
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^\\0;]*$",
+                            "errorMessage": "Caminho inválido."
+                        }
+                    ]
+                }
+            ],
+            "operandIdsSequenceDelimiter": "-",
+            "operandSyntaxRules": [
+                {
+                    "regexPattern": "(source-)+destination-",
+                    "errorMessage": null
+                },
+                {
+                    "regexPattern": "destination-(source-)+",
+                    "errorMessage": "O 'Destino' deve ser sempre o último bloco do comando cp."
+                }
+            ]
+        },
+        {
+            "id": "mv",
+            "shellCommand": "mv",
+            "label": "mv",
+            "description": "Move ou renomeia arquivos e diretórios.",
+            "color": "#6ab56a",
+            "optionColor": "#7fbf7f",
+            "options": [
+                {
+                    "flag": "-f",
+                    "description": "Força a movimentação sobrescrevendo arquivos existentes."
+                },
+                {
+                    "flag": "-v",
+                    "description": "Exibe o que está sendo movido."
+                }
+            ],
+            "operands": [
+                {
+                    "id": "source",
+                    "label": "Origem",
+                    "description": "Arquivo ou diretório de origem.",
+                    "color": "#a67f5f",
+                    "type": "file",
+                    "defaultValue": "origem.txt",
+                    "cardinality": {
+                        "min": 1,
+                        "max": "unlimited"
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^\\0;]*$",
+                            "errorMessage": "Caminho inválido."
+                        }
+                    ]
+                },
+                {
+                    "id": "destination",
+                    "label": "Destino",
+                    "description": "Novo nome ou local.",
+                    "color": "#a67f5f",
+                    "type": "file",
+                    "defaultValue": "destino.txt",
+                    "cardinality": {
+                        "min": 1,
+                        "max": 1
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^\\0;]*$",
+                            "errorMessage": "Caminho inválido."
+                        }
+                    ]
+                }
+            ],
+            "operandIdsSequenceDelimiter": "-",
+            "operandSyntaxRules": [
+                {
+                    "regexPattern": "(source-)+destination-",
+                    "errorMessage": null
+                },
+                {
+                    "regexPattern": "destination-(source-)+",
+                    "errorMessage": "O 'Destino' deve ser o último bloco para que o comando mv saiba para onde mover os arquivos."
+                }
+            ]
+        },
+        {
+            "id": "rm",
+            "shellCommand": "rm",
+            "label": "rm",
+            "description": "Remove arquivos ou diretórios.",
+            "color": "#c25b5b",
+            "optionColor": "#7fbf7f",
+            "options": [
+                {
+                    "flag": "-r",
+                    "description": "Remove diretórios recursivamente."
+                },
+                {
+                    "flag": "-f",
+                    "description": "Força a remoção sem pedir confirmação."
+                }
+            ],
+            "operands": [
+                {
+                    "id": "target",
+                    "label": "Alvo",
+                    "description": "Arquivo ou diretório a remover.",
+                    "color": "#a67f5f",
+                    "type": "file",
+                    "defaultValue": "arquivo.txt",
+                    "cardinality": {
+                        "min": 1,
+                        "max": "unlimited"
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^\\0;]*$",
+                            "errorMessage": "Caminho inválido."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "touch",
+            "shellCommand": "touch",
+            "label": "touch",
+            "description": "Cria arquivos vazios ou atualiza timestamps.",
+            "color": "#b58a6a",
+            "optionColor": "#7fbf7f",
+            "options": [],
+            "operands": [
+                {
+                    "id": "file",
+                    "label": "Arquivo",
+                    "description": "Arquivo a ser criado ou atualizado.",
+                    "color": "#a67f5f",
+                    "type": "file",
+                    "defaultValue": "arquivo.txt",
+                    "cardinality": {
+                        "min": 1,
+                        "max": "unlimited"
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^/\\0;]*$",
+                            "errorMessage": "Nome de arquivo inválido."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "cat",
+            "shellCommand": "cat",
+            "label": "cat",
+            "description": "Exibe o conteúdo de arquivos.",
+            "color": "#5d7fa6",
+            "optionColor": "#7fbf7f",
+            "options": [
+                {
+                    "flag": "-n",
+                    "description": "Numera todas as linhas da saída."
+                },
+                {
+                    "flag": "-b",
+                    "description": "Numera apenas linhas não vazias."
+                }
+            ],
+            "operands": [
+                {
+                    "id": "file",
+                    "label": "Arquivo",
+                    "description": "Arquivo cujo conteúdo será exibido.",
+                    "color": "#a67f5f",
+                    "type": "file",
+                    "defaultValue": "arquivo.txt",
+                    "cardinality": {
+                        "min": 1,
+                        "max": "unlimited"
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^/\\0;]*$",
+                            "errorMessage": "Nome de arquivo inválido."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "grep",
+            "shellCommand": "grep",
+            "label": "grep",
+            "description": "Procura por padrões de texto em arquivos.",
+            "color": "#9b6ab5",
+            "optionColor": "#7fbf7f",
+            "options": [
+                {
+                    "flag": "-i",
+                    "description": "Ignora diferenças de maiúsculas/minúsculas."
+                },
+                {
+                    "flag": "-n",
+                    "description": "Mostra números das linhas."
+                },
+                {
+                    "flag": "-v",
+                    "longFlag": "--invert-match",
+                    "description": "Seleciona linhas que não casam com o padrão."
+                }
+            ],
+            "operands": [
+                {
+                    "id": "pattern",
+                    "label": "Padrão",
+                    "description": "Texto ou expressão regular.",
+                    "color": "#a67f5f",
+                    "type": "string",
+                    "defaultValue": "erro",
+                    "cardinality": {
+                        "min": 1,
+                        "max": 1
+                    },
+                    "validations": [
+                        {
+                            "regex": "^.{1,200}$",
+                            "errorMessage": "Padrão muito longo."
+                        }
+                    ]
+                },
+                {
+                    "id": "files",
+                    "label": "Arquivos",
+                    "description": "Arquivos nos quais será feita a busca.",
+                    "color": "#a67f5f",
+                    "type": "file",
+                    "defaultValue": "arquivo.txt",
+                    "cardinality": {
+                        "min": 1,
+                        "max": "unlimited"
+                    },
+                    "validations": [
+                        {
+                            "regex": "^[^/\\0;]*$",
+                            "errorMessage": "Nome de arquivo inválido."
+                        }
+                    ]
+                }
+            ],
+            "operandIdsSequenceDelimiter": "-",
+            "operandSyntaxRules": [
+                {
+                    "regexPattern": "pattern-(files-)+",
+                    "errorMessage": null
+                },
+                {
+                    "regexPattern": "files-pattern-",
+                    "errorMessage": "Inversão detectada: O 'Padrão' de busca deve vir antes do arquivo no comando grep."
+                }
+            ]
+        },
+        {
+            "id": "echo",
+            "shellCommand": "echo",
+            "label": "echo",
+            "description": "Imprime texto na saída padrão.",
+            "color": "#c29b3b",
+            "optionColor": "#7fbf7f",
+            "options": [
+                {
+                    "flag": "-n",
+                    "description": "Não adiciona nova linha ao final."
+                }
+            ],
+            "operands": [
+                {
+                    "id": "text",
+                    "label": "Texto",
+                    "description": "Texto a ser exibido.",
+                    "color": "#a67f5f",
+                    "type": "string",
+                    "defaultValue": "Olá",
+                    "cardinality": {
+                        "min": 1,
+                        "max": "unlimited"
+                    },
+                    "validations": [
+                        {
+                            "regex": "^.{0,500}$",
+                            "errorMessage": "Texto muito longo."
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ps",
+            "shellCommand": "ps",
+            "label": "ps",
+            "description": "Exibe o status dos processos (programas) em execução no sistema.",
+            "color": "#4a90e2",
+            "optionColor": "#7fbf7f",
+            "options": [
+                {
+                    "flag": "aux",
+                    "description": "Mostra todos os processos de todos os usuários com detalhes (CPU, Memória, etc)."
+                },
+                {
+                    "flag": "-e",
+                    "longFlag": "--everyone",
+                    "description": "Lista absolutamente todos os processos do sistema."
+                },
+                {
+                    "flag": "-f",
+                    "longFlag": "--full",
+                    "description": "Exibe a listagem no formato completo, mostrando quem iniciou o processo (PPID)."
+                },
+                {
+                    "flag": "--sort",
+                    "description": "Ordena a lista por uma coluna específica.",
+                    "argument": {
+                        "type": "string",
+                        "label": "coluna",
+                        "defaultValue": "-pcpu"
+                    }
+                }
+            ],
+            "operands": [
+                {
+                    "id": "pid",
+                    "label": "PID",
+                    "description": "ID específico do processo que você deseja consultar.",
+                    "color": "#a67f5f",
+                    "type": "number",
+                    "cardinality": {
+                        "min": 0,
+                        "max": "unlimited"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "ping",
+            "shellCommand": "ping",
+            "label": "ping",
+            "description": "Envia pacotes para testar a conectividade de rede.",
+            "color": "#e67e22",
+            "options": [
+                {
+                    "flag": "-c",
+                    "description": "Número de respostas a aguardar.",
+                    "argument": {
+                        "type": "number",
+                        "label": "contagem"
+                    }
+                }
+            ],
+            "operands": [
+                {
+                    "id": "host",
+                    "description": "O endereço a receber a solicitação",
+                    "label": "Endereço",
+                    "type": "string",
+                    "defaultValue": "127.0.0.1",
+                    "cardinality": {
+                        "min": 1,
+                        "max": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "curl",
+            "shellCommand": "curl",
+            "label": "curl",
+            "description": "Transfere dados de um servidor via URL.",
+            "color": "#e67e22",
+            "options": [],
+            "operands": [
+                {
+                    "id": "url",
+                    "description": "A URL a ser requisitada.",
+                    "label": "URL",
+                    "type": "string",
+                    "defaultValue": "http://localhost:8000",
+                    "cardinality": {
+                        "min": 1,
+                        "max": 1
+                    }
+                }
+            ]
+        }
+    ],
+    "operators": [
+        {
+            "id": "pipe",
+            "label": "| (Pipe)",
+            "description": "Redireciona a saída do comando anterior para a entrada do próximo (Pipe).",
+            "color": "#b1745b",
+            "slots": [
+                {
+                    "name": "A",
+                    "type": "statement",
+                    "check": "command"
+                },
+                {
+                    "name": "B",
+                    "type": "statement",
+                    "check": "command",
+                    "symbol": "|",
+                    "symbolPlacement": "before"
+                }
+            ],
+            "slotsWithImplicitData": ["B"]
+        },
+        {
+            "id": "redirect_out",
+            "label": "> (Redirecionar)",
+            "description": "Salva a saída do comando em um arquivo (sobrescreve).",
+            "color": "#b1745b",
+            "slots": [
+                {
+                    "name": "A",
+                    "type": "statement",
+                    "check": "command"
+                },
+                {
+                    "name": "B",
+                    "type": "value",
+                    "check": "file",
+                    "symbol": ">",
+                    "symbolPlacement": "before"
+                }
+            ]
+        },
+        {
+            "id": "redirect_append",
+            "label": ">> (Append)",
+            "description": "Adiciona a saída do comando ao final de um arquivo (append).",
+            "color": "#b1745b",
+            "slots": [
+                {
+                    "name": "A",
+                    "type": "statement",
+                    "check": "command"
+                },
+                {
+                    "name": "B",
+                    "type": "statement",
+                    "check": "command",
+                    "symbol": ">>",
+                    "symbolPlacement": "before"
+                }
+            ]
+        },
+        {
+            "id": "and",
+            "label": "&& (E lógico)",
+            "description": "Executa o próximo comando apenas se o anterior tiver sucesso.",
+            "color": "#b1745b",
+            "slots": [
+                {
+                    "name": "A",
+                    "type": "statement",
+                    "check": "command"
+                },
+                {
+                    "name": "B",
+                    "type": "statement",
+                    "check": "command",
+                    "symbol": "&&",
+                    "symbolPlacement": "before"
+                }
+            ]
+        },
+        {
+            "id": "or",
+            "label": "|| (Ou lógico)",
+            "description": "Executa o próximo comando apenas se o anterior falhar.",
+            "color": "#b1745b",
+            "slots": [
+                {
+                    "name": "A",
+                    "type": "statement",
+                    "check": "command"
+                },
+                {
+                    "name": "B",
+                    "type": "statement",
+                    "check": "command",
+                    "symbol": "||",
+                    "symbolPlacement": "before"
+                }
+            ]
+        },
+        {
+            "id": "background",
+            "label": "background (&)",
+            "description": "Executa o comando em segundo plano (&).",
+            "color": "#b1745b",
+            "slots": [
+                {
+                    "name": "A",
+                    "type": "statement",
+                    "check": "command",
+                    "symbol": "& true",
+                    "symbolPlacement": "after"
+                }
+            ]
+        }
+    ],
+    "controls": [
+        {
+            "id": "if_statement",
+            "shellCommand": "if",
+            "label": "if",
+            "description": "Executa comandos condicionalmente baseado no sucesso de um comando teste.",
+            "color": "#dbaa25",
+            "syntaxEnd": "fi",
+            "slots": [
+                {
+                    "name": "CONDITION",
+                    "type": "statement",
+                    "check": "command",
+                    "label": "Se (comando):",
+                    "syntaxPrefix": "",
+                    "obligatory": true
+                },
+                {
+                    "name": "DO",
+                    "type": "statement",
+                    "check": "command",
+                    "label": "Então faça (then):",
+                    "syntaxPrefix": "; then",
+                    "obligatory": true
+                },
+                {
+                    "name": "ELSE",
+                    "type": "statement",
+                    "check": "command",
+                    "label": "Senão (else):",
+                    "syntaxPrefix": "else ",
+                    "breakLineBefore": true,
+                    "obligatory": false
+                }
+            ]
+        },
+        {
+            "id": "while_loop",
+            "shellCommand": "while",
+            "label": "while",
+            "description": "Repete comandos enquanto a condição for verdadeira.",
+            "color": "#dbaa25",
+            "syntaxEnd": "done",
+            "slots": [
+                {
+                    "name": "CONDITION",
+                    "type": "statement",
+                    "check": "command",
+                    "label": "Enquanto (comando):",
+                    "syntaxPrefix": "",
+                    "obligatory": true
+                },
+                {
+                    "name": "DO",
+                    "type": "statement",
+                    "check": "command",
+                    "label": "Faça (do):",
+                    "syntaxPrefix": "; do ",
+                    "breakLineBefore": false,
+                    "obligatory": true
+                }
+            ]
+        }
+    ],
+    "categories": [
+        {
+            "name": "Diretórios",
+            "commands": ["ls", "cd", "mkdir"]
+        },
+        {
+            "name": "Arquivos",
+            "commands": ["cp", "mv", "rm", "touch"]
+        },
+        {
+            "name": "Saída",
+            "commands": ["cat", "echo"]
+        },
+        {
+            "name": "Filtros",
+            "commands": ["grep"]
+        },
+        {
+            "name": "Sistema",
+            "commands": ["ps", "ping", "curl"]
+        },
+        {
+            "name": "Fluxo",
+            "commands": [
+                "pipe",
+                "redirect_out",
+                "redirect_append",
+                "background"
+            ]
+        },
+        {
+            "name": "Lógica",
+            "commands": ["and", "or", "if_statement", "while_loop"]
+        }
+    ]
+}

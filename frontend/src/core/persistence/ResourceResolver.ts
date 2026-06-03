@@ -1,58 +1,43 @@
-import * as ShellBlocks from "shellblocks"
-import { executeWithTimeout, TimeoutError } from "../utils/async";
+import * as ShellBlocks from "shellblocks";
 
 export type StrategyLogger = (message: string, level: ShellBlocks.LogLevel) => void;
 
 interface StoredResource<T> {
-    origin: "user" | "backend";
+    origin: "user";
     data: T;
     lastUpdated: number;
 }
 
-export interface ResourceConfig {
+export interface ResourceConfig<T> {
     storageKey: string;
-    endpoint: string;
     label: string;
+    defaultData: T;
 }
 
-/**
- * Serviço centralizado para a resolução e persistência de recursos.
- * Aplica uma estratégia de priorização (User Override, Rede, Cache)
- * para garantir a disponibilidade de dados no aplicativo.
- */
 export class ResourceResolver {
-    private readonly apiUrl: string;
     private readonly logger: StrategyLogger;
-    private readonly requestTimeoutMs: number;
 
-    constructor(
-        apiUrl: string,
-        requestTimeoutMs: number,
-        logger: StrategyLogger,
-    ) {
-        this.apiUrl = apiUrl;
-        this.requestTimeoutMs = requestTimeoutMs;
+    constructor(logger: StrategyLogger) {
         this.logger = logger;
     }
 
-    public async resolveResource<T>(config: ResourceConfig): Promise<T | null> {
+    public resolveResource<T>(config: ResourceConfig<T>): T {
         const stored = this.loadFromStorage<StoredResource<T>>(
             config.storageKey,
         );
 
-        const userData = this.checkUserOverride(stored, config.label);
-        if (userData) return userData;
+        if (stored?.origin === "user") {
+            this.logger(
+                `Usando ${config.label} personalizadas (Salvas pelo usuário).`,
+                ShellBlocks.LogLevel.INFO,
+            );
+            return stored.data;
+        }
 
-        const backendData = await this.fetchFromBackend<T>(
-            config.endpoint,
-            config.storageKey,
-        );
-        if (backendData) return backendData;
-
-        return this.tryOfflineFallback(stored, config.label);
+        return config.defaultData;
     }
 
-    public saveUserOverride<T>(config: ResourceConfig, data: T): void {
+    public saveUserOverride<T>(config: ResourceConfig<T>, data: T): void {
         const resource: StoredResource<T> = {
             origin: "user",
             data: data,
@@ -65,7 +50,7 @@ export class ResourceResolver {
         );
     }
 
-    public clearResource(config: ResourceConfig): void {
+    public clearResource<T>(config: ResourceConfig<T>): void {
         try {
             window.localStorage.removeItem(config.storageKey);
         } catch (e) {
@@ -79,76 +64,6 @@ export class ResourceResolver {
             `${config.label} locais excluídos com sucesso.`,
             ShellBlocks.LogLevel.WARN,
         );
-    }
-
-    private checkUserOverride<T>(
-        stored: StoredResource<T> | null,
-        label: string,
-    ): T | null {
-        if (stored?.origin === "user") {
-            this.logger(
-                `Usando ${label} personalizadas (Salvas pelo usuário).`,
-                ShellBlocks.LogLevel.INFO,
-            );
-            return stored.data;
-        }
-        return null;
-    }
-
-    private async fetchFromBackend<T>(
-        endpoint: string,
-        storageKey: string,
-    ): Promise<T | null> {
-        const fullUrl = `${this.apiUrl}/${endpoint}`;
-
-        try {
-            const response = await executeWithTimeout(
-                this.requestTimeoutMs,
-                (signal) => fetch(fullUrl, { signal }),
-            );
-
-            if (!response.ok) throw new Error(`Status ${response.status}`);
-
-            const data = await response.json();
-
-            this.saveToStorage(storageKey, {
-                origin: "backend",
-                data: data,
-                lastUpdated: Date.now(),
-            } as StoredResource<T>);
-
-            return data;
-        } catch (error) {
-            if (error instanceof TimeoutError) {
-                this.logger(`Timeout: ${error.message}`, ShellBlocks.LogLevel.WARN);
-            } else if (error instanceof Error) {
-                this.logger(
-                    `Falha na requisição a ${endpoint}: ${error.message}`,
-                    ShellBlocks.LogLevel.WARN,
-                );
-            }
-
-            return null;
-        }
-    }
-
-    private tryOfflineFallback<T>(
-        stored: StoredResource<T> | null,
-        label: string,
-    ): T | null {
-        if (stored) {
-            this.logger(
-                `Backend indisponível. Usando cópia local de ${label}.`,
-                ShellBlocks.LogLevel.WARN,
-            );
-            return stored.data;
-        }
-
-        this.logger(
-            `Falha crítica ao carregar ${label}: Backend offline e sem dados locais.`,
-            ShellBlocks.LogLevel.ERROR,
-        );
-        return null;
     }
 
     private loadFromStorage<T>(key: string): T | null {

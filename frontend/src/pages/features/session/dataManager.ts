@@ -5,63 +5,56 @@ import {
     ResourceResolver,
     ResourceConfig,
 } from "@/core/persistence/ResourceResolver";
-import { AppConfig } from "@/config/appConfig";
-import { ApiRoutes } from "@/config/apiRoutes";
+
+import defaultDefinitions from "@/assets/data/cli_definitions.json";
+import defaultGameData from "@/assets/data/levels.json";
 
 const STORAGE_KEYS = {
     DEFINITIONS: "cli_definitions_v1",
     LEVELS: "game_levels_v1",
 } as const;
 
-const DEFINITIONS_CONFIG: ResourceConfig = {
-    endpoint: ApiRoutes.DEFINITIONS,
+const DEFINITIONS_CONFIG: ResourceConfig<ShellBlocks.CLI.CliDefinitions> = {
     storageKey: STORAGE_KEYS.DEFINITIONS,
     label: "Definições",
+    defaultData: defaultDefinitions as unknown as ShellBlocks.CLI.CliDefinitions,
 };
 
-const GAME_DATA_CONFIG: ResourceConfig = {
-    endpoint: ApiRoutes.GAME_DATA,
+const GAME_DATA_CONFIG: ResourceConfig<API.GameData> = {
     storageKey: STORAGE_KEYS.LEVELS,
     label: "Níveis",
+    defaultData: defaultGameData as unknown as API.GameData,
 };
 
-const resourceResolver = new ResourceResolver(
-    AppConfig.API_BASE_URL,
-    AppConfig.API_REQUEST_TIMEOUT_MS,
-    Logger.log,
-);
+const resourceResolver = new ResourceResolver(Logger.log);
 
-export async function getDefinitions(): Promise<ShellBlocks.CLI.CliDefinitions | null> {
-    return await resourceResolver.resolveResource<ShellBlocks.CLI.CliDefinitions>(
-        DEFINITIONS_CONFIG,
-    );
+export function getDefinitions(): ShellBlocks.CLI.CliDefinitions {
+    return resourceResolver.resolveResource(DEFINITIONS_CONFIG);
 }
 
 export function saveCustomDefinitions(definitions: ShellBlocks.CLI.CliDefinitions): void {
     resourceResolver.saveUserOverride(DEFINITIONS_CONFIG, definitions);
 }
 
-export async function resetDefinitions(): Promise<ShellBlocks.CLI.CliDefinitions | null> {
+export function resetDefinitions(): ShellBlocks.CLI.CliDefinitions {
     resourceResolver.clearResource(DEFINITIONS_CONFIG);
     Logger.log(
         "Definições locais excluídas. Restaurando padrão...",
         ShellBlocks.LogLevel.WARN,
     );
-    return await getDefinitions();
+    return getDefinitions();
 }
 
-export async function getGameData(): Promise<API.GameData | null> {
-    return await resourceResolver.resolveResource<API.GameData>(
-        GAME_DATA_CONFIG,
-    );
+export function getGameData(): API.GameData {
+    return resourceResolver.resolveResource(GAME_DATA_CONFIG);
 }
 
 export function saveCustomGameData(data: API.GameData): void {
     resourceResolver.saveUserOverride(GAME_DATA_CONFIG, data);
 }
 
-export async function resetGameData(): Promise<API.GameData | null> {
+export function resetGameData(): API.GameData {
     resourceResolver.clearResource(GAME_DATA_CONFIG);
     Logger.log("Níveis locais excluídos. Restaurando padrão...", ShellBlocks.LogLevel.WARN);
-    return await getGameData();
+    return getGameData();
 }

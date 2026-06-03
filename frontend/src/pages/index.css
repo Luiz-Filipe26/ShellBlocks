@@ -1,5 +1,6 @@
 @import "./styles/tokens.css";
 @import "./styles/base.css";
+@import "./styles/blockly.css";
 @import "./styles/header.css";
 @import "./styles/badge.css";
 @import "./styles/level-details.css";

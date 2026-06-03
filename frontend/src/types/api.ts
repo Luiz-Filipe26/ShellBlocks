@@ -1,9 +1,3 @@
-import * as ShellBlocks from "shellblocks";
-
-export interface GeneratedScript {
-    script: string;
-}
-
 export interface ExecutionResult {
     stdout: string;
     stderr: string;
@@ -18,6 +12,8 @@ export interface Level {
     summary?: string;
     fullGuideHtml?: string;
     difficulty?: LevelDifficulty;
+    setupCommands?: string[];
+    verificationScript?: string;
 }
 
 export interface GameData {
@@ -26,6 +22,7 @@ export interface GameData {
 }
 
 export interface RunRequest {
-    ast: ShellBlocks.AST.AST | null;
-    level: Level | null;
+    userScript: string;
+    setupCommands?: string[];
+    verificationScript?: string;
 }

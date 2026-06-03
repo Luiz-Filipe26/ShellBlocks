@@ -108,11 +108,11 @@ export interface SelectorDependencies {
     progressLabel: HTMLElement;
 }
 
-export async function setupLevelSelector(
+export function setupLevelSelector(
     data: API.GameData | null,
     selectorDependencies: SelectorDependencies,
     isExperimentMode: boolean,
-): Promise<void> {
+): void {
     const { levelSelect, levelSummaryText, levelFullDetails } =
         selectorDependencies;
 

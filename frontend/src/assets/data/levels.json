@@ -1,0 +1,274 @@
+{
+    "levels": [
+        {
+            "id": "01_ls_basics",
+            "title": "Primeiro contato",
+            "summary": "Veja o que existe na pasta atual.",
+            "fullGuideHtml": "<h1>Bem-vindo ao Terminal</h1><p>O terminal é como uma conversa: você escreve um comando, e o computador responde em texto.</p><h3>Sua Ferramenta: ls</h3><p>O comando <strong>ls</strong> (do inglês <em>list</em>) serve para perguntar: <em>'O que tem nesta pasta?'</em></p><div class=\"terminal-display\">$ ls<br>fotos_viagem relatorio.txt</div><h3>Sua Missão</h3><ol><li>Abra a categoria <strong>Sistema</strong> e arraste o bloco <strong>ls</strong> para o Script Principal.</li><li>Clique no botão <strong>Executar</strong>.</li><li>Observe a lista de arquivos na saída do console.</li></ol>",
+            "setupCommands": [
+                "rm -rf *",
+                "touch relatorio.txt",
+                "touch notas_pessoais.txt",
+                "mkdir fotos_viagem"
+            ],
+            "verificationScript": "if [ -e /tmp/last_cmd_out ] && grep -q 'relatorio.txt' /tmp/last_cmd_out && grep -q 'fotos_viagem' /tmp/last_cmd_out; then echo 'OK'; exit 0; else echo 'Não encontrei a lista de arquivos. Você executou o bloco ls?'; exit 1; fi",
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "02_ls_options",
+            "title": "Opções (Flags)",
+            "summary": "Use opções para alterar o comportamento do comando.",
+            "fullGuideHtml": "<h1>Modificando o Comando</h1><p>O <code>ls</code> sozinho funciona, mas podemos alterar <strong>como</strong> ele funciona usando Opções (Flags).</p><h3>O que é uma Opção?</h3><p>Opções ativam 'poderes especiais' e <strong>sempre</strong> começam com um traço (<code>-</code>).</p><ul><li><code>-l</code> (long): Ativa o modo detalhado (tamanho, datas).</li><li><code>-h</code> (human): Deixa o tamanho legível (Ex: 2.5K em vez de 2560 bytes).</li></ul><div class=\"terminal-display\">$ ls -lh<br>-rw-r--r-- 1 user 2.5K Dez 19 backup.data</div><h3>Sua Missão</h3><ol><li>Arraste o bloco <strong>ls</strong>.</li><li>Adicione um bloco de opção com <strong>-l</strong> e outro com <strong>-h</strong>.</li><li>Execute para ver o tamanho legível do arquivo de backup.</li></ol>",
+            "setupCommands": [
+                "rm -rf *",
+                "dd if=/dev/zero of=backup.data bs=1024 count=3 2>/dev/null",
+                "echo 'final' >> backup.data"
+            ],
+            "verificationScript": "if grep -q 'backup.data' /tmp/last_cmd_out; then if grep -qE '[0-9]+[KMG]' /tmp/last_cmd_out; then echo 'OK'; exit 0; else echo 'O arquivo apareceu, mas o tamanho não está legível. Você lembrou da opção -h?'; exit 1; fi; else echo 'O arquivo backup.data não foi listado.'; exit 1; fi",
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "03_mkdir",
+            "title": "Operandos (Alvos)",
+            "summary": "Crie uma nova pasta definindo um operando.",
+            "fullGuideHtml": "<h1>Ação e Reação (Operandos)</h1><p>Alguns comandos funcionam sozinhos (como o <code>ls</code>). Outros precisam de um <strong>alvo</strong>, chamado de Operando.</p><h3>O que é um Operando?</h3><p>É o complemento do verbo. Se o comando é \"Crie uma pasta\", o operando responde \"Com qual nome?\".</p><h3>Sua Missão</h3><ol><li>Use o bloco <strong>mkdir</strong> (Make Directory).</li><li>Note que ele tem um espaço vazio na frente. Encaixe um bloco de <strong>Texto/Valor</strong> com a palavra <code>projetos</code>.</li><li>Execute para criar sua pasta.</li></ol>",
+            "setupCommands": ["rm -rf *"],
+            "verificationScript": "if [ -d projetos ]; then echo 'OK'; exit 0; elif [ -d Projetos ] || [ -d PROJETOS ]; then echo 'Atenção: O Linux diferencia maiúsculas de minúsculas. Você criou Projetos, mas pedimos projetos.'; exit 1; else echo 'A pasta projetos não foi encontrada. Você preencheu o operando com o nome correto?'; exit 1; fi",
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "04_cd",
+            "title": "Entrando em Pastas",
+            "summary": "Mude seu local de trabalho para a pasta 'projetos'.",
+            "fullGuideHtml": "<h1>Navegação (GPS)</h1><p>Criar a pasta não significa que você está <em>dentro</em> dela. O terminal tem um 'foco' chamado diretório de trabalho.</p><h3>O Comando cd</h3><p>Significa <em>Change Directory</em> (Mudar Diretório). É o equivalente a dar um clique duplo em uma pasta no Windows.</p><h3>Sua Missão</h3><p>Use o bloco <strong>cd</strong> com o nome <code>projetos</code> para entrar na pasta que você criou.</p><p><em>Dica: Se funcionar, o comando pwd (que roda internamente) vai mostrar que o caminho mudou.</em></p>",
+            "setupCommands": ["rm -rf *", "mkdir -p projetos"],
+            "verificationScript": "if pwd | grep -q '/projetos$'; then echo 'OK'; exit 0; else echo 'Você ainda não está dentro da pasta projetos.'; exit 1; fi",
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "05_cp",
+            "title": "Clonando Arquivos",
+            "summary": "Faça uma cópia de segurança do arquivo.",
+            "fullGuideHtml": "<h1>A Arte de Copiar</h1><p>O comando <strong>cp</strong> (Copy) é o nosso copiador. Diferente do 'Mover', o arquivo original permanece lá.</p><h3>Dois Operandos</h3><p>Este comando precisa de duas informações, nesta ordem exata:</p><ol><li><strong>Origem:</strong> O que você quer copiar? (<code>plano.txt</code>)</li><li><strong>Destino:</strong> Qual será o nome da cópia? (<code>backup.txt</code>)</li></ol><h3>Sua Missão</h3><p>Configure o bloco <strong>cp</strong> para copiar o arquivo <code>plano.txt</code> e criar o <code>backup.txt</code>.</p>",
+            "setupCommands": ["rm -rf *", "echo 'Dominar o mundo' > plano.txt"],
+            "verificationScript": "if [ ! -f plano.txt ]; then echo 'O arquivo original sumiu! Você usou mv (mover) em vez de cp (copiar)?'; exit 1; fi; if [ -f backup.txt ]; then echo 'OK'; exit 0; else echo 'O arquivo backup.txt não foi criado.'; exit 1; fi",
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "06_cat",
+            "title": "Lendo Arquivos",
+            "summary": "Descubra o que está escrito no arquivo secreto.",
+            "fullGuideHtml": "<h1>Arquivos têm Conteúdo</h1><p>Até agora, os arquivos eram apenas nomes na lista. Mas eles guardam informações.</p><h3>O Comando cat</h3><p>O nome vem de <em>Concatenate</em> (Concatenar). Ele pega todo o texto de um arquivo e joga na tela.</p><h3>Sua Missão</h3><p>Interceptamos uma mensagem. Use o bloco <strong>cat</strong> para ler o arquivo <code>mensagem_secreta.txt</code> e descobrir a senha.</p>",
+            "setupCommands": [
+                "rm -rf *",
+                "echo 'A senha do cofre é: BATATA-123' > mensagem_secreta.txt",
+                "touch lixo.txt"
+            ],
+            "verificationScript": "if grep -q 'BATATA-123' /tmp/last_cmd_out; then echo 'OK'; exit 0; else echo 'O conteúdo da mensagem não apareceu na tela. Você leu o arquivo certo?'; exit 1; fi",
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "07_grep",
+            "title": "O Filtro (Grep)",
+            "summary": "Encontre uma informação específica no meio de muitas linhas.",
+            "fullGuideHtml": "<h1>Agulha no Palheiro</h1><p>Ler arquivos pequenos com <code>cat</code> é fácil. Mas e se o arquivo tiver 1.000 linhas?</p><h3>O Comando grep</h3><p>Ele funciona como uma busca. Você diz o que quer procurar, e ele mostra <strong>apenas</strong> as linhas que contêm aquele texto.</p><h3>Sua Missão</h3><p>O arquivo <code>server.log</code> está cheio de mensagens. Use o <strong>grep</strong> para encontrar apenas a linha com a palavra <strong>ERRO</strong>.</p>",
+            "setupCommands": [
+                "rm -rf *",
+                "echo 'INFO: Sistema iniciou' > server.log",
+                "echo 'WARN: Uso de memória alto' >> server.log",
+                "echo 'ERRO: Falha crítica no disco' >> server.log",
+                "echo 'INFO: Tudo normal' >> server.log"
+            ],
+            "verificationScript": "if grep -q 'Falha crítica' /tmp/last_cmd_out && ! grep -q 'INFO' /tmp/last_cmd_out; then exit 0; else echo 'A filtragem falhou. Deveria aparecer APENAS a linha contendo ERRO.'; exit 1; fi",
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "08_redirect",
+            "title": "Salvando Resultados (>)",
+            "summary": "Grave a lista de arquivos dentro de um novo arquivo.",
+            "fullGuideHtml": "<h1>Persistência de Dados</h1><p>Normalmente, o resultado de um comando aparece na tela e desaparece logo depois. E se quisermos salvar essa resposta?</p><h3>O Operador Maior Que (>)</h3><p>Esse símbolo pega o resultado do que está à esquerda e <strong>salva dentro de um arquivo</strong> à direita.</p><div class=\"terminal-display\">$ ls > inventario.txt</div><h3>Sua Missão</h3><ol><li>Coloque o comando <strong>ls</strong>.</li><li>Encaixe o operador <strong>> (Redirecionar)</strong> logo abaixo dele.</li><li>Na própria caixinha de texto do operador <code>></code>, digite o nome do arquivo: <code>inventario.txt</code>.</li><li>Execute para salvar a lista de arquivos!</li></ol>",
+            "setupCommands": [
+                "rm -rf *",
+                "touch caixa_A.doc",
+                "touch caixa_B.doc"
+            ],
+            "verificationScript": "if [ -f inventario.txt ]; then if grep -q 'caixa_A.doc' inventario.txt; then echo 'OK'; exit 0; else echo 'O arquivo foi criado, mas não contém a lista de arquivos.'; exit 1; fi; else echo 'O arquivo inventario.txt não foi criado.'; exit 1; fi",
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "09_pipe",
+            "title": "Conectando Comandos (|)",
+            "summary": "Use a saída de um comando como entrada de outro.",
+            "fullGuideHtml": "<h1>Encanamento de Dados (|)</h1><p>No terminal, você pode conectar comandos para criar soluções poderosas usando o <strong>| (Pipe)</strong>.</p><h3>Como o Pipe funciona?</h3><p>Ele funciona como um cano invisível: pega o texto que <strong>sai</strong> do primeiro comando e o empurra para <strong>entrar</strong> no segundo comando, em vez de jogar na tela.</p><div class=\"terminal-display\">$ cat nomes.txt | grep \"Ana\"</div><h3>Sua Missão</h3><ol><li>Use o <strong>cat</strong> para ler o arquivo <code>nomes.txt</code>.</li><li>Conecte o operador <strong>| (Pipe)</strong> abaixo dele.</li><li>Conecte o comando <strong>grep</strong> buscando pela palavra <code>Ana</code>.</li><li>Execute para ver o texto fluir e ser filtrado!</li></ol>",
+            "setupCommands": [
+                "rm -rf *",
+                "echo 'Carlos' > nomes.txt",
+                "echo 'Ana Maria' >> nomes.txt",
+                "echo 'Pedro' >> nomes.txt",
+                "echo 'Ana Paula' >> nomes.txt"
+            ],
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "10_ping",
+            "title": "Sonar de Rede (Ping)",
+            "summary": "Verifique se um endereço de rede está ativo.",
+            "fullGuideHtml": "<h1>O Infinito e Além</h1><p>No Linux, o comando <strong>ping</strong> roda para sempre! Se você não limitá-lo, ele nunca para.</p><h3>A Opção de Contagem (-c)</h3><p>Para evitar que o terminal fique preso eternamente, usamos a opção <strong>-c</strong> (count) para definir quantas vezes queremos testar.</p><h3>Sua Missão</h3><p>Use o bloco <strong>ping</strong>:</p><ol><li>No campo de opções, ative a flag <strong>-c</strong> e digite <strong>4</strong> na contagem.</li><li>Defina o endereço como <code>127.0.0.1</code>.</li></ol>",
+            "setupCommands": ["rm -rf *"],
+            "verificationScript": "if grep -q '64 bytes from 127.0.0.1' /tmp/last_cmd_out; then exit 0; else echo 'O ping falhou. Verifique o endereço e se você limitou a contagem.'; exit 1; fi",
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "11_curl",
+            "title": "Buscando Dados (Curl)",
+            "summary": "Obtenha o conteúdo de uma página ou arquivo na rede.",
+            "fullGuideHtml": "<h1>O Navegador em Texto</h1><p>O comando <strong>curl</strong> busca o conteúdo de endereços (URLs) e mostra na tela.</p><h3>Sua Missão</h3><p>Existe um mini-servidor rodando neste computador na porta 8000. Use o <strong>curl</strong> para ler o conteúdo deste endereço:</p><code>http://127.0.0.1:8000/sucesso.txt</code>",
+            "setupCommands": [
+                "pkill -9 -f http.server || true",
+                "echo 'PARABENS! VOCE COMPLETOU O TUTORIAL!' > sucesso.txt",
+                "(python3 -m http.server 8000 --bind 127.0.0.1 > /dev/null 2>&1 & true)",
+                "sleep 3"
+            ],
+            "verificationScript": "if grep -q 'PARABENS' /tmp/last_cmd_out 2>/dev/null; then exit 0; else echo 'Erro: O servidor não respondeu a tempo. Tente novamente em instantes.'; exit 1; fi",
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "12_ps",
+            "title": "Visualizando Processos",
+            "summary": "Veja o que está rodando no sistema agora.",
+            "fullGuideHtml": "<h1>O Sistema está Vivo</h1><p>Mesmo quando você não digita nada, o computador está rodando vários programas invisíveis.</p><h3>O Comando ps</h3><p>O comando <strong>ps</strong> (Process Status) lista os programas que estão ativos no momento. É como o Gerenciador de Tarefas do Windows.</p><h3>Sua Missão</h3><p>Existe um processo chamado <code>servidor_oculto</code> rodando agora. Use o comando <strong>ps</strong> para encontrá-lo na lista de processos ativos.</p>",
+            "setupCommands": [
+                "pkill -f servidor_oculto || true",
+                "rm -rf *",
+                "(exec -a servidor_oculto sleep 200 &)"
+            ],
+            "verificationScript": "if grep -q 'servidor_oculto' /tmp/last_cmd_out; then exit 0; else echo 'Você não listou os processos corretamente ou o servidor oculto não apareceu (tente executar novamente).'; exit 1; fi",
+            "difficulty": "tutorial"
+        },
+        {
+            "id": "13_background",
+            "title": "Multitarefa (&)",
+            "summary": "Execute comandos em segundo plano.",
+            "fullGuideHtml": "<h1>Multitarefa (&)</h1><p>Alguns comandos demoram muito ou nunca param de rodar (como o <code>ping</code>). Para não travar o terminal, podemos enviá-los para o segundo plano.</p><h3>O Operador E-Comercial (&)</h3><p>Colocar um <code>&</code> no final avisa ao sistema: <em>\"Rode isso de forma invisível e me devolva o controle agora\"</em>.</p><h3>Sua Missão</h3><ol><li>Configure o comando <code>ping</code> com o destino <code>127.0.0.1</code>.</li><li>Adicione o operador <strong>& (Background)</strong>.</li><li>Execute. O sistema vai confirmar que o processo começou a rodar em segundo plano!</li></ol>",
+            "setupCommands": ["rm -rf *"],
+            "verificationScript": "sleep 0.5; if ps aux | grep -v grep | grep -q 'ping'; then exit 0; else echo 'O ping não está rodando em segundo plano. Você usou o & no final?'; exit 1; fi",
+            "difficulty": "training"
+        },
+        {
+            "id": "14_organizar",
+            "title": "Arrumando a Casa",
+            "summary": "Organize os arquivos soltos em diretórios.",
+            "fullGuideHtml": "<h1>Caos no Servidor</h1><p>Alguém (provavelmente o estagiário) deixou vários arquivos de log espalhados na pasta raiz. Precisamos organizar isso.</p><h3>Sua Missão</h3><ol><li>Crie um diretório chamado <code>logs</code>.</li><li>Use o comando <strong>mv</strong> para mover os arquivos <code>erro.log</code> e <code>acesso.log</code> para dentro dessa nova pasta.</li></ol>",
+            "setupCommands": [
+                "rm -rf *",
+                "touch erro.log",
+                "touch acesso.log",
+                "touch imagem.png",
+                "touch script.sh"
+            ],
+            "verificationScript": "if [ -d logs ] && [ -f logs/erro.log ] && [ -f logs/acesso.log ] && [ ! -f erro.log ]; then exit 0; else echo 'Os arquivos de log ainda não estão dentro da pasta logs.'; exit 1; fi",
+            "difficulty": "training"
+        },
+        {
+            "id": "15_limpeza",
+            "title": "Treino: Protocolo de Segurança",
+            "summary": "Remova arquivos sensíveis expostos.",
+            "fullGuideHtml": "<h1>Vazamento de Dados</h1><p>Um arquivo contendo senhas antigas foi deixado acidentalmente no servidor público. Isso é uma violação de segurança grave.</p><h3>Sua Missão</h3><p>Identifique o arquivo <code>senhas_antigas.txt</code> usando <strong>ls</strong> e remova-o imediatamente usando o comando <strong>rm</strong>.</p><p><em>Dica: O script deve listar os arquivos para confirmar o nome antes de apagar.</em></p>",
+            "setupCommands": [
+                "rm -rf *",
+                "touch notas.txt",
+                "echo 'admin:12345' > senhas_antigas.txt",
+                "touch todo_list.md"
+            ],
+            "verificationScript": "if [ ! -f senhas_antigas.txt ] && grep -q 'senhas_antigas.txt' /tmp/last_cmd_out; then exit 0; else if [ -f senhas_antigas.txt ]; then echo 'O arquivo de senhas ainda existe.'; else echo 'Você removeu o arquivo, mas não o listou (ls) para confirmar a existência dele antes.'; fi; exit 1; fi",
+            "difficulty": "training"
+        },
+        {
+            "id": "16_processamento",
+            "title": "Rotação de Logs",
+            "summary": "Filtre erros críticos e limpe o arquivo original.",
+            "fullGuideHtml": "<h1>Gerenciamento de Espaço</h1><p>O arquivo <code>servidor.log</code> ficou gigante e está ocupando todo o disco. Precisamos salvar apenas os erros e apagar o resto.</p><h3>Sua Missão</h3><ol><li>Use <strong>grep</strong> para filtrar as linhas com a palavra <strong>CRITICO</strong> do arquivo <code>servidor.log</code>.</li><li>Salve o resultado em um novo arquivo chamado <code>erros.txt</code>.</li><li>Após salvar, remova o arquivo original <code>servidor.log</code> para liberar espaço.</li></ol>",
+            "setupCommands": [
+                "rm -rf *",
+                "echo 'INFO: Tudo ok' > servidor.log",
+                "echo 'WARN: Memoria cheia' >> servidor.log",
+                "echo 'CRITICO: Banco de dados caiu' >> servidor.log",
+                "echo 'INFO: Reiniciando' >> servidor.log"
+            ],
+            "verificationScript": "if [ -f erros.txt ] && grep -q 'CRITICO' erros.txt && [ ! -f servidor.log ]; then exit 0; else echo 'Verifique se o arquivo erros.txt foi criado corretamente e se o servidor.log foi removido.'; exit 1; fi",
+            "difficulty": "training"
+        },
+        {
+            "id": "17_deploy",
+            "title": "Treino: Download e Deploy",
+            "summary": "Baixe um programa da rede e instale-o na pasta correta.",
+            "fullGuideHtml": "<h1>Instalação Manual</h1><p>Você precisa instalar o novo sistema de vendas que está no servidor central.</p><h3>O Processo de Deploy</h3><p>Instalar nada mais é do que baixar arquivos e colocá-los no lugar certo.</p><h3>Sua Missão</h3><ol><li>Crie um diretório chamado <code>app</code> para organizar o sistema.</li><li>Use o <strong>curl</strong> para ler a URL <code>http://127.0.0.1:8000/vendas.py</code>.</li><li><strong>Importante:</strong> Use o operador <strong>&gt;</strong> para salvar o resultado desse curl num arquivo chamado <code>vendas.py</code>.</li><li>Por fim, use o <strong>mv</strong> para mover esse arquivo para dentro da nova pasta <code>app</code> que você mesmo vai criar.</li></ol>",
+            "setupCommands": [
+                "rm -rf *",
+                "pkill -9 -f http.server || true",
+                "echo 'print(\"Sistema de Vendas v2.0\")' > vendas.py",
+                "(python3 -m http.server 8000 --bind 127.0.0.1 > /dev/null 2>&1 & true)",
+                "sleep 2"
+            ],
+            "verificationScript": "if [ -d app ] && [ -f app/vendas.py ]; then exit 0; else echo 'O arquivo vendas.py não foi encontrado DENTRO da pasta app. Você baixou e moveu ele corretamente?'; exit 1; fi",
+            "difficulty": "training"
+        },
+        {
+            "id": "18_challenge_security",
+            "title": "Desafio: O Keylogger",
+            "summary": "Identifique o malware, extraia a prova e elimine a ameaça.",
+            "fullGuideHtml": "<h1>Investigação Digital 🕵️‍♂️</h1><p>Alerta! Um programa espião (Keylogger) está rodando no servidor e gravando tudo o que digitamos no arquivo <code>teclado.log</code>.</p><h3>Relatório da Missão</h3><ol><li><strong>Identificar:</strong> Use o comando <strong>ps</strong> para descobrir o nome do arquivo Python do espião (será algo como <code>keylogger_vX.py</code>).</li><li><strong>Extrair a Prova:</strong> O arquivo <code>teclado.log</code> está cheio de lixo, mas tem uma linha contendo a palavra <code>SENHA</code>. Use o <strong>grep</strong> para isolar essa linha e use o operador <strong>> (Redirecionar)</strong> para salvá-la em <code>evidencia.txt</code>.</li><li><strong>Eliminar:</strong> Use o comando <strong>rm</strong> para apagar definitivamente o script do espião que você descobriu no passo 1.</li></ol>",
+            "setupCommands": [
+                "pkill -f keylogger_v3.py || true",
+                "rm -rf *",
+                "echo 'a' > teclado.log",
+                "echo 'b' >> teclado.log",
+                "echo 'user: admin' >> teclado.log",
+                "echo '[ALERTA] SENHA CAPTURADA: 123456' >> teclado.log",
+                "echo 'c' >> teclado.log",
+                "echo 'import time; time.sleep(400)' > keylogger_v3.py",
+                "(python3 keylogger_v3.py > /dev/null 2>&1 &)",
+                "sleep 1"
+            ],
+            "verificationScript": "if [ ! -f keylogger_v3.py ] && [ -f evidencia.txt ] && grep -q 'SENHA' evidencia.txt; then exit 0; else if [ -f keylogger_v3.py ]; then echo 'O script malicioso ainda não foi removido.'; else echo 'Você removeu o script, mas não salvou a evidência corretamente em evidencia.txt.'; fi; exit 1; fi",
+            "difficulty": "challenge"
+        },
+        {
+            "id": "19_challenge_deploy",
+            "title": "Desafio Final: O Grande Deploy",
+            "summary": "Prepare o ambiente e coloque a aplicação no ar.",
+            "fullGuideHtml": "<h1>Teste Final de SysAdmin 🎓</h1><p>O time de desenvolvimento terminou a nova aplicação, mas não sabem colocá-la no ar. O servidor é todo seu.</p><h3>Especificações do Deploy</h3><ol><li>Crie a estrutura de pastas usando <code>mkdir</code>: crie uma pasta chamada <code>app</code>.</li><li>Baixe o código fonte usando o comando <strong>curl</strong> no endereço <code>http://127.0.0.1:8000/server.py</code> e use o operador <strong>> (Redirecionar)</strong> para salvar isso em <code>server.py</code>.</li><li>Use o comando <strong>mv</strong> para mover o <code>server.py</code> recém-criado para dentro da pasta <code>app</code>.</li><li><strong>Atenção:</strong> Execute o servidor usando o bloco específico de controle Python (<code>python3 app/server.py</code>) e coloque-o em <strong>segundo plano (&)</strong> para não travar a máquina.</li></ol><p><em>Boa sorte! Se você passar daqui, está pronto para o mundo real.</em></p>",
+            "setupCommands": [
+                "rm -rf *",
+                "pkill -9 -f http.server || true",
+                "pkill -9 -f server.py || true",
+                "echo 'print(\"Servidor de Producao Rodando...\"); import time; time.sleep(100)' > server.py",
+                "(python3 -m http.server 8000 --bind 127.0.0.1 > /dev/null 2>&1 & true)",
+                "sleep 3"
+            ],
+            "verificationScript": "if [ -d app/logs ] && [ -f app/server.py ] && ps aux | grep -v grep | grep -q 'app/server.py'; then exit 0; else echo 'O deploy falhou. Verifique a estrutura de pastas, o arquivo e se o processo está rodando.'; exit 1; fi",
+            "difficulty": "challenge"
+        }
+    ],
+    "levelOrder": [
+        "01_ls_basics",
+        "02_ls_options",
+        "03_mkdir",
+        "04_cd",
+        "05_cp",
+        "06_cat",
+        "07_grep",
+        "08_redirect",
+        "09_pipe",
+        "10_ping",
+        "11_curl",
+        "12_ps",
+        "13_background",
+        "14_organizar",
+        "15_limpeza",
+        "16_processamento",
+        "17_deploy",
+        "18_challenge_security",
+        "19_challenge_deploy"
+    ]
+}

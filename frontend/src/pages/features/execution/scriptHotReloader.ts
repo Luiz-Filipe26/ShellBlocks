@@ -1,10 +1,7 @@
 import * as ShellBlocks from "shellblocks";
 import * as Blockly from "blockly";
-import * as API from "@/types/api";
 import * as Logger from "../ui/systemLogger";
-import { AppConfig } from "@/config/appConfig";
-import { ApiRoutes } from "@/config/apiRoutes";
-import { executeWithTimeout } from "@/core/utils/async";
+import { generateShellScript } from "@/core/shellblocks/generation/scriptGenerator";
 
 const MIN_INTERVAL_MS = 700;
 
@@ -15,7 +12,7 @@ export function setupScriptHotReloader(
     workspace: Blockly.WorkspaceSvg,
     codeOutput: HTMLPreElement,
 ): void {
-    sendAstToBackend(workspace, codeOutput);
+    updateScriptOutput(workspace, codeOutput);
 
     workspace.addChangeListener((event) => {
         if (event.isUiEvent) return;
@@ -28,7 +25,7 @@ export function setupScriptHotReloader(
                 clearTimeout(pendingTimer);
                 pendingTimer = null;
             }
-            sendAstToBackend(workspace, codeOutput);
+            updateScriptOutput(workspace, codeOutput);
             return;
         }
 
@@ -37,15 +34,15 @@ export function setupScriptHotReloader(
 
         pendingTimer = window.setTimeout(() => {
             pendingTimer = null;
-            sendAstToBackend(workspace, codeOutput);
+            updateScriptOutput(workspace, codeOutput);
         }, wait);
     });
 }
 
-async function sendAstToBackend(
+function updateScriptOutput(
     workspace: Blockly.WorkspaceSvg,
     codeOutput: HTMLPreElement,
-): Promise<void> {
+): void {
     lastStartTime = Date.now();
 
     const ast = ShellBlocks.serializeWorkspaceToAST(workspace);
@@ -57,33 +54,13 @@ async function sendAstToBackend(
     }
 
     try {
-        const response = await executeWithTimeout(
-            AppConfig.API_REQUEST_TIMEOUT_MS,
-            (signal) =>
-                fetch(
-                    `${AppConfig.API_BASE_URL}/${ApiRoutes.GENERATE_SCRIPT}`,
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(ast),
-                        signal: signal,
-                    },
-                ),
+        const script = generateShellScript(ast);
+        codeOutput.textContent = script;
+    } catch (error) {
+        codeOutput.textContent = "// Erro ao gerar script localmente";
+        Logger.log(
+            "Erro interno na geração do script",
+            ShellBlocks.LogLevel.ERROR,
         );
-
-        if (!response.ok) {
-            codeOutput.textContent = "// Erro ao gerar script no backend";
-            Logger.log(
-                "Erro ao gerar script no backend",
-                ShellBlocks.LogLevel.ERROR,
-            );
-            return;
-        }
-
-        const data: API.GeneratedScript = await response.json();
-        codeOutput.textContent = data.script;
-    } catch {
-        codeOutput.textContent = "// Falha ao conectar ao backend";
-        Logger.log("Falha ao conectar no backend", ShellBlocks.LogLevel.ERROR);
     }
 }

@@ -29,7 +29,7 @@ async function start(): Promise<void> {
     new SidebarResizer(
         pageElements.sidebarResizerGutter,
         pageElements.sidebar,
-        "right"
+        "right",
     ).start();
     new SidebarResizer(
         pageElements.instructionsResizerGutter,
@@ -43,7 +43,7 @@ async function start(): Promise<void> {
         closeHelpBtn: pageElements.closeHelpBtn,
     });
 
-    const definitions = await getDefinitions();
+    const definitions = getDefinitions();
     const workspace = await ShellBlocks.setupWorkspace(
         pageElements.blocklyArea,
         definitions,
@@ -67,8 +67,8 @@ async function start(): Promise<void> {
         enforceExperimentRestrictions();
     }
 
-    gameData = await getGameData();
-    await setupLevelSelector(gameData, pageElements, IS_EXPERIMENT_MODE);
+    gameData = getGameData();
+    setupLevelSelector(gameData, pageElements, IS_EXPERIMENT_MODE);
 
     setupScriptHotReloader(workspace, pageElements.codeOutput);
     registerButtonListeners(workspace);
@@ -127,8 +127,8 @@ function registerButtonListeners(workspace: Blockly.WorkspaceSvg) {
                 "ATENÇÃO: Isso apagará suas definições e níveis personalizados e voltará ao padrão do servidor. Continuar?",
             )
         ) {
-            PersistenceManager.resetToFactorySettings(workspace, async () => {
-                await setupLevelSelector(
+            PersistenceManager.resetToFactorySettings(workspace, () => {
+                setupLevelSelector(
                     gameData,
                     pageElements,
                     IS_EXPERIMENT_MODE,

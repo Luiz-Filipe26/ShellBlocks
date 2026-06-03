@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from "vite";
 import path from "path";
+import { viteSingleFile } from "vite-plugin-singlefile";
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), "");
@@ -8,7 +9,7 @@ export default defineConfig(({ mode }) => {
         resolve: {
             tsconfigPaths: true,
         },
-        plugins: [],
+        plugins: [viteSingleFile()],
         root: "src/pages",
         envDir: path.resolve(__dirname),
         publicDir: path.resolve(__dirname, "public"),
@@ -28,16 +29,6 @@ export default defineConfig(({ mode }) => {
         build: {
             outDir: path.resolve(__dirname, "dist"),
             emptyOutDir: true,
-            chunkSizeWarningLimit: 1000,
-            rollupOptions: {
-                output: {
-                    manualChunks(id: string) {
-                        if (id.includes("blockly")) {
-                            return "vendor";
-                        }
-                    },
-                },
-            },
         },
     };
 });
