@@ -1,4 +1,5 @@
 .blocklyWarningIcon {
   scale: 1.5;
+  transform-box: fill-box;
   transform-origin: center;
 }
