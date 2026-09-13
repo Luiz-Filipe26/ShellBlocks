@@ -3,6 +3,9 @@
 *.exe
 /*.js
 
+# Arquivos de controle pessoal
+TODO.md
+
 # Arquivos de configuração de IDEs
 .idea/
 .vscode/
