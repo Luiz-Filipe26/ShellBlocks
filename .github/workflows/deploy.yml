@@ -55,7 +55,7 @@ jobs:
 
           scp \
             dist/shellblocks-server.js \
-            "$DEPLOY_USER@$DEPLOY_HOST:~/shellblocks-server.js.new"
+            "$DEPLOY_USER@$DEPLOY_HOST:~/shellblocks-server.new.js"
 
       - name: Publicar e Reiniciar Aplicação
         env:
@@ -67,9 +67,9 @@ jobs:
           ssh "$DEPLOY_USER@$DEPLOY_HOST" <<'EOF'
             set -euo pipefail
 
-            node --check ~/shellblocks-server.js.new
+            node --check ~/shellblocks-server.new.js
 
-            mv ~/shellblocks-server.js.new ~/shellblocks-server.js
+            mv ~/shellblocks-server.new.js ~/shellblocks-server.js
 
             pm2 restart shellblocks
 
