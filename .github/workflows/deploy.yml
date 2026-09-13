@@ -1,0 +1,87 @@
+name: Deploy ShellBlocks
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "**/package-lock.json"
+
+      - name: Executar Build Completo
+        run: |
+          set -euo pipefail
+          chmod +x build_project.sh
+          ./build_project.sh
+
+      - name: Configurar SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Transferir Artefato
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+
+          scp \
+            dist/shellblocks-server.js \
+            "$DEPLOY_USER@$DEPLOY_HOST:~/shellblocks-server.js.new"
+
+      - name: Publicar e Reiniciar Aplicação
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" <<'EOF'
+            set -euo pipefail
+
+            node --check ~/shellblocks-server.js.new
+
+            mv ~/shellblocks-server.js.new ~/shellblocks-server.js
+
+            pm2 restart shellblocks
+
+            for attempt in {1..10}; do
+              if curl --fail --silent --show-error http://localhost:7000/ > /dev/null; then
+                echo "ShellBlocks está respondendo corretamente."
+                exit 0
+              fi
+
+              sleep 2
+            done
+
+            echo "ShellBlocks não respondeu após o deploy."
+            exit 1
+          EOF
