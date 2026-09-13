@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import frontendPage from "./index.html"; 
+import frontendPage from "../build/frontend/index.html"; 
 import { runHandler } from "./controllers/executionController";
 import { runInSandbox } from "./services/sandboxRunner";
 import { ensureDockerImageExists } from "./services/dockerService";

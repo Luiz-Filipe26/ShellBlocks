@@ -17,7 +17,7 @@ O código correspondente aos blocos é gerado pela aplicação e pode ser execut
 * **Fases educacionais:** níveis, estado da sessão e lógica de validação das fases são tratados pelo frontend.
 * **Execução isolada:** os scripts são executados em containers Docker efêmeros, sem acesso à rede e com limites de CPU, memória e tempo.
 * **Frontend Single File:** a SPA inteira é empacotada pelo Vite em um único arquivo HTML.
-* **Artefato final único:** o build integra o frontend ao backend e gera `shellblocks-server.js`.
+* **Artefato final único:** o build integra o frontend ao backend e gera `dist/shellblocks-server.js`.
 
 ## Arquitetura
 
@@ -119,7 +119,8 @@ Uma visão resumida da organização atual:
 ├── docs/
 ├── build_project.sh
 ├── build_project.ps1
-└── shellblocks-server.js
+└── dist/
+    └── shellblocks-server.js
 ```
 
 No frontend, `core/shellblocks` contém o núcleo reutilizável responsável pela representação e pelo funcionamento dos blocos. A camada `pages/features` concentra funcionalidades específicas da aplicação educacional, como execução, sessão e interface da página.
@@ -328,16 +329,16 @@ Esse arquivo contém o frontend necessário para executar a aplicação.
 
 ### 2. Integração com o backend
 
-O HTML compilado é copiado para:
+O HTML compilado é copiado para uma área intermediária de build do backend:
 
 ```text
-backend/src/index.html
+backend/build/frontend/index.html
 ```
 
 O backend importa esse arquivo diretamente:
 
 ```ts
-import frontendPage from "./index.html";
+import frontendPage from "../build/frontend/index.html";
 ```
 
 As rotas que não correspondem à API recebem esse HTML, permitindo que o mesmo processo Node hospede a SPA.
@@ -350,16 +351,16 @@ O backend é compilado e empacotado em:
 backend/dist/server.js
 ```
 
-O script de build copia então o resultado para a raiz:
+O script de build copia então esse resultado para o diretório de distribuição do projeto:
 
 ```text
-shellblocks-server.js
+dist/shellblocks-server.js
 ```
 
 O artefato final da aplicação é, portanto:
 
 ```text
-./shellblocks-server.js
+./dist/shellblocks-server.js
 ```
 
 ## Executando
@@ -376,7 +377,7 @@ O Docker deve estar instalado, em execução e acessível pelo usuário que inic
 Depois do build:
 
 ```sh
-node shellblocks-server.js
+node dist/shellblocks-server.js
 ```
 
 Por padrão, o servidor utiliza:

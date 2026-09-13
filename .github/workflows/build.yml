@@ -37,26 +37,26 @@ jobs:
 
       - name: Verificar Artefato Gerado
         run: |
-          FILE_NAME="${{ env.GENERATED_FILE_NAME }}"
+          ARTIFACT_PATH="${{ env.GENERATED_ARTIFACT_PATH }}"
 
-          if [ -z "$FILE_NAME" ]; then
-            echo "❌ GENERATED_FILE_NAME não definido."
+          if [ -z "$ARTIFACT_PATH" ]; then
+            echo "❌ GENERATED_ARTIFACT_PATH não definido."
             exit 1
           fi
 
-          if [ ! -f "$FILE_NAME" ]; then
-            echo "❌ Artefato '$FILE_NAME' não encontrado."
+          if [ ! -f "$ARTIFACT_PATH" ]; then
+            echo "❌ Artefato '$ARTIFACT_PATH' não encontrado."
             exit 1
           fi
 
-          echo "✅ Artefato '$FILE_NAME' validado com sucesso."
+          echo "✅ Artefato '$ARTIFACT_PATH' validado com sucesso."
 
       - name: Upload Artifact (Dev)
         if: "!startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v4
         with:
           name: shellblocks-dev-build
-          path: ${{ env.GENERATED_FILE_NAME }}
+          path: ${{ env.GENERATED_ARTIFACT_PATH }}
           retention-days: 3
 
       - name: Preparar Asset da Release
@@ -64,7 +64,7 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
           RELEASE_NAME="shellblocks-${VERSION}.js"
-          mv "${{ env.GENERATED_FILE_NAME }}" "$RELEASE_NAME"
+          mv "${{ env.GENERATED_ARTIFACT_PATH }}" "$RELEASE_NAME"
           echo "RELEASE_ASSET=$RELEASE_NAME" >> $GITHUB_ENV
 
       - name: Criar Release Oficial

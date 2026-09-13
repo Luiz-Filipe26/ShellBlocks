@@ -1,16 +1,15 @@
 # Dependências locais do Node
 node_modules/
 
-# Pasta de saída do compilador local (o esbuild gera aqui antes de mover)
+# Arquivos intermediários do processo de build
+build/
+
+# Artefatos gerados pelo build do backend
 dist/
 
 # Arquivos de configuração de ambiente (segurança e portas locais)
 .env
 .env.local
-
-# O arquivo do Frontend copiado dinamicamente pelo script de build
-# Ignorado para não sujar o histórico do Git com código gerado automaticamente
-src/index.html
 
 # Logs de erro do NPM
 npm-debug.log*

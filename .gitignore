@@ -1,7 +1,5 @@
-# Arquivos executáveis gerados na raiz
-*.jar
-*.exe
-/*.js
+# Artefatos finais do projeto
+/dist/
 
 # Arquivos de controle pessoal
 TODO.md
