@@ -64,7 +64,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          ssh "$DEPLOY_USER@$DEPLOY_HOST" <<'EOF'
+          ssh -T "$DEPLOY_USER@$DEPLOY_HOST" <<'EOF'
             set -euo pipefail
 
             node --check ~/shellblocks-server.new.js
@@ -73,15 +73,18 @@ jobs:
 
             pm2 restart shellblocks
 
-            for attempt in {1..10}; do
-              if curl --fail --silent --show-error http://localhost:7000/ > /dev/null; then
-                echo "ShellBlocks está respondendo corretamente."
-                exit 0
-              fi
+            if ! curl \
+              --fail \
+              --silent \
+              --show-error \
+              --retry 10 \
+              --retry-delay 2 \
+              --retry-connrefused \
+              http://localhost:7000/ \
+              > /dev/null; then
+              echo "ShellBlocks não respondeu corretamente após o deploy." >&2
+              exit 1
+            fi
 
-              sleep 2
-            done
-
-            echo "ShellBlocks não respondeu após o deploy."
-            exit 1
+            echo "ShellBlocks está respondendo corretamente."
           EOF
