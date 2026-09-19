@@ -3,6 +3,7 @@
 
 # Arquivos de controle pessoal
 TODO.md
+*.local
 
 # Arquivos de configuração de IDEs
 .idea/
