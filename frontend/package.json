@@ -8,7 +8,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "type-check:test": "tsc --noEmit -p tsconfig.test.json",
-        "type-check": "tsc --noEmit",
+        "type-check": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
         "build": "npm run type-check && vite build",
         "preview": "vite preview"
     },
