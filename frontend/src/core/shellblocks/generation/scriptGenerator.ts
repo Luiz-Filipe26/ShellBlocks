@@ -1,8 +1,10 @@
-import { ASTNode, ASTParameter } from "../types/ast"; // Ajuste o caminho conforme sua árvore
+import { ASTNode, ASTParameter } from "../types/ast";
 
 const SAFE_ARGUMENT_PATTERN = /^[a-zA-Z0-9._/-]+$/;
 
-export function generateShellScript(rootNode: ASTNode | undefined | null): string {
+export function generateShellScript(
+    rootNode: ASTNode | undefined | null,
+): string {
     if (!rootNode) throw new Error("AST não pode ser nula");
     return dispatch(rootNode);
 }
@@ -11,179 +13,152 @@ function dispatch(node: ASTNode | undefined): string {
     if (!node) return "";
 
     switch (node.type) {
-        case "script": return generateScript(node);
-        case "command": return generateCommand(node);
-        case "control": return generateControl(node);
-        case "operator": return generateOperator(node);
-        case "option": return generateOption(node);
-        case "operand": return generateOperand(node);
-        default: return "";
+        case "script":
+            return generateScript(node);
+        case "command":
+            return generateCommand(node);
+        case "control":
+            return generateControl(node);
+        case "operator":
+            return generateOperator(node);
+        case "option":
+            return generateOption(node);
+        case "operand":
+            return generateOperand(node);
     }
 }
 
 function generateScript(node: ASTNode): string {
-    if (!node.parameters) return "";
     return node.parameters
-        .map((p) => renderParameter(p, "\n"))
-        .filter((s) => s.trim() !== "")
+        .map((parameter) => renderParameter(parameter, "\n"))
+        .filter((rendered) => rendered.trim() !== "")
         .join("\n");
 }
 
 function generateCommand(node: ASTNode): string {
-    let sb = node.name || "";
+    let script = node.name;
 
-    const optionsParam = getParameter(node, "options");
-    if (optionsParam) {
-        const val = renderParameter(optionsParam, " ");
-        if (val.trim() !== "") sb += ` ${val}`;
+    const options = getParameter(node, "options");
+    if (options) {
+        const renderedOptions = renderParameter(options, " ");
+        if (renderedOptions.trim() !== "") script += ` ${renderedOptions}`;
     }
 
-    const operandsParam = getParameter(node, "operands");
-    if (operandsParam) {
-        const val = renderParameter(operandsParam, " ");
-        if (val.trim() !== "") sb += ` ${val}`;
+    const operands = getParameter(node, "operands");
+    if (operands) {
+        const renderedOperands = renderParameter(operands, " ");
+        if (renderedOperands.trim() !== "") script += ` ${renderedOperands}`;
     }
 
-    return sb;
+    return script;
 }
 
 function generateControl(node: ASTNode): string {
     if (!node.controlConfig) return "";
 
-    let sb = node.name || "";
+    let script = node.name;
 
     for (const slot of node.controlConfig.slots) {
         const parameter = getParameter(node, slot.key);
+        if (!parameter) continue;
 
-        if (parameter) {
-            const content = renderParameter(parameter, "\n");
+        const content = renderParameter(parameter, "\n");
+        if (content.trim() === "" && !slot.obligatory) continue;
 
-            if (content.trim() === "" && !slot.obligatory) continue;
+        if (slot.breakLineBefore) {
+            if (script.length > 0 && !script.endsWith("\n")) script += "\n";
+        } else {
+            script = ensureSpaceSeparator(script);
+        }
 
-            sb = ensureSpaceSeparator(sb);
+        if (slot.syntaxPrefix) script += slot.syntaxPrefix;
 
-            if (slot.syntaxPrefix) {
-                sb += slot.syntaxPrefix;
-            }
-
-            if (isContainer(parameter)) {
-                sb += `\n${indent(content)}`;
-            } else {
-                sb = ensureSpaceSeparator(sb);
-                sb += content;
-            }
+        if (parameter.source === "input") {
+            script += `\n${indent(content)}`;
+        } else {
+            script = ensureSpaceSeparator(script);
+            script += content;
         }
     }
 
-    if (node.controlConfig.syntaxEnd) {
-        if (sb.length > 0 && !sb.endsWith("\n")) sb += "\n";
-        sb += node.controlConfig.syntaxEnd;
-    }
-
-    return sb;
+    if (script.length > 0 && !script.endsWith("\n")) script += "\n";
+    return script + node.controlConfig.syntaxEnd;
 }
 
 function generateOperator(node: ASTNode): string {
     if (!node.operatorConfig) return "";
 
-    let sb = "";
+    const parts: string[] = [];
 
     for (const slot of node.operatorConfig.slots) {
         const parameter = getParameter(node, slot.key);
+        if (!parameter) continue;
 
-        if (parameter) {
-            let content = "";
+        const content =
+            parameter.source === "input"
+                ? renderChildren(parameter, "\n")
+                : quoteArgumentIfUnsafe(parameter.value);
+        if (parameter.source === "input" && content.trim() === "") continue;
 
-            if (isContainer(parameter)) {
-                content = renderChildren(parameter, "\n");
-            } else {
-                const rawValue = parameter.value;
-                if (!rawValue || rawValue.trim() === "") continue;
-                content = quoteArgumentIfUnsafe(rawValue);
-            }
-
-            if (content.trim() === "") continue;
-
-            if (slot.breakLineBefore) {
-                if (sb.length > 0 && !sb.endsWith("\n")) sb += "\n";
-            } else if (sb.length > 0) {
-                sb += " ";
-            }
-
-            if (slot.symbol) {
-                if (slot.symbolPlacement === "before") {
-                    sb += `${slot.symbol} ${content}`;
-                } else {
-                    sb += `${content} ${slot.symbol}`;
-                }
-            } else {
-                sb += content;
-            }
+        if (slot.symbol === undefined) {
+            parts.push(content);
+        } else if (slot.symbolPlacement === "before") {
+            parts.push(`${slot.symbol} ${content}`);
+        } else {
+            parts.push(`${content} ${slot.symbol}`);
         }
     }
-    return sb;
+
+    return parts.join(" ");
 }
 
 function generateOption(node: ASTNode): string {
     const flag = getParameterValue(node, "flag");
-    const value = getParameterValue(node, "value");
+    if (flag.trim() === "") return "";
 
-    let sb = "";
-    if (flag.trim() !== "") {
-        sb += flag;
-        if (value.trim() !== "") {
-            sb += ` ${quoteArgumentIfUnsafe(value)}`;
-        }
-    }
-    return sb;
+    const valueParameter = getParameter(node, "value");
+    if (!valueParameter) return flag;
+
+    return `${flag} ${quoteArgumentIfUnsafe(valueParameter.value)}`;
 }
 
 function generateOperand(node: ASTNode): string {
-    const value = getParameterValue(node, "value");
-    return value ? quoteArgumentIfUnsafe(value) : "";
+    const valueParameter = getParameter(node, "value");
+    if (!valueParameter) return "";
+    return quoteArgumentIfUnsafe(valueParameter.value);
 }
 
-// --- Funções Auxiliares ---
-
 function getParameter(node: ASTNode, key: string): ASTParameter | undefined {
-    return node.parameters?.find((p) => p.key === key);
+    return node.parameters.find((parameter) => parameter.key === key);
 }
 
 function getParameterValue(node: ASTNode, key: string): string {
-    return getParameter(node, key)?.value || "";
-}
-
-function isContainer(parameter: ASTParameter): boolean {
-    return !!parameter.children && parameter.children.length > 0;
+    return getParameter(node, key)?.value ?? "";
 }
 
 function renderParameter(parameter: ASTParameter, separator: string): string {
-    if (isContainer(parameter)) {
+    if (parameter.source === "input") {
         return renderChildren(parameter, separator);
     }
-    return parameter.value || "";
+    return parameter.value;
 }
 
 function renderChildren(parameter: ASTParameter, separator: string): string {
-    if (!parameter.children) return "";
     return parameter.children
         .map((child) => dispatch(child))
         .filter((rendered) => rendered.trim() !== "")
         .join(separator);
 }
 
-function ensureSpaceSeparator(str: string): string {
-    if (str.length > 0) {
-        const lastChar = str.slice(-1);
-        if (lastChar !== "\n" && lastChar !== " ") {
-            return str + " ";
-        }
+function ensureSpaceSeparator(value: string): string {
+    if (value.length > 0 && !value.endsWith("\n") && !value.endsWith(" ")) {
+        return value + " ";
     }
-    return str;
+    return value;
 }
 
 function quoteArgumentIfUnsafe(rawArgument: string): string {
-    if (!rawArgument || rawArgument.length === 0) return "''";
+    if (rawArgument.length === 0) return "''";
     if (SAFE_ARGUMENT_PATTERN.test(rawArgument)) return rawArgument;
     return `'${rawArgument.replace(/'/g, "'\\''")}'`;
 }

@@ -1,7 +1,7 @@
 import * as Blockly from "blockly";
 import * as ShellBlocks from "shellblocks";
 import * as Logger from "../ui/systemLogger";
-import * as API from "@/types/api";
+import type { GameData } from "./types";
 import * as DataManager from "../session/dataManager";
 
 const LAST_UNLOCKED_LEVEL_ID_KEY = "experiment_progress_v1";
@@ -79,9 +79,15 @@ export function uploadScript(workspace: Blockly.WorkspaceSvg): void {
             const state = JSON.parse(jsonContent);
 
             Blockly.Events.disable();
-            workspace.clear();
-            Blockly.serialization.workspaces.load(state, workspace);
-            Blockly.Events.enable();
+            try {
+                workspace.clear();
+                Blockly.serialization.workspaces.load(state, workspace);
+            } finally {
+                Blockly.Events.enable();
+            }
+            Blockly.Events.fire(
+                new Blockly.Events.FinishedLoading(workspace),
+            );
 
             ShellBlocks.showToast(workspace, "Script carregado com sucesso!");
         } catch (error) {
@@ -102,14 +108,9 @@ export function uploadScript(workspace: Blockly.WorkspaceSvg): void {
 export function uploadDefinitions(workspace: Blockly.WorkspaceSvg): void {
     triggerFileUpload((jsonContent) => {
         try {
-            const definitions: ShellBlocks.CLI.CliDefinitions =
-                JSON.parse(jsonContent);
-
-            if (!definitions.commands || !Array.isArray(definitions.commands)) {
-                throw new Error('JSON inválido: falta array de "commands".');
-            }
-
-            DataManager.saveCustomDefinitions(definitions);
+            const rawDefinitions: unknown = JSON.parse(jsonContent);
+            const definitions =
+                DataManager.saveCustomDefinitions(rawDefinitions);
             ShellBlocks.refreshWorkspaceDefinitions(workspace, definitions);
 
             const message = "Definições atualizadas com sucesso!";
@@ -128,7 +129,7 @@ export function uploadDefinitions(workspace: Blockly.WorkspaceSvg): void {
  */
 export async function resetToFactorySettings(
     workspace: Blockly.WorkspaceSvg,
-    onLevelsReset: () => void,
+    onLevelsReset: (data: GameData) => void,
 ): Promise<void> {
     try {
         Logger.log("Iniciando reset de fábrica...", ShellBlocks.LogLevel.INFO);
@@ -140,8 +141,8 @@ export async function resetToFactorySettings(
             throw new Error("Falha ao baixar definições padrão.");
         }
 
-        DataManager.resetGameData();
-        onLevelsReset();
+        const defaultGameData = DataManager.resetGameData();
+        onLevelsReset(defaultGameData);
 
         ShellBlocks.showToast(
             workspace,
@@ -159,17 +160,12 @@ export async function resetToFactorySettings(
  */
 export function uploadGameData(
     workspace: Blockly.WorkspaceSvg,
-    onSuccess: (data: API.GameData) => void,
+    onSuccess: (data: GameData) => void,
 ): void {
     triggerFileUpload((jsonContent) => {
         try {
-            const gameData: API.GameData = JSON.parse(jsonContent);
-
-            if (!gameData.levels || !Array.isArray(gameData.levels)) {
-                throw new Error('JSON inválido: falta array de "levels".');
-            }
-
-            DataManager.saveCustomGameData(gameData);
+            const rawGameData: unknown = JSON.parse(jsonContent);
+            const gameData = DataManager.saveCustomGameData(rawGameData);
             onSuccess(gameData);
 
             ShellBlocks.showToast(workspace, "Níveis atualizados manualmente.");

@@ -104,7 +104,6 @@
             "description": "Altera o diretório de trabalho atual.",
             "color": "#7fc37f",
             "optionColor": "#7fbf7f",
-            "options": [],
             "operands": [
                 {
                     "id": "directory",
@@ -233,14 +232,14 @@
                     ]
                 }
             ],
-            "operandIdsSequenceDelimiter": "-",
+            "operandIdsSequenceDelimiter": ">",
             "operandSyntaxRules": [
                 {
-                    "regexPattern": "(source-)+destination-",
+                    "regexPattern": "(source>)+destination>",
                     "errorMessage": null
                 },
                 {
-                    "regexPattern": "destination-(source-)+",
+                    "regexPattern": "destination>(source>)+",
                     "errorMessage": "O 'Destino' deve ser sempre o último bloco do comando cp."
                 }
             ]
@@ -300,14 +299,14 @@
                     ]
                 }
             ],
-            "operandIdsSequenceDelimiter": "-",
+            "operandIdsSequenceDelimiter": ">",
             "operandSyntaxRules": [
                 {
-                    "regexPattern": "(source-)+destination-",
+                    "regexPattern": "(source>)+destination>",
                     "errorMessage": null
                 },
                 {
-                    "regexPattern": "destination-(source-)+",
+                    "regexPattern": "destination>(source>)+",
                     "errorMessage": "O 'Destino' deve ser o último bloco para que o comando mv saiba para onde mover os arquivos."
                 }
             ]
@@ -357,7 +356,6 @@
             "description": "Cria arquivos vazios ou atualiza timestamps.",
             "color": "#b58a6a",
             "optionColor": "#7fbf7f",
-            "options": [],
             "operands": [
                 {
                     "id": "file",
@@ -464,6 +462,7 @@
                     "description": "Arquivos nos quais será feita a busca.",
                     "color": "#a67f5f",
                     "type": "file",
+                    "optionalWithImplicitInput": true,
                     "defaultValue": "arquivo.txt",
                     "cardinality": {
                         "min": 1,
@@ -477,14 +476,14 @@
                     ]
                 }
             ],
-            "operandIdsSequenceDelimiter": "-",
+            "operandIdsSequenceDelimiter": ">",
             "operandSyntaxRules": [
                 {
-                    "regexPattern": "pattern-(files-)+",
+                    "regexPattern": "pattern>(files>)*",
                     "errorMessage": null
                 },
                 {
-                    "regexPattern": "files-pattern-",
+                    "regexPattern": "files>pattern>",
                     "errorMessage": "Inversão detectada: O 'Padrão' de busca deve vir antes do arquivo no comando grep."
                 }
             ]
@@ -605,7 +604,6 @@
             "label": "curl",
             "description": "Transfere dados de um servidor via URL.",
             "color": "#e67e22",
-            "options": [],
             "operands": [
                 {
                     "id": "url",
@@ -630,13 +628,11 @@
             "slots": [
                 {
                     "name": "A",
-                    "type": "statement",
-                    "check": "command"
+                    "type": "statement"
                 },
                 {
                     "name": "B",
                     "type": "statement",
-                    "check": "command",
                     "symbol": "|",
                     "symbolPlacement": "before"
                 }
@@ -651,13 +647,13 @@
             "slots": [
                 {
                     "name": "A",
-                    "type": "statement",
-                    "check": "command"
+                    "type": "statement"
                 },
                 {
                     "name": "B",
                     "type": "value",
-                    "check": "file",
+                    "valueType": "file",
+                    "allowEmptyValue": false,
                     "symbol": ">",
                     "symbolPlacement": "before"
                 }
@@ -671,13 +667,13 @@
             "slots": [
                 {
                     "name": "A",
-                    "type": "statement",
-                    "check": "command"
+                    "type": "statement"
                 },
                 {
                     "name": "B",
-                    "type": "statement",
-                    "check": "command",
+                    "type": "value",
+                    "valueType": "file",
+                    "allowEmptyValue": false,
                     "symbol": ">>",
                     "symbolPlacement": "before"
                 }
@@ -691,13 +687,11 @@
             "slots": [
                 {
                     "name": "A",
-                    "type": "statement",
-                    "check": "command"
+                    "type": "statement"
                 },
                 {
                     "name": "B",
                     "type": "statement",
-                    "check": "command",
                     "symbol": "&&",
                     "symbolPlacement": "before"
                 }
@@ -711,13 +705,11 @@
             "slots": [
                 {
                     "name": "A",
-                    "type": "statement",
-                    "check": "command"
+                    "type": "statement"
                 },
                 {
                     "name": "B",
                     "type": "statement",
-                    "check": "command",
                     "symbol": "||",
                     "symbolPlacement": "before"
                 }
@@ -732,7 +724,6 @@
                 {
                     "name": "A",
                     "type": "statement",
-                    "check": "command",
                     "symbol": "& true",
                     "symbolPlacement": "after"
                 }
@@ -750,24 +741,18 @@
             "slots": [
                 {
                     "name": "CONDITION",
-                    "type": "statement",
-                    "check": "command",
                     "label": "Se (comando):",
                     "syntaxPrefix": "",
                     "obligatory": true
                 },
                 {
                     "name": "DO",
-                    "type": "statement",
-                    "check": "command",
                     "label": "Então faça (then):",
                     "syntaxPrefix": "; then",
                     "obligatory": true
                 },
                 {
                     "name": "ELSE",
-                    "type": "statement",
-                    "check": "command",
                     "label": "Senão (else):",
                     "syntaxPrefix": "else ",
                     "breakLineBefore": true,
@@ -785,16 +770,12 @@
             "slots": [
                 {
                     "name": "CONDITION",
-                    "type": "statement",
-                    "check": "command",
                     "label": "Enquanto (comando):",
                     "syntaxPrefix": "",
                     "obligatory": true
                 },
                 {
                     "name": "DO",
-                    "type": "statement",
-                    "check": "command",
                     "label": "Faça (do):",
                     "syntaxPrefix": "; do ",
                     "breakLineBefore": false,
@@ -806,27 +787,27 @@
     "categories": [
         {
             "name": "Diretórios",
-            "commands": ["ls", "cd", "mkdir"]
+            "entities": ["ls", "cd", "mkdir"]
         },
         {
             "name": "Arquivos",
-            "commands": ["cp", "mv", "rm", "touch"]
+            "entities": ["cp", "mv", "rm", "touch"]
         },
         {
             "name": "Saída",
-            "commands": ["cat", "echo"]
+            "entities": ["cat", "echo"]
         },
         {
             "name": "Filtros",
-            "commands": ["grep"]
+            "entities": ["grep"]
         },
         {
             "name": "Sistema",
-            "commands": ["ps", "ping", "curl"]
+            "entities": ["ps", "ping", "curl"]
         },
         {
             "name": "Fluxo",
-            "commands": [
+            "entities": [
                 "pipe",
                 "redirect_out",
                 "redirect_append",
@@ -835,7 +816,7 @@
         },
         {
             "name": "Lógica",
-            "commands": ["and", "or", "if_statement", "while_loop"]
+            "entities": ["and", "or", "if_statement", "while_loop"]
         }
     ]
 }

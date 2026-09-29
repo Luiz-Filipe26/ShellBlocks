@@ -6,49 +6,52 @@ export interface Binding {
 
 export interface SemanticControlSlot {
     name: string;
-    syntaxPrefix?: string | null;
-    obligatory?: boolean;
-    breakLineBefore?: boolean;
+    syntaxPrefix?: string;
+    obligatory: boolean;
+    breakLineBefore: boolean;
 }
 
 export interface SemanticControlDefinition {
-    syntaxEnd?: string | null;
+    syntaxEnd: string;
     slots: SemanticControlSlot[];
 }
 
-export interface SemanticOperatorSlot {
+interface SemanticOperatorSlotBase {
     name: string;
-    symbol?: string | null;
-    symbolPlacement?: "before" | "after" | null;
 }
+
+export type SemanticOperatorSlot = SemanticOperatorSlotBase &
+    (
+        | { symbol: string; symbolPlacement: "before" | "after" }
+        | { symbol?: never; symbolPlacement?: never }
+    );
 
 export interface SemanticOperatorDefinition {
     slots: SemanticOperatorSlot[];
 }
 
 export interface BaseSemanticData {
-    nodeType: string;
+    nodeType:
+        | "script"
+        | "command"
+        | "option"
+        | "operand"
+        | "control"
+        | "operator";
     name: string;
     bindings: Binding[];
 }
 
 export interface StructuralSemanticData extends BaseSemanticData {
     nodeType: "script" | "command" | "option" | "operand";
-    bindings: (Binding & {
-        key: "commands" | "options" | "operands" | "flag" | "value";
-    })[];
 }
 
-export interface DynamicSemanticData extends BaseSemanticData {
-    definition: Record<string, Record<string, any>>;
-}
-
-export interface ControlSemanticData extends DynamicSemanticData {
+export interface ControlSemanticData extends BaseSemanticData {
     nodeType: "control";
     definition: { control: SemanticControlDefinition };
 }
 
-export interface OperatorSemanticData extends DynamicSemanticData {
+export interface OperatorSemanticData extends BaseSemanticData {
     nodeType: "operator";
     definition: { operator: SemanticOperatorDefinition };
 }

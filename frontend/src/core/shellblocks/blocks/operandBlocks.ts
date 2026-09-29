@@ -1,14 +1,13 @@
 import * as Blockly from "blockly";
 import * as BlockIDs from "../constants/blockIds";
-import { validateOperandValue } from "../validation/valueValidators";
+import { validateScalarValue } from "../validation/valueValidators";
 import * as BlockComponents from "../ui/blockComponents";
 import * as CLI from "../types/cli";
-import { setBlockSemanticData } from "../serialization/metadataManager";
+import { setBlockTypeSemanticData } from "../serialization/metadataManager";
 import { renderBlockWarnings } from "../validation/validationWarnings";
 
 export function createOperandBlocks(commandDefinition: CLI.CLICommand): void {
-    if (!commandDefinition.operands || commandDefinition.operands.length === 0)
-        return;
+    if (commandDefinition.operands.length === 0) return;
 
     for (const operandDef of commandDefinition.operands) {
         createSingleOperandBlock(commandDefinition, operandDef);
@@ -19,21 +18,24 @@ function createSingleOperandBlock(
     commandDefinition: CLI.CLICommand,
     operandDefinition: CLI.CLIOperand,
 ): void {
-    Blockly.Blocks[
-        BlockIDs.commandOperandBlockType(commandDefinition, operandDefinition)
-    ] = {
+    const blockType = BlockIDs.commandOperandBlockType(
+        commandDefinition,
+        operandDefinition,
+    );
+    setBlockTypeSemanticData(blockType, {
+        nodeType: "operand",
+        name: operandDefinition.id,
+        bindings: [
+            {
+                key: "value",
+                source: "field",
+                name: BlockIDs.FIELDS.VALUE,
+            },
+        ],
+    });
+
+    Blockly.Blocks[blockType] = {
         init: function(this: Blockly.Block) {
-            setBlockSemanticData(this, {
-                nodeType: "operand",
-                name: operandDefinition.id,
-                bindings: [
-                    {
-                        key: "value",
-                        source: "field",
-                        name: BlockIDs.FIELDS.VALUE,
-                    },
-                ],
-            });
             appendOperandInputs(commandDefinition, operandDefinition, this);
 
             BlockComponents.setupParentIndicator(
@@ -61,6 +63,14 @@ function appendOperandInputs(
         .appendField(`${operandDefinition.label}:`)
         .appendField(field, BlockIDs.FIELDS.VALUE);
 
+    validateScalarValue(
+        operandDefinition.defaultValue,
+        operandDefinition,
+        block,
+        `operand:${operandDefinition.id}`,
+    );
+    renderBlockWarnings(block);
+
     block.setPreviousStatement(
         true,
         BlockIDs.commandOperandStatementType(commandDefinition),
@@ -69,7 +79,7 @@ function appendOperandInputs(
         true,
         BlockIDs.commandOperandStatementType(commandDefinition),
     );
-    block.setColour(operandDefinition.color || commandDefinition.color);
+    block.setColour(operandDefinition.color ?? commandDefinition.color);
     block.setTooltip(operandDefinition.description);
 }
 
@@ -78,20 +88,22 @@ function buildOperandField(
     block: Blockly.Block,
 ): Blockly.FieldTextInput {
     const textField = new Blockly.FieldTextInput(
-        operandDefinition.defaultValue || "",
+        operandDefinition.defaultValue,
     );
 
-    if (operandDefinition.validations) {
-        textField.setValidator((newValue) => {
-            validateOperandValue(
-                newValue,
-                operandDefinition.validations,
-                block,
-            );
-            renderBlockWarnings(block);
-            return newValue;
-        });
-    }
+    const validate = (newValue: string): void => {
+        validateScalarValue(
+            newValue,
+            operandDefinition,
+            block,
+            `operand:${operandDefinition.id}`,
+        );
+        renderBlockWarnings(block);
+    };
 
+    textField.setValidator((newValue) => {
+        validate(newValue);
+        return newValue;
+    });
     return textField;
 }

@@ -14,7 +14,7 @@ import { getDefinitions, getGameData } from "./features/session/dataManager";
 import * as ShellBlocks from "shellblocks";
 import { MAIN_WORKSPACE_ID } from "./features/constants/constants";
 import { getPageElements } from "./features/ui/DOMProvider";
-import { GameData } from "@/types/api";
+import type { GameData } from "./features/session/types";
 import { SidebarResizer } from "./features/ui/SidebarResizer";
 import { setupSidebarToggle } from "./features/ui/sidebarController";
 import { setupHelpGuide } from "./features/ui/helpController";
@@ -42,6 +42,7 @@ async function start(): Promise<void> {
         helpModal: pageElements.helpModal,
         closeHelpBtn: pageElements.closeHelpBtn,
     });
+    Logger.initSystemLogger(pageElements.systemLogContainer);
 
     const definitions = getDefinitions();
     const workspace = await ShellBlocks.setupWorkspace(
@@ -53,8 +54,6 @@ async function start(): Promise<void> {
             shouldSetupAutosave: true,
         },
     );
-    Logger.initSystemLogger(pageElements.systemLogContainer);
-
     if (workspace == null) {
         Logger.log(
             "Não foi possível criar o workspace! Aplicação abortada.",
@@ -127,20 +126,20 @@ function registerButtonListeners(workspace: Blockly.WorkspaceSvg) {
                 "ATENÇÃO: Isso apagará suas definições e níveis personalizados e voltará ao padrão do servidor. Continuar?",
             )
         ) {
-            PersistenceManager.resetToFactorySettings(workspace, () => {
+            PersistenceManager.resetToFactorySettings(workspace, (data) => {
+                gameData = data;
                 setupLevelSelector(
                     gameData,
                     pageElements,
                     IS_EXPERIMENT_MODE,
                 );
-                pageElements.levelSelect.selectedIndex = 0;
-                pageElements.levelSelect.dispatchEvent(new Event("change"));
             });
         }
     });
 
     pageElements.btnLoadGame.addEventListener("click", () => {
-        PersistenceManager.uploadGameData(workspace, () => {
+        PersistenceManager.uploadGameData(workspace, (data) => {
+            gameData = data;
             setupLevelSelector(gameData, pageElements, IS_EXPERIMENT_MODE);
         });
     });

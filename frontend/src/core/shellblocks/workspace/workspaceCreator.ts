@@ -2,9 +2,9 @@ import * as Blockly from "blockly";
 import * as CLI from "../types/cli";
 import * as BlockIDs from "../constants/blockIds";
 import { createToolbox } from "./toolboxBuilder";
-import { findScriptRoot, initSystemBlocks } from "../blocks/systemBlocks";
+import { findScriptRoot } from "../blocks/systemBlocks";
 import { disableOrphanBlocks } from "./orphanHandler";
-import { createAllBlocksFromDefinition } from "../blocks/blocksBuilder";
+import { registerBlockTypesFromDefinitions } from "../blocks/blocksBuilder";
 import {
     clearAutoSave,
     initAutoSaver,
@@ -24,20 +24,12 @@ const FALLBACK_DEFINITIONS: CLI.CliDefinitions = {
     categories: [
         {
             name: "Sistema Offline",
-            commands: [],
+            entities: [],
         },
     ],
     operators: [],
     controls: [],
 };
-
-// --- Tipos Auxiliares para Normalização ---
-interface RawCLICommand extends Omit<CLI.CLICommand, "id"> {
-    id?: string;
-}
-interface RawCliDefinitions extends Omit<CLI.CliDefinitions, "commands"> {
-    commands: RawCLICommand[];
-}
 
 /**
  * Inicializa o Workspace principal.
@@ -47,7 +39,6 @@ export async function setupWorkspace(
     definitions: CLI.CliDefinitions | null,
     config: WorkspaceConfig,
 ): Promise<Blockly.WorkspaceSvg | null> {
-    initSystemBlocks();
     if (!definitions) {
         config.externalLogger(
             "Backend indisponível. Iniciando em Modo de Segurança.",
@@ -56,12 +47,11 @@ export async function setupWorkspace(
         definitions = FALLBACK_DEFINITIONS;
     }
 
-    const normalizedDefinitions = normalizeCliDefinitions(definitions);
-    createAllBlocksFromDefinition(normalizedDefinitions);
+    registerBlockTypesFromDefinitions(definitions);
 
     const workspace = Blockly.inject(
         blocklyArea,
-        getBlocklyOptions(normalizedDefinitions),
+        getBlocklyOptions(definitions),
     );
 
     setLoggerForWorkspace(workspace, config.externalLogger);
@@ -90,14 +80,16 @@ export function refreshWorkspaceDefinitions(
     workspace: Blockly.WorkspaceSvg,
     definitions: CLI.CliDefinitions,
 ): void {
-    const normalizedDefs = normalizeCliDefinitions(definitions);
-    createAllBlocksFromDefinition(normalizedDefs);
-    const newToolbox = createToolbox(normalizedDefs);
+    registerBlockTypesFromDefinitions(definitions);
+    const newToolbox = createToolbox(definitions);
     workspace.updateToolbox(newToolbox);
     Blockly.Events.disable();
-    workspace.clear();
-    createScriptRoot(workspace);
-    Blockly.Events.enable();
+    try {
+        workspace.clear();
+        createScriptRoot(workspace);
+    } finally {
+        Blockly.Events.enable();
+    }
 }
 
 /**
@@ -138,19 +130,6 @@ function getBlocklyOptions(
             colour: "#ccc",
             snap: true,
         },
-    };
-}
-
-function normalizeCliDefinitions(
-    raw: RawCliDefinitions | CLI.CliDefinitions,
-): CLI.CliDefinitions {
-    const defs = raw as RawCliDefinitions;
-    return {
-        ...defs,
-        commands: defs.commands.map((command) => ({
-            ...command,
-            id: command.id || command.shellCommand,
-        })),
     };
 }
 

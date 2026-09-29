@@ -11,13 +11,13 @@ import {
 } from "../types/semanticData";
 
 export function serializeWorkspaceToAST(
-    workspace: Blockly.WorkspaceSvg,
+    workspace: Blockly.Workspace,
 ): AST.AST | null {
     const rootBlock = findScriptRoot(workspace);
     if (!rootBlock) return null;
 
     const node = serializeNode(rootBlock);
-    return node.type === "script" ? (node as AST.AST) : null;
+    return node.type === "script" ? { ...node, type: "script" } : null;
 }
 
 function serializeNode(block: Blockly.Block): AST.ASTNode {
@@ -50,9 +50,16 @@ function extractParamsFromBlock(
     sourceBlock: Blockly.Block,
     bindingsGuide: Binding[],
 ): AST.ASTParameter[] {
-    return bindingsGuide.map((binding) => {
+    return bindingsGuide.flatMap((binding) => {
+        const componentExists =
+            binding.source === "field"
+                ? sourceBlock.getField(binding.name) !== null
+                : sourceBlock.getInput(binding.name) !== null;
+        if (!componentExists) return [];
+
         const parameter: AST.ASTParameter = {
             key: binding.key,
+            source: binding.source,
             value: "",
             children: [],
         };
@@ -64,7 +71,7 @@ function extractParamsFromBlock(
         } else {
             parameter.children = serializeInputChain(sourceBlock, binding.name);
         }
-        return parameter;
+        return [parameter];
     });
 }
 
@@ -90,12 +97,12 @@ function enrichNodeWithMetadata(
     node: AST.ASTNode,
     data: SemanticData,
 ): AST.ASTNode {
-    if (data.nodeType === "control" && data.definition?.control) {
+    if (data.nodeType === "control") {
         node.controlConfig = mapControlConfiguration(
             data.definition.control,
             data.bindings,
         );
-    } else if (data.nodeType === "operator" && data.definition?.operator) {
+    } else if (data.nodeType === "operator") {
         node.operatorConfig = mapOperatorConfiguration(
             data.definition.operator,
             data.bindings,
@@ -130,11 +137,15 @@ function mapOperatorConfiguration(
     bindingsGuide: Binding[],
 ): AST.ASTOperatorConfig {
     return {
-        slots: operatorDefinition.slots.map((slot) => ({
-            key: findKeyForTechnicalName(slot.name, bindingsGuide),
-            symbol: slot.symbol,
-            symbolPlacement: slot.symbolPlacement,
-        })),
+        slots: operatorDefinition.slots.map((slot) => {
+            const key = findKeyForTechnicalName(slot.name, bindingsGuide);
+            if (slot.symbol === undefined) return { key };
+            return {
+                key,
+                symbol: slot.symbol,
+                symbolPlacement: slot.symbolPlacement,
+            };
+        }),
     };
 }
 

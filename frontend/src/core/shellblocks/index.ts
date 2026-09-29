@@ -4,6 +4,11 @@ export {
     createScriptRoot, // Útil exportar isso também
 } from "./workspace/workspaceCreator";
 export { serializeWorkspaceToAST } from "./serialization/serializer";
+export {
+    parseCliDefinitions,
+    CliDefinitionsValidationError,
+    type CliDefinitionsParseResult,
+} from "./definitions/cliDefinitionsParser";
 export { showToast } from "./ui/toast";
 export {
     getWorkspaceErrors,

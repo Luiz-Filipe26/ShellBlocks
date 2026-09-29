@@ -1,4 +1,12 @@
-import * as API from "@/types/api";
+import {
+    ExecutionResultSchema,
+    ExecutionStatus,
+    RunRequestSchema,
+    type ExecutionResult,
+    type RunRequest,
+    type StageResult,
+} from "@shellblocks/shared/contracts/execution";
+import { API_REQUEST_TIMEOUT_MS } from "@shellblocks/shared/config/sandbox";
 import * as ShellBlocks from "shellblocks";
 import { executeWithTimeout } from "@/core/utils/async";
 import { AppConfig } from "@/config/appConfig";
@@ -49,8 +57,16 @@ export async function runScript(
     try {
         userScript = generateShellScript(ast);
     } catch (error) {
-        Logger.log(`Erro ao gerar script localmente: ${error}`, ShellBlocks.LogLevel.ERROR);
-        cliOutput.textContent += "[ERRO DE GERAÇÃO INTERNA]\n$";
+        const message = `Erro ao gerar script localmente: ${error}`;
+        Logger.log(message, ShellBlocks.LogLevel.ERROR);
+        ShellBlocks.showToast(workspace, message, ShellBlocks.LogLevel.ERROR);
+        return;
+    }
+
+    if (userScript.trim() === "") {
+        const message = "Adicione um comando antes de executar.";
+        ShellBlocks.showToast(workspace, message, ShellBlocks.LogLevel.WARN);
+        Logger.log(message, ShellBlocks.LogLevel.WARN);
         return;
     }
 
@@ -63,24 +79,25 @@ export async function runScript(
     try {
         const level = getCachedLevelData(currentLevelId);
 
-        const payload: API.RunRequest = {
-            userScript: userScript,
-            setupCommands: level?.setupCommands || [],
-            verificationScript: level?.verificationScript || "",
-        };
+        const payload: RunRequest = RunRequestSchema.parse({
+            userScript,
+            setupScript: level?.setupScript,
+            verificationScript: level?.verificationScript,
+        });
 
         const result = await requestExecution(payload);
         renderExecutionOutput(
             result,
             cliOutput,
+            workspace,
             currentLevelId,
             onLevelSuccess,
         );
     } catch (error) {
         const message = `Erro de Conexão: ${error}`;
-        ShellBlocks.showToast(workspace, message);
+        ShellBlocks.showToast(workspace, message, ShellBlocks.LogLevel.ERROR);
         Logger.log(message, ShellBlocks.LogLevel.ERROR);
-        cliOutput.textContent += `[ERRO DE CONEXÃO]: ${error}\n$`;
+        cliOutput.textContent += "$";
     } finally {
         runBtn.disabled = false;
         runBtn.textContent = "Executar";
@@ -120,68 +137,172 @@ function showValidationModal(
 }
 
 async function requestExecution(
-    payload: API.RunRequest,
-): Promise<API.ExecutionResult> {
-    const response = await executeWithTimeout(
-        AppConfig.API_REQUEST_TIMEOUT_MS,
-        (signal) =>
-            fetch(`${AppConfig.API_BASE_URL}/${ApiRoutes.RUN_SCRIPT}`, {
+    payload: RunRequest,
+): Promise<ExecutionResult> {
+    const { response, responseBody } = await executeWithTimeout(
+        API_REQUEST_TIMEOUT_MS,
+        async (signal) => {
+            const response = await fetch(`${AppConfig.API_BASE_URL}/${ApiRoutes.RUN_SCRIPT}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
-                signal: signal,
-            }),
+                signal,
+            });
+            const responseBody: unknown = await response.json();
+            return { response, responseBody };
+        },
     );
 
+    const result = ExecutionResultSchema.parse(responseBody);
+
     if (!response.ok) {
+        if (result.status === ExecutionStatus.INFRASTRUCTURE_ERROR) {
+            return result;
+        }
         throw new Error(`HTTP ${response.status}`);
     }
 
-    return response.json();
+    return result;
 }
 
 function renderExecutionOutput(
-    result: API.ExecutionResult,
+    result: ExecutionResult,
     cliOutput: HTMLPreElement,
+    workspace: Blockly.WorkspaceSvg,
     currentLevelId: string,
     onLevelSuccess: OnLevelSuccess,
 ): void {
-    let output = "";
-
-    if (result.stdout) {
-        output += result.stdout;
-        if (!output.endsWith("\n")) output += "\n";
+    if (result.status === ExecutionStatus.INFRASTRUCTURE_ERROR) {
+        showInfrastructureFailure(result, workspace);
+        cliOutput.textContent += "$";
+        return;
     }
 
-    if (result.stderr) {
-        output += `[STDERR]: ${result.stderr}\n`;
+    if (result.status === ExecutionStatus.SETUP_FAILED) {
+        showSetupFailure(result.setup, workspace);
+        cliOutput.textContent += "$";
+        return;
     }
 
-    cliOutput.textContent += output;
+    renderStudentExecution(result.execution, cliOutput);
 
-    if (currentLevelId !== SANDBOX_LEVEL_ID) {
-        if (result.exitCode === 0) {
-            cliOutput.textContent += "[SUCESSO] Objetivo concluído.\n";
+    if (currentLevelId === SANDBOX_LEVEL_ID) {
+        cliOutput.textContent += "$";
+        return;
+    }
 
-            const status = onLevelSuccess(currentLevelId);
+    if (!result.verification) {
+        const message =
+            "Este nível não possui verificação e não pode ser concluído automaticamente.";
+        Logger.log(message, ShellBlocks.LogLevel.WARN);
+        ShellBlocks.showToast(workspace, message, ShellBlocks.LogLevel.WARN);
+        cliOutput.textContent += "$";
+        return;
+    }
 
-            if (status.unlockedNewLevel) {
-                cliOutput.textContent +=
-                    "------------------------------------------------\n";
-                cliOutput.textContent += "SISTEMA: Novo nível desbloqueado!\n";
-                if (status.nextLevelTitle) {
-                    cliOutput.textContent += `PRÓXIMO: ${status.nextLevelTitle}\n`;
-                }
-                cliOutput.textContent +=
-                    "------------------------------------------------\n";
+    renderVerificationFeedback(result.verification);
+
+    if (result.verification.exitCode === 0) {
+        const message = "Objetivo concluído.";
+        Logger.log(message, ShellBlocks.LogLevel.INFO);
+        ShellBlocks.showToast(workspace, message);
+        const status = onLevelSuccess(currentLevelId);
+
+        if (status.unlockedNewLevel) {
+            Logger.log("Novo nível desbloqueado!", ShellBlocks.LogLevel.INFO);
+            if (status.nextLevelTitle) {
+                Logger.log(
+                    `Próximo: ${status.nextLevelTitle}`,
+                    ShellBlocks.LogLevel.INFO,
+                );
             }
-        } else {
-            cliOutput.textContent += "[FALHA] O objetivo não foi atingido.\n";
         }
-    } else if (result.exitCode !== 0) {
-        cliOutput.textContent += `(Exit Code: ${result.exitCode})\n`;
+    } else {
+        const message = "O objetivo não foi atingido.";
+        Logger.log(message, ShellBlocks.LogLevel.WARN);
+        ShellBlocks.showToast(workspace, message, ShellBlocks.LogLevel.WARN);
     }
 
     cliOutput.textContent += "$";
-    cliOutput.scrollTop = cliOutput.scrollHeight; // Garante que o usuário veja a mensagem final
+}
+
+function renderStudentExecution(
+    execution: StageResult,
+    cliOutput: HTMLPreElement,
+): void {
+    const stdout = decodeStageStream(execution.stdoutBase64);
+    const stderr = decodeStageStream(execution.stderrBase64);
+    if (stdout) {
+        cliOutput.textContent += stdout;
+        if (!stdout.endsWith("\n")) {
+            cliOutput.textContent += "\n";
+        }
+    }
+
+    if (stderr) {
+        cliOutput.textContent += "[STDERR DO COMANDO]\n";
+        cliOutput.textContent += stderr;
+        if (!stderr.endsWith("\n")) {
+            cliOutput.textContent += "\n";
+        }
+    }
+
+    if (execution.exitCode !== 0) {
+        cliOutput.textContent += `(Exit code do comando: ${execution.exitCode})\n`;
+    }
+}
+
+function renderVerificationFeedback(verification: StageResult): void {
+    const stdout = decodeStageStream(verification.stdoutBase64);
+    const stderr = decodeStageStream(verification.stderrBase64);
+    if (stdout) {
+        Logger.log(
+            `Verificação: ${stdout.trimEnd()}`,
+            verification.exitCode === 0
+                ? ShellBlocks.LogLevel.INFO
+                : ShellBlocks.LogLevel.WARN,
+        );
+    }
+
+    if (stderr) {
+        Logger.log(
+            `Verificação (stderr): ${stderr.trimEnd()}`,
+            ShellBlocks.LogLevel.ERROR,
+        );
+    }
+}
+
+function showSetupFailure(
+    setup: StageResult,
+    workspace: Blockly.WorkspaceSvg,
+): void {
+    const detail =
+        decodeStageStream(setup.stderrBase64) ||
+        decodeStageStream(setup.stdoutBase64);
+    const message = detail
+        ? `Falha ao preparar o ambiente: ${detail.trimEnd()}`
+        : `Falha ao preparar o ambiente (exit code ${setup.exitCode}).`;
+    Logger.log(message, ShellBlocks.LogLevel.ERROR);
+    ShellBlocks.showToast(workspace, message, ShellBlocks.LogLevel.ERROR);
+}
+
+function showInfrastructureFailure(
+    result: Extract<
+        ExecutionResult,
+        { status: typeof ExecutionStatus.INFRASTRUCTURE_ERROR }
+    >,
+    workspace: Blockly.WorkspaceSvg,
+): void {
+    const message = `Falha de infraestrutura: ${result.message}`;
+    Logger.log(
+        result.details ? `${message} ${result.details}` : message,
+        ShellBlocks.LogLevel.ERROR,
+    );
+    ShellBlocks.showToast(workspace, message, ShellBlocks.LogLevel.ERROR);
+}
+
+export function decodeStageStream(base64: string): string {
+    const binary = atob(base64);
+    const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
 }

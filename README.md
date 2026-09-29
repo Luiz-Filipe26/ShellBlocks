@@ -60,7 +60,8 @@ O backend é deliberadamente pequeno e possui responsabilidades de infraestrutur
 * expor `POST /api/run`;
 * garantir a disponibilidade da imagem Docker usada para execução;
 * executar scripts Shell em ambiente isolado;
-* retornar `stdout`, `stderr` e `exitCode`.
+* retornar separadamente os resultados da preparação, da execução do aluno e
+  da verificação pedagógica.
 
 A inteligência que determina o significado dos comandos, o funcionamento dos níveis e os critérios de uma fase permanece no frontend.
 
@@ -93,6 +94,10 @@ Uma visão resumida da organização atual:
 
 ```text
 .
+├── shared/
+│   └── contracts/
+│       └── execution.ts
+│
 ├── frontend/
 │   ├── src/
 │   │   ├── assets/
@@ -111,6 +116,9 @@ Uma visão resumida da organização atual:
 ├── backend/
 │   ├── src/
 │   │   ├── controllers/
+│   │   ├── docker/
+│   │   │   ├── Dockerfile.sandbox
+│   │   │   └── runner.sandbox.js
 │   │   ├── services/
 │   │   ├── server.ts
 │   │   └── types.d.ts
@@ -124,6 +132,8 @@ Uma visão resumida da organização atual:
 ```
 
 No frontend, `core/shellblocks` contém o núcleo reutilizável responsável pela representação e pelo funcionamento dos blocos. A camada `pages/features` concentra funcionalidades específicas da aplicação educacional, como execução, sessão e interface da página.
+
+`shared/contracts` contém os contratos de execução compartilhados entre frontend e backend. No backend, `src/docker` concentra a definição da imagem isolada e o runner Node executado dentro dela.
 
 ## Modelo do frontend
 
@@ -236,28 +246,27 @@ A requisição pode conter:
 ```ts
 {
     userScript,
-    setupCommands,
+    setupScript,
     verificationScript
 }
 ```
 
 Cada parte possui uma responsabilidade distinta:
 
-* `setupCommands`: prepara o estado inicial necessário para a execução;
+* `setupScript`: prepara o estado inicial necessário para a execução em um
+  processo Shell separado;
 * `userScript`: script produzido pelo usuário;
 * `verificationScript`: script opcional utilizado para verificar o estado resultante.
 
 A decisão sobre quais scripts devem ser enviados pertence ao frontend.
 
-A resposta segue a estrutura:
-
-```ts
-interface ExecutionResult {
-    stdout: string;
-    stderr: string;
-    exitCode: number;
-}
-```
+A resposta distingue os resultados da preparação, da execução do aluno e da
+verificação. `completed` indica que a preparação e a execução foram concluídas;
+a verificação, quando existe, permanece um resultado separado e determina o
+cumprimento do objetivo pedagógico. `setup_failed` indica que a preparação
+falhou e impede os estágios seguintes. Falhas no Docker, timeout ou respostas
+internas inválidas retornam `infrastructure_error` e não são tratadas como erro
+do aluno nem como reprovação pedagógica.
 
 ## Sandbox de execução
 
@@ -269,6 +278,7 @@ A imagem inclui Bash e utilitários utilizados pelos exercícios, como:
 * grep;
 * sed;
 * awk;
+* Node.js
 * Python;
 * curl;
 * ping.
@@ -279,10 +289,13 @@ A execução utiliza atualmente:
 rede:    desabilitada
 memória: 100 MB
 CPU:     0.5
-timeout: 30 segundos
+timeout da sandbox: 28 segundos
 ```
 
-O container é iniciado com `--rm`, portanto é descartado após a execução.
+O timeout da request é de 30 segundos; o backend limita a execução da sandbox
+a 28 segundos. Cada execução recebe um nome exclusivo no
+formato `shellblocks-<UUID>`, e o backend encerra e remove explicitamente apenas
+esse container ao término normal, em caso de erro ou quando o prazo expira.
 
 ### Imagem Docker
 
@@ -292,9 +305,13 @@ Na inicialização, o backend verifica se existe uma imagem chamada:
 blockly-shell-env
 ```
 
-Caso ela ainda não exista, o próprio servidor realiza seu build.
+O backend calcula um fingerprint SHA-256 dos arquivos `Dockerfile.sandbox` e
+`runner.sandbox.js` e o compara com a label `shellblocks.build.sha256` da imagem. A
+imagem é reutilizada quando os valores correspondem. Se a imagem não existir,
+não possuir a label ou contiver um fingerprint diferente, o servidor realiza
+novamente seu build e grava a label atualizada.
 
-A definição da imagem está embutida no backend, portanto não é necessário manter um `Dockerfile` separado apenas para o sandbox.
+A definição da imagem e o runner da sandbox são mantidos em arquivos próprios no backend.
 
 O servidor também realiza uma pequena execução de aquecimento durante a inicialização.
 

@@ -2,8 +2,6 @@ import * as Blockly from "blockly";
 import * as CLI from "../types/cli";
 import { setError, clearError } from "./validationManager";
 import { getBlockSemanticData } from "../serialization/metadataManager";
-import * as BlockTraversal from "../helpers/blockTraversal";
-import { getOperatorDefinition } from "../blocks/operatorBlocks";
 import { VALIDATION_ERRORS } from "../constants/validationErrors";
 
 /**
@@ -17,9 +15,7 @@ export function validateOperandSyntax(
     clearError(commandBlock, VALIDATION_ERRORS.SYNTAX_ERROR_ID);
 
     const rules = commandDefinition.operandSyntaxRules;
-    if (!rules || rules.length === 0) return;
-
-    if (shouldRelaxOperandChecks(commandBlock)) return;
+    if (rules.length === 0) return;
 
     const normalizedSequence = getNormalizedSequence(
         operandBlocks,
@@ -27,24 +23,16 @@ export function validateOperandSyntax(
     );
 
     for (const rule of rules) {
-        try {
-            const regex = new RegExp(`^${rule.regexPattern}$`);
-            const regexSuccess = regex.test(normalizedSequence);
-            const isSyntaxGuaranteedValid = regexSuccess && !rule.errorMessage;
-            if (isSyntaxGuaranteedValid) return;
-            const isKnownError = regexSuccess && rule.errorMessage;
-            if (isKnownError) {
-                setError(
-                    commandBlock,
-                    VALIDATION_ERRORS.SYNTAX_ERROR_ID,
-                    rule.errorMessage || "",
-                );
-                return;
-            }
-        } catch (e) {
-            console.error(
-                `Falha no Regex de sintaxe do comando ${commandDefinition.id}`,
+        const regex = new RegExp(`^(?:${rule.regexPattern})$`);
+        const regexSuccess = regex.test(normalizedSequence);
+        if (regexSuccess && rule.errorMessage === null) return;
+        if (regexSuccess && rule.errorMessage !== null) {
+            setError(
+                commandBlock,
+                VALIDATION_ERRORS.SYNTAX_ERROR_ID,
+                rule.errorMessage,
             );
+            return;
         }
     }
 
@@ -55,26 +43,16 @@ export function validateOperandSyntax(
     );
 }
 
-function shouldRelaxOperandChecks(block: Blockly.Block): boolean {
-    const parent = block.getSurroundParent();
-    if (!parent) return false;
-
-    const operatorDefinition = getOperatorDefinition(parent.type);
-    if (!operatorDefinition) return false;
-
-    const slotName = BlockTraversal.getParentInputName(block);
-    if (!slotName) return false;
-
-    return (
-        operatorDefinition.slotsWithImplicitData?.includes(slotName) ?? false
-    );
-}
-
 function getNormalizedSequence(
     operandBlocks: Blockly.Block[],
     commandDefinition: CLI.CLICommand,
 ): string {
-    const delimiter = commandDefinition.operandIdsSequenceDelimiter || "-";
+    const delimiter = commandDefinition.operandIdsSequenceDelimiter;
+    if (delimiter === undefined) {
+        throw new Error(
+            `Comando ${commandDefinition.id} possui regras sintáticas sem delimitador.`,
+        );
+    }
 
     return operandBlocks
         .map((block) => {

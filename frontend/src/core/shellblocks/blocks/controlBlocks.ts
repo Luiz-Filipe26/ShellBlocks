@@ -1,6 +1,6 @@
 import * as Blockly from "blockly";
 import * as CLI from "../types/cli";
-import { setBlockSemanticData } from "../serialization/metadataManager";
+import { setBlockTypeSemanticData } from "../serialization/metadataManager";
 import * as BlockIDs from "../constants/blockIds";
 import * as BlockComponents from "../ui/blockComponents";
 import { validateControlCardinality } from "../validation/cardinalityValidator";
@@ -8,29 +8,30 @@ import { renderBlockWarnings } from "../validation/validationWarnings";
 import { addLocalChangeListener } from "../events/blockEventListeners";
 
 export function createControlBlock(controlDefinition: CLI.CLIControl): void {
-    Blockly.Blocks[BlockIDs.controlBlockType(controlDefinition)] = {
-        init: function(this: Blockly.BlockSvg) {
-            setBlockSemanticData(this, {
-                nodeType: "control",
-                name: controlDefinition.shellCommand,
-                bindings: controlDefinition.slots.map((slot) => ({
-                    key: slot.name,
-                    source: "input",
+    const blockType = BlockIDs.controlBlockType(controlDefinition);
+    setBlockTypeSemanticData(blockType, {
+        nodeType: "control",
+        name: controlDefinition.shellCommand,
+        bindings: controlDefinition.slots.map((slot) => ({
+            key: slot.name,
+            source: "input",
+            name: slot.name,
+        })),
+        definition: {
+            control: {
+                syntaxEnd: controlDefinition.syntaxEnd,
+                slots: controlDefinition.slots.map((slot) => ({
                     name: slot.name,
-                    breakLineBefore: slot.breakLineBefore || false,
+                    syntaxPrefix: slot.syntaxPrefix,
+                    obligatory: slot.obligatory,
+                    breakLineBefore: slot.breakLineBefore,
                 })),
-                definition: {
-                    control: {
-                        syntaxEnd: controlDefinition.syntaxEnd || null,
-                        slots: controlDefinition.slots.map((slot) => ({
-                            name: slot.name,
-                            syntaxPrefix: slot.syntaxPrefix || null,
-                            obligatory: slot.obligatory || false,
-                        })),
-                    },
-                },
-            });
+            },
+        },
+    });
 
+    Blockly.Blocks[blockType] = {
+        init: function(this: Blockly.BlockSvg) {
             appendControlHeader(controlDefinition, this);
             appendControlSlots(controlDefinition, this);
             setupControlConnections(controlDefinition, this);
@@ -67,7 +68,7 @@ function appendControlSlots(
     controlDefinition.slots.forEach((slot) => {
         const input = block
             .appendStatementInput(slot.name)
-            .setCheck(slot.check);
+            .setCheck(BlockIDs.commandStatementType());
         if (slot.label) input.appendField(slot.label);
     });
 }
@@ -86,8 +87,10 @@ function setupControlValidation(
     controlDefinition: CLI.CLIControl,
     block: Blockly.BlockSvg,
 ): void {
-    addLocalChangeListener(block, () => {
+    const validate = (): void => {
         validateControlCardinality(block, controlDefinition);
         renderBlockWarnings(block);
-    });
+    };
+    addLocalChangeListener(block, validate);
+    if (Blockly.Events.isEnabled()) validate();
 }

@@ -44,9 +44,13 @@ function secureLoadSerializedWorkspace(
     jsonState: { [key: string]: any },
 ) {
     Blockly.Events.disable();
-    workspace.clear();
-    Blockly.serialization.workspaces.load(jsonState, workspace);
-    Blockly.Events.enable();
+    try {
+        workspace.clear();
+        Blockly.serialization.workspaces.load(jsonState, workspace);
+    } finally {
+        Blockly.Events.enable();
+    }
+    Blockly.Events.fire(new Blockly.Events.FinishedLoading(workspace));
 }
 
 /**

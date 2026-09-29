@@ -1,6 +1,6 @@
 import * as CLI from "../types/cli";
 
-export const ROOT_BLOCK_TYPE = "script_root" as const;
+export const ROOT_BLOCK_TYPE = "system:script_root" as const;
 
 export const INPUTS = {
     OPTIONS: "OPTIONS",
@@ -27,28 +27,28 @@ export const CONTEXT_MENU_IDS = {
 } as const;
 
 export function commandBlockType(commandDefinition: CLI.CLICommand): string {
-    return commandDefinition.id;
+    return `command:${commandDefinition.id}`;
 }
 
 export function controlBlockType(controlDefinition: CLI.CLIControl): string {
-    return controlDefinition.id;
+    return `control:${controlDefinition.id}`;
 }
 
 export function operatorBlockType(operatorDefinition: CLI.CLIOperator): string {
-    return operatorDefinition.id;
+    return `operator:${operatorDefinition.id}`;
 }
 
 export function commandOptionBlockType(
     commandDefinition: CLI.CLICommand,
 ): string {
-    return `${commandDefinition.id}_option`;
+    return `option:${commandDefinition.id}`;
 }
 
 export function commandOperandBlockType(
     commandDefinition: CLI.CLICommand,
     operandDefinition: CLI.CLIOperand,
 ): string {
-    return `${commandDefinition.id}_${operandDefinition.id}_operand`;
+    return `operand:${commandDefinition.id}:${operandDefinition.id}`;
 }
 
 export function commandStatementType(): string {

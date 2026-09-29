@@ -2,32 +2,40 @@ import * as Blockly from "blockly";
 import * as BlockIDs from "../constants/blockIds";
 import * as BlockComponents from "../ui/blockComponents";
 import * as CLI from "../types/cli";
-import { setBlockSemanticData } from "../serialization/metadataManager";
+import { setBlockTypeSemanticData } from "../serialization/metadataManager";
+import {
+    clearScalarValueErrors,
+    validateScalarValue,
+} from "../validation/valueValidators";
+import { renderBlockWarnings } from "../validation/validationWarnings";
+
+const OPTION_ARGUMENT_ERROR_SCOPE = "option-argument";
 
 export function createOptionBlock(commandDefinition: CLI.CLICommand): void {
-    if (!commandDefinition.options || commandDefinition.options.length === 0) {
+    if (commandDefinition.options.length === 0) {
         return;
     }
 
-    Blockly.Blocks[BlockIDs.commandOptionBlockType(commandDefinition)] = {
-        init: function(this: Blockly.Block) {
-            setBlockSemanticData(this, {
-                nodeType: "option",
-                name: commandDefinition.shellCommand,
-                bindings: [
-                    {
-                        key: "flag",
-                        source: "field",
-                        name: BlockIDs.FIELDS.FLAG,
-                    },
-                    {
-                        key: "value",
-                        source: "field",
-                        name: BlockIDs.FIELDS.OPTION_ARG_VALUE,
-                    },
-                ],
-            });
+    const blockType = BlockIDs.commandOptionBlockType(commandDefinition);
+    setBlockTypeSemanticData(blockType, {
+        nodeType: "option",
+        name: commandDefinition.shellCommand,
+        bindings: [
+            {
+                key: "flag",
+                source: "field",
+                name: BlockIDs.FIELDS.FLAG,
+            },
+            {
+                key: "value",
+                source: "field",
+                name: BlockIDs.FIELDS.OPTION_ARG_VALUE,
+            },
+        ],
+    });
 
+    Blockly.Blocks[blockType] = {
+        init: function(this: Blockly.Block) {
             appendOptionInputs(commandDefinition, this);
 
             BlockComponents.setupParentIndicator(
@@ -52,6 +60,18 @@ function updateOptionBlockShape(
     selectedFlag: string,
     commandDefinition: CLI.CLICommand,
 ) {
+    const previousFlag = block.getFieldValue(BlockIDs.FIELDS.FLAG);
+    const previousArgument = commandDefinition.options.find(
+        (option) => option.flag === previousFlag,
+    )?.argument;
+    if (previousArgument) {
+        clearScalarValueErrors(
+            block,
+            previousArgument,
+            OPTION_ARGUMENT_ERROR_SCOPE,
+        );
+    }
+
     const optionDefinition = commandDefinition.options.find(
         (option) => option.flag === selectedFlag,
     );
@@ -59,17 +79,34 @@ function updateOptionBlockShape(
     const inputExists = block.getInput(BlockIDs.INPUTS.OPTION_ARG_INPUT);
     if (!optionDefinition || !optionDefinition.argument) {
         if (inputExists) block.removeInput(BlockIDs.INPUTS.OPTION_ARG_INPUT);
+        renderBlockWarnings(block);
         return;
     }
+    const argumentDefinition = optionDefinition.argument;
 
     if (inputExists) block.removeInput(BlockIDs.INPUTS.OPTION_ARG_INPUT);
     const input = block.appendDummyInput(BlockIDs.INPUTS.OPTION_ARG_INPUT);
-    input.appendField(optionDefinition.argument.label + ":");
+    input.appendField(argumentDefinition.label + ":");
     const argField = new Blockly.FieldTextInput(
-        optionDefinition.argument.defaultValue || "",
+        argumentDefinition.defaultValue,
     );
 
+    const validate = (newValue: string): void => {
+        validateScalarValue(
+            newValue,
+            argumentDefinition,
+            block,
+            OPTION_ARGUMENT_ERROR_SCOPE,
+        );
+        renderBlockWarnings(block);
+    };
+    argField.setValidator((newValue) => {
+        validate(newValue);
+        return newValue;
+    });
+
     input.appendField(argField, BlockIDs.FIELDS.OPTION_ARG_VALUE);
+    validate(argumentDefinition.defaultValue);
 }
 
 function appendOptionInputs(
@@ -105,7 +142,7 @@ function appendOptionInputs(
         BlockIDs.commandOptionStatementType(commandDefinition),
     );
 
-    block.setColour(commandDefinition.optionColor || commandDefinition.color);
+    block.setColour(commandDefinition.optionColor ?? commandDefinition.color);
 }
 
 function buildOptionDropdown(

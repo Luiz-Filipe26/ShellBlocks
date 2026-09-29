@@ -66,7 +66,8 @@ export function setupParentIndicator(
         if (!indicatorField) return;
 
         const insideRoot =
-            block.getSurroundParent()?.type === commandDefinition.id;
+            block.getSurroundParent()?.type ===
+            BlockIDs.commandBlockType(commandDefinition);
 
         indicatorField.setValue(insideRoot ? "" : textWhenOutside);
     });

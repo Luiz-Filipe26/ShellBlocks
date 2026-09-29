@@ -5,7 +5,7 @@ import { renderBlockWarnings } from "../validation/validationWarnings";
 import * as BlockComponents from "../ui/blockComponents";
 import * as BlockTraversal from "../helpers/blockTraversal";
 import * as CLI from "../types/cli";
-import { setBlockSemanticData } from "../serialization/metadataManager";
+import { setBlockTypeSemanticData } from "../serialization/metadataManager";
 import {
     unplugExclusiveOptionsFromCommand,
     unplugDuplicatesFromList,
@@ -16,24 +16,26 @@ import { addLocalChangeListener } from "../events/blockEventListeners";
 import { validateOperandSyntax } from "../validation/syntaxValidator";
 
 export function createCommandBlock(commandDefinition: CLI.CLICommand): void {
-    Blockly.Blocks[commandDefinition.id] = {
+    const blockType = BlockIDs.commandBlockType(commandDefinition);
+    setBlockTypeSemanticData(blockType, {
+        nodeType: "command",
+        name: commandDefinition.shellCommand,
+        bindings: [
+            {
+                key: "options",
+                source: "input",
+                name: BlockIDs.INPUTS.OPTIONS,
+            },
+            {
+                key: "operands",
+                source: "input",
+                name: BlockIDs.INPUTS.OPERANDS,
+            },
+        ],
+    });
+
+    Blockly.Blocks[blockType] = {
         init: function(this: Blockly.BlockSvg) {
-            setBlockSemanticData(this, {
-                nodeType: "command",
-                name: commandDefinition.shellCommand,
-                bindings: [
-                    {
-                        key: "options",
-                        source: "input",
-                        name: BlockIDs.INPUTS.OPTIONS,
-                    },
-                    {
-                        key: "operands",
-                        source: "input",
-                        name: BlockIDs.INPUTS.OPERANDS,
-                    },
-                ],
-            });
             appendCommandHeader(commandDefinition, this);
             appendCommandInputs(commandDefinition, this);
             setupCommandIntegrityPipeline(commandDefinition, this);
@@ -64,14 +66,14 @@ function appendCommandInputs(
     commandDefinition: CLI.CLICommand,
     commandBlock: Blockly.BlockSvg,
 ): void {
-    if (commandDefinition.options && commandDefinition.options.length > 0) {
+    if (commandDefinition.options.length > 0) {
         commandBlock
             .appendStatementInput(BlockIDs.INPUTS.OPTIONS)
             .setCheck(BlockIDs.commandOptionStatementType(commandDefinition))
             .appendField("Opções:");
     }
 
-    if (commandDefinition.operands && commandDefinition.operands.length > 0) {
+    if (commandDefinition.operands.length > 0) {
         commandBlock
             .appendStatementInput(BlockIDs.INPUTS.OPERANDS)
             .setCheck(BlockIDs.commandOperandStatementType(commandDefinition))
@@ -88,7 +90,7 @@ function setupCommandIntegrityPipeline(
     commandDefinition: CLI.CLICommand,
     commandBlock: Blockly.BlockSvg,
 ): void {
-    addLocalChangeListener(commandBlock, () => {
+    const validate = (): void => {
         let optionBlocks = BlockTraversal.getBlocksList(
             commandBlock.getInputTargetBlock(BlockIDs.INPUTS.OPTIONS),
             { type: BlockIDs.commandOptionBlockType(commandDefinition) },
@@ -105,29 +107,30 @@ function setupCommandIntegrityPipeline(
             (block) => block.getParent() !== null,
         );
 
-        if (commandDefinition.exclusiveOptions) {
-            unplugExclusiveOptionsFromCommand(
-                optionBlocks,
-                commandDefinition.exclusiveOptions,
-            );
-            optionBlocks = optionBlocks.filter(
-                (block) => block.getParent() !== null,
-            );
-        }
+        unplugExclusiveOptionsFromCommand(
+            optionBlocks,
+            commandDefinition.exclusiveOptions,
+        );
+        optionBlocks = optionBlocks.filter(
+            (block) => block.getParent() !== null,
+        );
 
         autoFixExcessOperands(operandBlocks, commandDefinition);
         operandBlocks = operandBlocks.filter(
             (block) => block.getParent() !== null,
         );
 
-        validateCardinality(commandBlock, commandDefinition, {
-            optionBlocks: optionBlocks,
-            operandBlocks: operandBlocks,
-        });
+        validateCardinality(
+            commandBlock,
+            commandDefinition,
+            operandBlocks,
+        );
 
         validateOperandSyntax(commandBlock, commandDefinition, operandBlocks);
 
         renderBlockWarnings(commandBlock);
         BlockComponents.updateCardinalityIndicator(commandBlock);
-    });
+    };
+    addLocalChangeListener(commandBlock, validate);
+    if (Blockly.Events.isEnabled()) validate();
 }

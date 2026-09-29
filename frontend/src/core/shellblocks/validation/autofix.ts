@@ -88,7 +88,7 @@ export function autoFixExcessOperands(
     }
 
     for (const operandDef of commandDefinition.operands) {
-        const max = operandDef.cardinality?.max ?? 0;
+        const max = operandDef.cardinality.max;
         if (max === "unlimited") continue;
 
         const operandType = BlockIDs.commandOperandBlockType(

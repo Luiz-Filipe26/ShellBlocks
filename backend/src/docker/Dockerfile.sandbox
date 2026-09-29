@@ -1,0 +1,7 @@
+FROM alpine:latest
+RUN apk add --no-cache bash coreutils grep sed gawk python3 curl iputils nodejs
+RUN addgroup -g 1000 aluno && adduser -D -u 1000 -G aluno aluno
+COPY runner.sandbox.js /usr/local/lib/shellblocks/runner.sandbox.js
+RUN chown root:root /usr/local/lib/shellblocks/runner.sandbox.js && chmod 0555 /usr/local/lib/shellblocks/runner.sandbox.js
+WORKDIR /home/aluno
+ENTRYPOINT ["node", "/usr/local/lib/shellblocks/runner.sandbox.js"]

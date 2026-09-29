@@ -101,7 +101,7 @@ docs/levels.md
 
 Use configuration for declarative facts. Keep behavior that is inherently procedural or semantic in TypeScript rather than forcing it into JSON merely to make the application more data-driven.
 
-`levels.json` defines the educational progression, including presentation, setup commands, optional verification scripts, difficulty and ordering.
+`levels.json` defines the educational progression, including presentation, an optional setup script, optional verification scripts, difficulty and ordering.
 
 When changing either format, keep the TypeScript model, existing data and corresponding documentation consistent.
 

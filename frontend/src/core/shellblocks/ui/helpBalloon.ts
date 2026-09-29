@@ -52,7 +52,7 @@ export function buildCommandHelpHTML(
         <div class="help-balloon__desc">${descriptionHtml}</div>
     `;
 
-    if (commandDefinition.options && commandDefinition.options.length > 0) {
+    if (commandDefinition.options.length > 0) {
         html += `
             <strong class="help-balloon__subtitle">Opções disponíveis:</strong>
             <ul class="help-balloon__list">
@@ -66,6 +66,23 @@ export function buildCommandHelpHTML(
                 <li>
                     <code>${option.flag}</code>${longFlag}:
                     <span class="help-balloon__text">${option.description}</span>
+                </li>
+            `;
+        }
+        html += "</ul>";
+    }
+
+    if (commandDefinition.operands.length > 0) {
+        html += `
+            <strong class="help-balloon__subtitle">Operandos (valores ou alvos):</strong>
+            <ul class="help-balloon__list">
+        `;
+
+        for (const operand of commandDefinition.operands) {
+            html += `
+                <li>
+                    <strong>${operand.label}</strong>:
+                    <span class="help-balloon__text">${operand.description}</span>
                 </li>
             `;
         }

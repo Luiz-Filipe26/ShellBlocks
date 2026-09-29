@@ -26,9 +26,7 @@ Cada item de `levels` possui a seguinte estrutura:
     "title": "Operandos (Alvos)",
     "summary": "Crie uma nova pasta definindo um operando.",
     "fullGuideHtml": "<h1>Ação e Reação (Operandos)</h1><p>...</p>",
-    "setupCommands": [
-        "rm -rf *"
-    ],
+    "setupScript": "rm -rf *",
     "verificationScript": "if [ -d projetos ]; then echo 'OK'; exit 0; else exit 1; fi",
     "difficulty": "tutorial"
 }
@@ -40,7 +38,7 @@ Cada item de `levels` possui a seguinte estrutura:
 | `title`              | Título apresentado ao usuário.                                                              |
 | `summary`            | Descrição curta do objetivo do nível.                                                       |
 | `fullGuideHtml`      | Guia completo da atividade, armazenado como HTML.                                           |
-| `setupCommands`      | Comandos executados, em ordem, para preparar o ambiente antes do script do usuário.         |
+| `setupScript`        | Script Shell opcional que prepara o ambiente antes do script do usuário.                    |
 | `verificationScript` | Script opcional executado após o script do usuário para verificar o resultado da atividade. |
 | `difficulty`         | Classificação do nível. Atualmente: `tutorial`, `training` ou `challenge`.                  |
 
@@ -49,25 +47,46 @@ Cada item de `levels` possui a seguinte estrutura:
 Quando utilizados, os scripts de um nível seguem conceitualmente esta sequência:
 
 ```text
-setupCommands
+setupScript
       ↓
 script do usuário
       ↓
 verificationScript
 ```
 
-`setupCommands` cria o estado inicial necessário para a atividade, podendo criar arquivos e diretórios, iniciar processos ou preparar serviços locais.
+`setupScript` cria o estado inicial necessário para a atividade, podendo criar
+arquivos e diretórios, iniciar processos ou preparar serviços locais. Ele roda
+em um processo Shell separado do script do aluno. Efeitos externos, como o
+filesystem e processos iniciados, permanecem; diretório atual, variáveis locais,
+aliases e outros estados internos da Shell não são compartilhados.
 
-`verificationScript` verifica o estado produzido pelo usuário. Um código de saída `0` indica sucesso; outros códigos indicam falha. A verificação pode inspecionar diretamente o ambiente ou consultar a saída do script do usuário, armazenada em:
+`verificationScript` verifica o estado produzido pelo usuário. Um código de
+saída `0` indica sucesso; outros códigos indicam falha. A verificação pode
+inspecionar diretamente o ambiente ou consultar a saída do script do usuário
+no arquivo cujo caminho é fornecido pela variável:
 
 ```text
-/tmp/last_cmd_out
+SHELLBLOCKS_LAST_CMD_OUT_FILE
 ```
+
+Quando o objetivo também depende da construção utilizada, o Shell gerado pelo
+workspace fica disponível ao verificador em:
+
+```text
+SHELLBLOCKS_USER_SCRIPT_FILE
+```
+
+Esse arquivo é recriado pelo executor depois do script do usuário e antes da
+verificação, preservando exatamente o texto enviado para execução.
+
+O diretório de trabalho final da shell do aluno fica disponível ao verificador
+em `SHELLBLOCKS_FINAL_CWD`. Os demais estados internos da shell não são
+compartilhados entre os estágios.
 
 Por exemplo:
 
 ```sh
-grep -q 'relatorio.txt' /tmp/last_cmd_out
+grep -q 'relatorio.txt' "$SHELLBLOCKS_LAST_CMD_OUT_FILE"
 ```
 
 ou:
@@ -77,6 +96,18 @@ ou:
 ```
 
 `verificationScript` é opcional: existem níveis que não o definem.
+
+Os três estágios possuem resultados independentes. Uma falha em `setupScript`
+interrompe a execução antes do script do usuário e da
+verificação. O código de saída do script do usuário é preservado, mas não
+determina sozinho a conclusão do nível: quando existe, o resultado de
+`verificationScript` é o critério pedagógico. Assim, uma verificação pode
+confirmar o objetivo mesmo que o último comando do aluno tenha retornado um
+código diferente de zero.
+
+Um nível sem `verificationScript` não é concluído automaticamente. No modo
+sandbox não há verificação pedagógica nem progressão de nível; somente o
+resultado do script do usuário é apresentado.
 
 ## Conteúdo educacional
 
@@ -129,9 +160,7 @@ Ao adicionar um nível que deve fazer parte da progressão, portanto, é necess�
     "title": "Criando uma pasta",
     "summary": "Crie uma pasta chamada exemplo.",
     "fullGuideHtml": "<h1>Criando uma pasta</h1><p>Use <strong>mkdir</strong> para criar a pasta <code>exemplo</code>.</p>",
-    "setupCommands": [
-        "rm -rf *"
-    ],
+    "setupScript": "rm -rf *",
     "verificationScript": "if [ -d exemplo ]; then echo 'OK'; exit 0; else echo 'A pasta exemplo não foi encontrada.'; exit 1; fi",
     "difficulty": "tutorial"
 }

@@ -29,17 +29,23 @@ export function createToolbox(
         itemRegistry.set(command.id, transformCommandToCategory(command));
     });
 
-    cliDefinitions.controls?.forEach((control) => {
-        itemRegistry.set(control.id, transformSimpleToBlock(control));
+    cliDefinitions.controls.forEach((control) => {
+        itemRegistry.set(control.id, {
+            kind: "block",
+            type: BlockIDs.controlBlockType(control),
+        });
     });
 
-    cliDefinitions.operators?.forEach((operation) => {
-        itemRegistry.set(operation.id, transformSimpleToBlock(operation));
+    cliDefinitions.operators.forEach((operator) => {
+        itemRegistry.set(operator.id, {
+            kind: "block",
+            type: BlockIDs.operatorBlockType(operator),
+        });
     });
 
     const categories: ToolboxCategory[] = cliDefinitions.categories.map(
         (category) => {
-            const contents = category.commands
+            const contents = category.entities
                 .map((id) => itemRegistry.get(id))
                 .filter((item): item is ToolboxItem => item !== undefined);
 
@@ -72,7 +78,7 @@ function transformCommandToCategory(
                 kind: "block",
                 type: BlockIDs.commandBlockType(commandDefinition),
             },
-            ...(commandDefinition.options?.length
+            ...(commandDefinition.options.length
                 ? [
                     {
                         kind: "block" as const,
@@ -91,15 +97,4 @@ function transformCommandToCategory(
             })),
         ],
     };
-}
-
-function transformSimpleToBlock(
-    definition: CLI.CLIControl | CLI.CLIOperator,
-): ToolboxBlock {
-    const type =
-        "slots" in definition
-            ? BlockIDs.operatorBlockType(definition)
-            : BlockIDs.controlBlockType(definition);
-
-    return { kind: "block", type };
 }

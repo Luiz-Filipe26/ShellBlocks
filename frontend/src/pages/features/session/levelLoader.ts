@@ -1,4 +1,4 @@
-import * as API from "@/types/api";
+import type { GameData, Level, LevelDifficulty } from "./types";
 import * as ShellBlocks from "shellblocks";
 import * as PersistenceManager from "./persistenceManager";
 import * as Logger from "../ui/systemLogger";
@@ -6,16 +6,17 @@ import { LevelSuccessResult } from "../execution/scriptRunner";
 
 export const SANDBOX_LEVEL_ID = "sandbox";
 
-let levelsCache: Map<string, API.Level> = new Map();
-let orderedLevels: API.Level[] = [];
+let levelsCache: Map<string, Level> = new Map();
+let orderedLevels: Level[] = [];
 
 let currentLevelId: string = SANDBOX_LEVEL_ID;
+let isLevelSelectorListenerRegistered = false;
 
 export function getCurrentLevelId(): string {
     return currentLevelId;
 }
 
-export function getCachedLevelData(levelId: string): API.Level | undefined {
+export function getCachedLevelData(levelId: string): Level | undefined {
     return levelsCache.get(levelId);
 }
 
@@ -109,14 +110,18 @@ export interface SelectorDependencies {
 }
 
 export function setupLevelSelector(
-    data: API.GameData | null,
+    data: GameData | null,
     selectorDependencies: SelectorDependencies,
     isExperimentMode: boolean,
 ): void {
     const { levelSelect, levelSummaryText, levelFullDetails } =
         selectorDependencies;
+    registerLevelSelectorListener(selectorDependencies);
 
     if (!data) {
+        levelsCache.clear();
+        orderedLevels = [];
+        currentLevelId = SANDBOX_LEVEL_ID;
         levelSelect.innerHTML = "<option>Erro ao carregar níveis</option>";
         levelSummaryText.textContent = "Erro de conexão com o servidor.";
         levelFullDetails.innerHTML = "";
@@ -145,8 +150,6 @@ export function setupLevelSelector(
         lastUnlockedLevelId || "",
         isExperimentMode,
     );
-
-    registerLevelSelectorEvents(selectorDependencies);
 
     levelSelect.value = SANDBOX_LEVEL_ID;
     levelSelect.dispatchEvent(new Event("change"));
@@ -179,13 +182,13 @@ function modifyOptionsToDisplayProgress(
     });
 }
 
-function getSortedLevels(gameData: API.GameData): API.Level[] {
+function getSortedLevels(gameData: GameData): Level[] {
     const levelsMap = new Map(
         gameData.levels.map((level) => [level.id, level]),
     );
     return gameData.levelOrder
         .map((id) => levelsMap.get(id))
-        .filter((level): level is API.Level => level !== undefined);
+        .filter((level): level is Level => level !== undefined);
 }
 
 function createOption(value: string, text?: string): HTMLOptionElement {
@@ -195,7 +198,9 @@ function createOption(value: string, text?: string): HTMLOptionElement {
     return option;
 }
 
-function registerLevelSelectorEvents(deps: SelectorDependencies): void {
+function registerLevelSelectorListener(deps: SelectorDependencies): void {
+    if (isLevelSelectorListenerRegistered) return;
+
     const { levelSelect, levelSummaryText, levelFullDetails } = deps;
 
     levelSelect.addEventListener("change", () => {
@@ -217,6 +222,8 @@ function registerLevelSelectorEvents(deps: SelectorDependencies): void {
             renderErrorState(currentLevelId, levelSummaryText, levelFullDetails);
         }
     });
+
+    isLevelSelectorListenerRegistered = true;
 }
 
 function renderSandboxMode(
@@ -237,7 +244,7 @@ function renderSandboxMode(
 }
 
 function renderLevelMode(
-    level: API.Level,
+    level: Level,
     summaryElement: HTMLElement,
     detailsElement: HTMLElement,
 ): void {
@@ -266,7 +273,7 @@ function renderErrorState(
 }
 
 function getBadgeHtml(
-    inputDifficulty?: API.LevelDifficulty | "sandbox",
+    inputDifficulty?: LevelDifficulty | "sandbox",
 ): string {
     if (!inputDifficulty) return "";
 

@@ -22,17 +22,6 @@ export function renderBlockWarnings(block: Blockly.Block): void {
         ),
     );
 
-    const cardMinOperands = errors.find(
-        (error) =>
-            error.id ===
-            ValidationErrors.VALIDATION_ERRORS.CARDINALITY_MIN_OPERANDS,
-    );
-    const cardMinOptions = errors.find(
-        (error) =>
-            error.id ===
-            ValidationErrors.VALIDATION_ERRORS.CARDINALITY_MIN_OPTIONS,
-    );
-
     if (cardSpecificOperands.length > 0) {
         lines.push("- Faltam operandos específicos:");
         cardSpecificOperands.forEach((error) => {
@@ -40,9 +29,6 @@ export function renderBlockWarnings(block: Blockly.Block): void {
             lines.push(`    • ${cleanMsg}`);
         });
     }
-
-    if (cardMinOperands) lines.push(`- ${cardMinOperands.message}`);
-    if (cardMinOptions) lines.push(`- ${cardMinOptions.message}`);
 
     const otherErrors = errors.filter(
         (error) =>

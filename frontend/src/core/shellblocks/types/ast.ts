@@ -2,26 +2,29 @@ import { SemanticData } from "./semanticData";
 
 export interface ASTParameter {
     key: string;
+    source: "field" | "input";
     value: string;
     children: ASTNode[];
 }
 
 export interface ASTControlConfig {
-    syntaxEnd?: string | null;
+    syntaxEnd: string;
     slots: {
         key: string;
-        syntaxPrefix?: string | null;
-        obligatory?: boolean;
+        syntaxPrefix?: string;
+        obligatory: boolean;
+        breakLineBefore: boolean;
     }[];
 }
 
+export type ASTOperatorSlot = { key: string } &
+    (
+        | { symbol: string; symbolPlacement: "before" | "after" }
+        | { symbol?: never; symbolPlacement?: never }
+    );
+
 export interface ASTOperatorConfig {
-    slots: {
-        key: string;
-        symbol?: string | null;
-        symbolPlacement?: "before" | "after" | null;
-        breakLineBefore?: boolean;
-    }[];
+    slots: ASTOperatorSlot[];
 }
 
 export interface ASTNode {

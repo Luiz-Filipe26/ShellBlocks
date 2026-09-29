@@ -1,0 +1,323 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["commands", "categories"],
+    "$defs": {
+        "externalId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "nonEmptyString": {
+            "type": "string",
+            "minLength": 1
+        },
+        "hexColor": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "valueType": {
+            "type": "string",
+            "enum": ["string", "number", "file", "folder"]
+        },
+        "validation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["regex", "errorMessage"],
+            "properties": {
+                "regex": { "type": "string" },
+                "errorMessage": { "$ref": "#/$defs/nonEmptyString" }
+            }
+        },
+        "argument": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "label"],
+            "properties": {
+                "type": { "$ref": "#/$defs/valueType" },
+                "label": { "$ref": "#/$defs/nonEmptyString" },
+                "defaultValue": { "type": "string" },
+                "allowEmptyValue": { "type": "boolean" },
+                "validations": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/validation" }
+                }
+            }
+        },
+        "cardinality": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["min", "max"],
+            "properties": {
+                "min": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "max": {
+                    "oneOf": [
+                        {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        {
+                            "const": "unlimited"
+                        }
+                    ]
+                }
+            }
+        },
+        "operandSyntaxRule": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["regexPattern", "errorMessage"],
+            "properties": {
+                "regexPattern": { "type": "string" },
+                "errorMessage": {
+                    "oneOf": [
+                        { "type": "null" },
+                        { "$ref": "#/$defs/nonEmptyString" }
+                    ]
+                }
+            }
+        },
+        "option": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["flag"],
+            "properties": {
+                "flag": { "$ref": "#/$defs/nonEmptyString" },
+                "longFlag": { "$ref": "#/$defs/nonEmptyString" },
+                "description": { "type": "string" },
+                "argument": { "$ref": "#/$defs/argument" }
+            }
+        },
+        "operand": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label", "type", "cardinality"],
+            "properties": {
+                "id": { "$ref": "#/$defs/externalId" },
+                "label": { "$ref": "#/$defs/nonEmptyString" },
+                "description": { "type": "string" },
+                "color": { "$ref": "#/$defs/hexColor" },
+                "type": { "$ref": "#/$defs/valueType" },
+                "defaultValue": { "type": "string" },
+                "allowEmptyValue": { "type": "boolean" },
+                "optionalWithImplicitInput": { "type": "boolean" },
+                "cardinality": { "$ref": "#/$defs/cardinality" },
+                "validations": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/validation" }
+                }
+            }
+        },
+        "command": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "shellCommand", "label", "color"],
+            "properties": {
+                "id": { "$ref": "#/$defs/externalId" },
+                "shellCommand": { "$ref": "#/$defs/nonEmptyString" },
+                "label": { "$ref": "#/$defs/nonEmptyString" },
+                "description": { "type": "string" },
+                "color": { "$ref": "#/$defs/hexColor" },
+                "optionColor": { "$ref": "#/$defs/hexColor" },
+                "options": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/option" }
+                },
+                "exclusiveOptions": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "minItems": 2,
+                        "items": { "$ref": "#/$defs/nonEmptyString" }
+                    }
+                },
+                "operands": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/operand" }
+                },
+                "operandIdsSequenceDelimiter": {
+                    "type": "string",
+                    "pattern": "^[^A-Za-z0-9_\\-:]+$"
+                },
+                "operandSyntaxRules": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/operandSyntaxRule" }
+                }
+            },
+            "allOf": [
+                {
+                    "if": {
+                        "required": ["operandSyntaxRules"],
+                        "properties": {
+                            "operandSyntaxRules": {
+                                "type": "array",
+                                "minItems": 1
+                            }
+                        }
+                    },
+                    "then": {
+                        "required": ["operandIdsSequenceDelimiter"],
+                        "properties": {
+                            "operandIdsSequenceDelimiter": { "type": "string" }
+                        }
+                    }
+                }
+            ]
+        },
+        "operatorStatementSlot": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "type"],
+            "properties": {
+                "name": { "$ref": "#/$defs/externalId" },
+                "type": { "const": "statement" },
+                "label": { "type": "string" },
+                "symbol": { "$ref": "#/$defs/nonEmptyString" },
+                "symbolPlacement": {
+                    "type": "string",
+                    "enum": ["before", "after"]
+                }
+            },
+            "allOf": [{ "$ref": "#/$defs/symbolInvariant" }]
+        },
+        "operatorValueSlot": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "type", "valueType"],
+            "properties": {
+                "name": { "$ref": "#/$defs/externalId" },
+                "type": { "const": "value" },
+                "label": { "type": "string" },
+                "symbol": { "$ref": "#/$defs/nonEmptyString" },
+                "symbolPlacement": {
+                    "type": "string",
+                    "enum": ["before", "after"]
+                },
+                "valueType": { "$ref": "#/$defs/valueType" },
+                "defaultValue": { "type": "string" },
+                "allowEmptyValue": { "type": "boolean" },
+                "validations": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/validation" }
+                }
+            },
+            "allOf": [{ "$ref": "#/$defs/symbolInvariant" }]
+        },
+        "symbolInvariant": {
+            "if": {
+                "type": "object",
+                "required": ["symbol"],
+                "properties": { "symbol": {} }
+            },
+            "then": {
+                "type": "object",
+                "required": ["symbolPlacement"],
+                "properties": { "symbolPlacement": {} }
+            },
+            "else": {
+                "type": "object",
+                "not": {
+                    "type": "object",
+                    "required": ["symbolPlacement"],
+                    "properties": { "symbolPlacement": {} }
+                }
+            }
+        },
+        "operator": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "label", "color", "slots"],
+            "properties": {
+                "id": { "$ref": "#/$defs/externalId" },
+                "label": { "$ref": "#/$defs/nonEmptyString" },
+                "description": { "type": "string" },
+                "color": { "$ref": "#/$defs/hexColor" },
+                "slots": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "oneOf": [
+                            { "$ref": "#/$defs/operatorStatementSlot" },
+                            { "$ref": "#/$defs/operatorValueSlot" }
+                        ]
+                    }
+                },
+                "slotsWithImplicitData": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/externalId" }
+                }
+            }
+        },
+        "controlSlot": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "obligatory"],
+            "properties": {
+                "name": { "$ref": "#/$defs/externalId" },
+                "label": { "type": "string" },
+                "syntaxPrefix": { "type": "string" },
+                "obligatory": { "type": "boolean" },
+                "breakLineBefore": { "type": "boolean" }
+            }
+        },
+        "control": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "id",
+                "shellCommand",
+                "label",
+                "color",
+                "syntaxEnd",
+                "slots"
+            ],
+            "properties": {
+                "id": { "$ref": "#/$defs/externalId" },
+                "shellCommand": { "$ref": "#/$defs/nonEmptyString" },
+                "label": { "$ref": "#/$defs/nonEmptyString" },
+                "description": { "type": "string" },
+                "color": { "$ref": "#/$defs/hexColor" },
+                "syntaxEnd": { "$ref": "#/$defs/nonEmptyString" },
+                "slots": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "$ref": "#/$defs/controlSlot" }
+                }
+            }
+        },
+        "category": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name"],
+            "properties": {
+                "name": { "$ref": "#/$defs/nonEmptyString" },
+                "entities": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/externalId" }
+                }
+            }
+        }
+    },
+    "properties": {
+        "$schema": { "type": "string" },
+        "commands": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/command" }
+        },
+        "operators": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/operator" }
+        },
+        "controls": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/control" }
+        },
+        "categories": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/category" }
+        }
+    }
+}

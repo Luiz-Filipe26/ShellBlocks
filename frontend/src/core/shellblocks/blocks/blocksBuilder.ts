@@ -4,6 +4,8 @@ import { createOperandBlocks } from "./operandBlocks";
 import * as CLI from "../types/cli";
 import { createControlBlock } from "./controlBlocks";
 import { createOperatorBlock } from "./operatorBlocks";
+import { initSystemBlocks } from "./systemBlocks";
+import { clearBlockSemanticDataRegistry } from "../serialization/metadataManager";
 
 export function createBlocksFromCommandDefinition(
     commandDefinition: CLI.CLICommand,
@@ -13,18 +15,21 @@ export function createBlocksFromCommandDefinition(
     createOperandBlocks(commandDefinition);
 }
 
-export function createAllBlocksFromDefinition(
+export function registerBlockTypesFromDefinitions(
     cliDefinitions: CLI.CliDefinitions,
 ) {
+    clearBlockSemanticDataRegistry();
+    initSystemBlocks();
+
     for (const definition of cliDefinitions.commands) {
         createBlocksFromCommandDefinition(definition);
     }
 
-    for (const controlBlock of cliDefinitions.controls || []) {
+    for (const controlBlock of cliDefinitions.controls) {
         createControlBlock(controlBlock);
     }
 
-    for (const operatorBlock of cliDefinitions.operators || []) {
+    for (const operatorBlock of cliDefinitions.operators) {
         createOperatorBlock(operatorBlock);
     }
 }
