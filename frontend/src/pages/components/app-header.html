@@ -1,0 +1,34 @@
+<header id="app-header" class="app-header">
+    <div class="header-brand">
+        <div class="logo-area">
+            <h1>ShellBlocks</h1>
+            <span class="brand-divider">|</span>
+            <span class="brand-tagline">Ambiente Interativo para Aprendizado de CLI</span>
+        </div>
+    </div>
+
+    <div class="header-context">
+        <button id="btn-help-guide" class="btn-tool btn-guide-urgent">
+            <img src="../assets/icons/lucid/circle-question-mark.svg" class="btn-icon" alt="" />
+            Explicar Ferramenta
+        </button>
+
+        <div class="context-controls">
+            <div class="context-summary">
+                <img src="../assets/icons/lucid/info.svg" class="icon-inline" alt="" />
+                <p id="level-summary-text" class="summary-text"></p>
+            </div>
+            <div class="progress-bar-container">
+                <span id="progress-label">Nível 1/19</span>
+                <div class="progress-bar-track">
+                    <div id="progress-bar-fill" class="progress-bar-fill" style="width: 5%"></div>
+                </div>
+            </div>
+
+            <label for="level-select" class="input-label">Missão:</label>
+            <select id="level-select" class="level-select">
+                <option value="">Carregando...</option>
+            </select>
+        </div>
+    </div>
+</header>
