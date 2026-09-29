@@ -3,13 +3,13 @@ import type { Express, Request, Response } from "express";
 import {
     registerRoutes,
     runHandler,
-} from "../../src/controllers/executionController";
+} from "@/controllers/executionController";
 
 const { mockRunInSandbox } = vi.hoisted(() => ({
     mockRunInSandbox: vi.fn(),
 }));
 
-vi.mock("../../src/services/sandboxRunner", () => ({
+vi.mock("@/services/sandboxRunner", () => ({
     runInSandbox: mockRunInSandbox,
 }));
 

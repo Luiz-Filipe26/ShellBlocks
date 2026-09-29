@@ -3,8 +3,8 @@ import { randomUUID } from "node:crypto";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { SANDBOX_EXECUTION_TIMEOUT_MS } from "@shellblocks/shared/config/sandbox";
 import type { ExecutionResult, StageResult } from "@shellblocks/shared/contracts/execution";
-import { ensureDockerImageExists } from "../../src/services/dockerService";
-import { runInSandbox } from "../../src/services/sandboxRunner";
+import { ensureDockerImageExists } from "@/services/dockerService";
+import { runInSandbox } from "@/services/sandboxRunner";
 
 const SUITE_LABEL_KEY = "shellblocks.test-run";
 const SUITE_ID = randomUUID();

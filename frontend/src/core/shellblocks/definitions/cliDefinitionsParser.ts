@@ -1,5 +1,5 @@
 import Ajv2020, { type ErrorObject } from "ajv/dist/2020";
-import cliDefinitionsSchema from "../../../assets/data/cli_schema.json";
+import cliDefinitionsSchema from "@/assets/data/cli_schema.json";
 import * as CLI from "../types/cli";
 
 export interface CliDefinitionsParseResult {

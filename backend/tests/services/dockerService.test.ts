@@ -3,7 +3,7 @@ import {
     computeBuildFingerprint,
     ensureDockerImageExists,
     type DockerImageOperations,
-} from "../../src/services/dockerService";
+} from "@/services/dockerService";
 
 describe("computeBuildFingerprint", () => {
     const inputs = [

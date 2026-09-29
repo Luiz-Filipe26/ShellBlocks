@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import * as BlockIDs from "../../src/core/shellblocks/constants/blockIds";
+import * as BlockIDs from "@/core/shellblocks/constants/blockIds";
 import {
     autoFixExcessOperands,
     unplugDuplicatesFromList,
     unplugExclusiveOptionsFromCommand,
-} from "../../src/core/shellblocks/validation/autofix";
+} from "@/core/shellblocks/validation/autofix";
 import { createBlock, connectInput, connectNext, createHeadlessWorkspace } from "../helpers/blockly";
 import { validDefinitions } from "../helpers/cliFixtures";
 

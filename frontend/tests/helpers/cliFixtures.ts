@@ -1,8 +1,8 @@
 import type {
     CliDefinitions,
     RawCliDefinitions,
-} from "../../src/core/shellblocks/types/cli";
-import { parseCliDefinitions } from "../../src/core/shellblocks/definitions/cliDefinitionsParser";
+} from "@/core/shellblocks/types/cli";
+import { parseCliDefinitions } from "@/core/shellblocks/definitions/cliDefinitionsParser";
 
 export function validRawDefinitions(): RawCliDefinitions {
     return {

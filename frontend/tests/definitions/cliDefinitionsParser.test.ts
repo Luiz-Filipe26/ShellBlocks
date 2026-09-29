@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
     CliDefinitionsValidationError,
     parseCliDefinitions,
-} from "../../src/core/shellblocks/definitions/cliDefinitionsParser";
-import officialDefinitions from "../../src/assets/data/cli_definitions.json";
+} from "@/core/shellblocks/definitions/cliDefinitionsParser";
+import officialDefinitions from "@/assets/data/cli_definitions.json";
 import { validRawDefinitions } from "../helpers/cliFixtures";
 
 function parseProblems(input: unknown): string[] {

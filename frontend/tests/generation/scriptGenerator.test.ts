@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { generateShellScript } from "../../src/core/shellblocks/generation/scriptGenerator";
+import { generateShellScript } from "@/core/shellblocks/generation/scriptGenerator";
 import type {
     ASTNode,
     ASTOperatorConfig,
     ASTParameter,
-} from "../../src/core/shellblocks/types/ast";
+} from "@/core/shellblocks/types/ast";
 
 const field = (key: string, value: string): ASTParameter => ({
     key,

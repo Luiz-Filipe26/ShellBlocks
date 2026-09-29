@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
     DockerCommandOutcome,
     RunDockerCommand,
-} from "../../src/services/dockerCommand";
-import { runInSandbox } from "../../src/services/sandboxRunner";
+} from "@/services/dockerCommand";
+import { runInSandbox } from "@/services/sandboxRunner";
 
 const empty = Buffer.alloc(0);
 const stage = { exitCode: 0, stdoutBase64: "b2s=", stderrBase64: "" };

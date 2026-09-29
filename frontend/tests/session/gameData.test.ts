@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type * as Blockly from "blockly";
-import defaultGameData from "../../src/assets/data/levels.json";
-import { parseGameData } from "../../src/pages/features/session/gameDataParser";
+import defaultGameData from "@/assets/data/levels.json";
+import { parseGameData } from "@/pages/features/session/gameDataParser";
 import {
     getGameData,
     saveCustomGameData,
-} from "../../src/pages/features/session/dataManager";
-import { uploadGameData } from "../../src/pages/features/session/persistenceManager";
-import * as Logger from "../../src/pages/features/ui/systemLogger";
+} from "@/pages/features/session/dataManager";
+import { uploadGameData } from "@/pages/features/session/persistenceManager";
+import * as Logger from "@/pages/features/ui/systemLogger";
 
 class MemoryStorage implements Storage {
     private readonly entries = new Map<string, string>();

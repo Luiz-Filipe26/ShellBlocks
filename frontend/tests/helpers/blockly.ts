@@ -1,6 +1,6 @@
 import * as Blockly from "blockly";
-import { registerBlockTypesFromDefinitions } from "../../src/core/shellblocks/blocks/blocksBuilder";
-import type { CliDefinitions } from "../../src/core/shellblocks/types/cli";
+import { registerBlockTypesFromDefinitions } from "@/core/shellblocks/blocks/blocksBuilder";
+import type { CliDefinitions } from "@/core/shellblocks/types/cli";
 
 export function createHeadlessWorkspace(
     definitions: CliDefinitions,

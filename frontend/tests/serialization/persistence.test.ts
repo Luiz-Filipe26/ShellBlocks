@@ -1,17 +1,17 @@
 import * as Blockly from "blockly";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as BlockIDs from "../../src/core/shellblocks/constants/blockIds";
-import { generateShellScript } from "../../src/core/shellblocks/generation/scriptGenerator";
-import { serializeWorkspaceToAST } from "../../src/core/shellblocks/serialization/serializer";
-import { loadSession } from "../../src/core/shellblocks/serialization/workspaceAutoSaver";
-import { getErrors } from "../../src/core/shellblocks/validation/validationManager";
+import * as BlockIDs from "@/core/shellblocks/constants/blockIds";
+import { generateShellScript } from "@/core/shellblocks/generation/scriptGenerator";
+import { serializeWorkspaceToAST } from "@/core/shellblocks/serialization/serializer";
+import { loadSession } from "@/core/shellblocks/serialization/workspaceAutoSaver";
+import { getErrors } from "@/core/shellblocks/validation/validationManager";
 import { createBlock, connectInput, createHeadlessWorkspace } from "../helpers/blockly";
 import { validDefinitions } from "../helpers/cliFixtures";
 
-vi.mock("../../src/core/shellblocks/ui/toast", () => ({
+vi.mock("@/core/shellblocks/ui/toast", () => ({
     showToast: vi.fn(),
 }));
-vi.mock("../../src/core/shellblocks/services/logging", () => ({
+vi.mock("@/core/shellblocks/services/logging", () => ({
     coreLog: vi.fn(),
 }));
 

@@ -2,7 +2,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { EventEmitter } from "node:events";
 import { PassThrough } from "node:stream";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { runDockerCommand } from "../../src/services/dockerCommand";
+import { runDockerCommand } from "@/services/dockerCommand";
 
 vi.mock("node:child_process", () => ({ spawn: vi.fn() }));
 

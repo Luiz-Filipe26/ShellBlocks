@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import * as BlockIDs from "../../src/core/shellblocks/constants/blockIds";
-import { registerBlockTypesFromDefinitions } from "../../src/core/shellblocks/blocks/blocksBuilder";
-import { generateShellScript } from "../../src/core/shellblocks/generation/scriptGenerator";
-import { getBlockSemanticData } from "../../src/core/shellblocks/serialization/metadataManager";
-import { serializeWorkspaceToAST } from "../../src/core/shellblocks/serialization/serializer";
+import * as BlockIDs from "@/core/shellblocks/constants/blockIds";
+import { registerBlockTypesFromDefinitions } from "@/core/shellblocks/blocks/blocksBuilder";
+import { generateShellScript } from "@/core/shellblocks/generation/scriptGenerator";
+import { getBlockSemanticData } from "@/core/shellblocks/serialization/metadataManager";
+import { serializeWorkspaceToAST } from "@/core/shellblocks/serialization/serializer";
 import { createBlock, connectInput, createHeadlessWorkspace } from "../helpers/blockly";
 import { validDefinitions } from "../helpers/cliFixtures";
 

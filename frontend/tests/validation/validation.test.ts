@@ -1,11 +1,11 @@
 import * as Blockly from "blockly";
 import { describe, expect, it } from "vitest";
-import * as BlockIDs from "../../src/core/shellblocks/constants/blockIds";
-import { validateCardinality } from "../../src/core/shellblocks/validation/cardinalityValidator";
-import { receivesImplicitInput } from "../../src/core/shellblocks/validation/implicitInput";
-import { validateOperandSyntax } from "../../src/core/shellblocks/validation/syntaxValidator";
-import { getErrors, setError } from "../../src/core/shellblocks/validation/validationManager";
-import { validateScalarValue } from "../../src/core/shellblocks/validation/valueValidators";
+import * as BlockIDs from "@/core/shellblocks/constants/blockIds";
+import { validateCardinality } from "@/core/shellblocks/validation/cardinalityValidator";
+import { receivesImplicitInput } from "@/core/shellblocks/validation/implicitInput";
+import { validateOperandSyntax } from "@/core/shellblocks/validation/syntaxValidator";
+import { getErrors, setError } from "@/core/shellblocks/validation/validationManager";
+import { validateScalarValue } from "@/core/shellblocks/validation/valueValidators";
 import { createBlock, connectInput, connectNext, createHeadlessWorkspace } from "../helpers/blockly";
 import { validDefinitions } from "../helpers/cliFixtures";
 
