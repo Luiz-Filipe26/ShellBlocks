@@ -5,6 +5,11 @@ echo "--- Limpando artefatos de builds anteriores ---"
 rm -rf frontend/dist backend/build backend/dist dist
 mkdir -p backend/build/frontend dist
 
+echo "--- Instalando dependências do package compartilhado ---"
+cd shared
+npm ci --silent --no-fund
+cd ..
+
 echo "--- [1/3] Compilando o Frontend (Single File) ---"
 cd frontend
 npm install --silent --no-fund
