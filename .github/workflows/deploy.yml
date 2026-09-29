@@ -73,15 +73,18 @@ jobs:
 
             pm2 restart shellblocks
 
-            if ! curl \
+            if ! timeout 180s curl \
               --fail \
               --silent \
               --show-error \
-              --retry 10 \
+              --retry 90 \
               --retry-delay 2 \
               --retry-connrefused \
+              --max-time 5 \
               http://localhost:7000/ \
               > /dev/null; then
+              pm2 describe shellblocks || true
+              pm2 logs shellblocks --lines 100 --nostream || true
               echo "ShellBlocks não respondeu corretamente após o deploy." >&2
               exit 1
             fi
