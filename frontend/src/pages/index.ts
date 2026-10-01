@@ -2,7 +2,7 @@ import "blockly/blocks";
 import "blockly/msg/pt";
 import {
     getCurrentLevelId,
-    onLevelSuccesEvent,
+    markLevelCompleted,
     setupLevelSelector,
 } from "./features/session/levelLoader";
 import { setupScriptHotReloader } from "./features/execution/scriptHotReloader";
@@ -18,6 +18,9 @@ import type { GameData } from "./features/session/types";
 import { SidebarResizer } from "./features/ui/SidebarResizer";
 import { setupSidebarToggle } from "./features/ui/sidebarController";
 import { setupHelpGuide } from "./features/ui/helpController";
+import { clearWorkspaceAssembly, hasWorkspaceAssembly } from "@/core/shellblocks/workspace/assembly";
+import type { SelectorDependencies } from "./features/session/levelLoader";
+import { saveWorkspaceSession } from "@/core/shellblocks/serialization/workspaceAutoSaver";
 
 const pageElements = getPageElements();
 let gameData: GameData | null = null;
@@ -67,10 +70,14 @@ async function start(): Promise<void> {
     }
 
     gameData = getGameData();
-    setupLevelSelector(gameData, pageElements, IS_EXPERIMENT_MODE);
+    const selectorDependencies: SelectorDependencies = {
+        ...pageElements,
+        hasWorkspaceAssembly: () => hasWorkspaceAssembly(workspace),
+    };
+    setupLevelSelector(gameData, selectorDependencies, IS_EXPERIMENT_MODE);
 
     setupScriptHotReloader(workspace, pageElements.codeOutput);
-    registerButtonListeners(workspace);
+    registerButtonListeners(workspace, selectorDependencies);
 }
 
 function enforceExperimentRestrictions() {
@@ -85,12 +92,15 @@ function enforceExperimentRestrictions() {
     buttonsToDisable.forEach((button) => (button.disabled = true));
 }
 
-function registerButtonListeners(workspace: Blockly.WorkspaceSvg) {
+function registerButtonListeners(
+    workspace: Blockly.WorkspaceSvg,
+    selectorDependencies: SelectorDependencies,
+) {
     pageElements.runBtn.addEventListener("click", async () => {
         runScript(workspace, pageElements, getCurrentLevelId(), (levelId) =>
-            onLevelSuccesEvent(
+            markLevelCompleted(
                 levelId,
-                pageElements.levelSelect,
+                selectorDependencies,
                 IS_EXPERIMENT_MODE,
             ),
         );
@@ -98,6 +108,13 @@ function registerButtonListeners(workspace: Blockly.WorkspaceSvg) {
 
     pageElements.clearBtn.addEventListener("click", () => {
         pageElements.cliOutput.textContent = "$";
+    });
+
+    pageElements.btnClearAssembly.addEventListener("click", () => {
+        const cleared = clearWorkspaceAssembly(workspace, () =>
+            confirm("Remover os blocos da montagem? O Script Principal será mantido."),
+        );
+        if (cleared) saveWorkspaceSession(workspace, MAIN_WORKSPACE_ID);
     });
 
     pageElements.btnSaveScript.addEventListener("click", () => {
@@ -130,7 +147,7 @@ function registerButtonListeners(workspace: Blockly.WorkspaceSvg) {
                 gameData = data;
                 setupLevelSelector(
                     gameData,
-                    pageElements,
+                    selectorDependencies,
                     IS_EXPERIMENT_MODE,
                 );
             });
@@ -140,7 +157,7 @@ function registerButtonListeners(workspace: Blockly.WorkspaceSvg) {
     pageElements.btnLoadGame.addEventListener("click", () => {
         PersistenceManager.uploadGameData(workspace, (data) => {
             gameData = data;
-            setupLevelSelector(gameData, pageElements, IS_EXPERIMENT_MODE);
+            setupLevelSelector(gameData, selectorDependencies, IS_EXPERIMENT_MODE);
         });
     });
 }

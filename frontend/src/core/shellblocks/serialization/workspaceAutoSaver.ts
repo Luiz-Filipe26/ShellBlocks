@@ -68,13 +68,13 @@ export function initAutoSaver(
         }
 
         saveTimeout = window.setTimeout(() => {
-            saveState(workspace, workspaceId);
+            saveWorkspaceSession(workspace, workspaceId);
             saveTimeout = null;
         }, SAVE_DELAY_MS);
     });
 }
 
-function saveState(workspace: Blockly.WorkspaceSvg, workspaceId: string): void {
+export function saveWorkspaceSession(workspace: Blockly.Workspace, workspaceId: string): void {
     const autoSaveStorageKey = getAutoSaveStorageKey(workspaceId);
     try {
         const state = Blockly.serialization.workspaces.save(workspace);

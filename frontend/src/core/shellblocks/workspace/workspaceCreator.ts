@@ -6,12 +6,13 @@ import { findScriptRoot } from "../blocks/systemBlocks";
 import { disableOrphanBlocks } from "./orphanHandler";
 import { registerBlockTypesFromDefinitions } from "../blocks/blocksBuilder";
 import {
-    clearAutoSave,
     initAutoSaver,
     loadSession,
+    saveWorkspaceSession,
 } from "../serialization/workspaceAutoSaver";
 import { LogFunction, LogLevel } from "../types/logger";
 import { setLoggerForWorkspace } from "../services/logging";
+import { clearWorkspaceAssembly } from "./assembly";
 
 export interface WorkspaceConfig {
     externalLogger: LogFunction;
@@ -65,10 +66,7 @@ export async function setupWorkspace(
     if (config.shouldSetupAutosave)
         initAutoSaver(workspace, config.workspaceId);
 
-    initCustomContextMenu(
-        config.workspaceId,
-        config.shouldSetupAutosave || false,
-    );
+    initCustomContextMenu(config.workspaceId, config.shouldSetupAutosave ?? false);
 
     return workspace;
 }
@@ -133,10 +131,7 @@ function getBlocklyOptions(
     };
 }
 
-function initCustomContextMenu(
-    workspaceId: string,
-    hasAutosave: boolean,
-): void {
+function initCustomContextMenu(workspaceId: string, hasAutosave: boolean): void {
     const { registry, ScopeType } = Blockly.ContextMenuRegistry;
 
     if (registry.getItem(BlockIDs.CONTEXT_MENU_IDS.CLEAR_OPTION))
@@ -150,29 +145,11 @@ function initCustomContextMenu(
         callback: (scope) => {
             const workspace = scope.workspace as Blockly.WorkspaceSvg;
             if (!workspace) return;
-            Blockly.Events.setGroup(true);
-
-            try {
-                const rootBlock = findScriptRoot(workspace);
-                const allBlocks = workspace.getAllBlocks(false);
-
-                allBlocks.forEach((block) => {
-                    if (block !== rootBlock) {
-                        block.dispose(false);
-                    }
-                });
-
-                if (!rootBlock) {
-                    createScriptRoot(workspace);
-                }
-
-                if (hasAutosave) {
-                    clearAutoSave(workspaceId);
-                }
-            } finally {
-                Blockly.Events.setGroup(false);
-            }
+            const cleared = clearWorkspaceAssembly(workspace, () =>
+                confirm("Remover os blocos da montagem? O Script Principal será mantido."),
+            );
+            if (cleared && hasAutosave) saveWorkspaceSession(workspace, workspaceId);
         },
-        displayText: "Limpar e Resetar",
+        displayText: "Limpar montagem",
     });
 }

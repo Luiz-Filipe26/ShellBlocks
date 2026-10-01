@@ -13,7 +13,12 @@ import { AppConfig } from "@/config/appConfig";
 import { ApiRoutes } from "@/config/apiRoutes";
 import * as Logger from "../ui/systemLogger";
 import * as Blockly from "blockly";
-import { getCachedLevelData, SANDBOX_LEVEL_ID } from "../session/levelLoader";
+import {
+    getCachedLevelData,
+    getCurrentLevelId,
+    SANDBOX_LEVEL_ID,
+} from "../session/levelLoader";
+import type { Level } from "../session/types";
 import { generateShellScript } from "@/core/shellblocks/generation/scriptGenerator";
 
 interface RunDependencies {
@@ -25,12 +30,7 @@ interface RunDependencies {
     closeModalBtn: HTMLButtonElement;
 }
 
-export interface LevelSuccessResult {
-    unlockedNewLevel: boolean;
-    nextLevelTitle?: string;
-}
-
-export type OnLevelSuccess = (levelId: string) => LevelSuccessResult;
+export type OnLevelSuccess = (levelId: string) => void;
 
 export async function runScript(
     workspace: Blockly.WorkspaceSvg,
@@ -70,15 +70,14 @@ export async function runScript(
         return;
     }
 
-    cliOutput.textContent += " executar-script-atual\n";
+    const level = getCachedLevelData(currentLevelId);
+    cliOutput.textContent += `\n[Execução: ${level?.title ?? "Modo Livre"}]\n executar-script-atual\n`;
 
     runBtn.disabled = true;
     runBtn.textContent = "Executando...";
     cliOutput.scrollTop = cliOutput.scrollHeight;
 
     try {
-        const level = getCachedLevelData(currentLevelId);
-
         const payload: RunRequest = RunRequestSchema.parse({
             userScript,
             setupScript: level?.setupScript,
@@ -91,6 +90,7 @@ export async function runScript(
             cliOutput,
             workspace,
             currentLevelId,
+            level,
             onLevelSuccess,
         );
     } catch (error) {
@@ -170,6 +170,7 @@ function renderExecutionOutput(
     cliOutput: HTMLPreElement,
     workspace: Blockly.WorkspaceSvg,
     currentLevelId: string,
+    originatingLevel: Level | undefined,
     onLevelSuccess: OnLevelSuccess,
 ): void {
     if (result.status === ExecutionStatus.INFRASTRUCTURE_ERROR) {
@@ -201,26 +202,21 @@ function renderExecutionOutput(
     }
 
     renderVerificationFeedback(result.verification);
+    const sameMission = getCachedLevelData(currentLevelId) === originatingLevel;
+    const isCurrentMission = sameMission && currentLevelId === getCurrentLevelId();
+    const missionTitle = originatingLevel?.title ?? currentLevelId;
 
     if (result.verification.exitCode === 0) {
-        const message = "Objetivo concluído.";
+        const message = `Objetivo concluído: ${missionTitle}.`;
         Logger.log(message, ShellBlocks.LogLevel.INFO);
-        ShellBlocks.showToast(workspace, message);
-        const status = onLevelSuccess(currentLevelId);
-
-        if (status.unlockedNewLevel) {
-            Logger.log("Novo nível desbloqueado!", ShellBlocks.LogLevel.INFO);
-            if (status.nextLevelTitle) {
-                Logger.log(
-                    `Próximo: ${status.nextLevelTitle}`,
-                    ShellBlocks.LogLevel.INFO,
-                );
-            }
-        }
+        if (isCurrentMission) ShellBlocks.showToast(workspace, message);
+        if (sameMission) onLevelSuccess(currentLevelId);
     } else {
-        const message = "O objetivo não foi atingido.";
+        const message = `O objetivo não foi atingido nesta tentativa: ${missionTitle}.`;
         Logger.log(message, ShellBlocks.LogLevel.WARN);
-        ShellBlocks.showToast(workspace, message, ShellBlocks.LogLevel.WARN);
+        if (isCurrentMission) {
+            ShellBlocks.showToast(workspace, message, ShellBlocks.LogLevel.WARN);
+        }
     }
 
     cliOutput.textContent += "$";

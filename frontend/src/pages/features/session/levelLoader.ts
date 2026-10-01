@@ -2,7 +2,6 @@ import type { GameData, Level, LevelDifficulty } from "./types";
 import * as ShellBlocks from "shellblocks";
 import * as PersistenceManager from "./persistenceManager";
 import * as Logger from "../ui/systemLogger";
-import { LevelSuccessResult } from "../execution/scriptRunner";
 
 export const SANDBOX_LEVEL_ID = "sandbox";
 
@@ -11,6 +10,7 @@ let orderedLevels: Level[] = [];
 
 let currentLevelId: string = SANDBOX_LEVEL_ID;
 let isLevelSelectorListenerRegistered = false;
+const completedLevelIds = new Set<string>();
 
 export function getCurrentLevelId(): string {
     return currentLevelId;
@@ -20,12 +20,16 @@ export function getCachedLevelData(levelId: string): Level | undefined {
     return levelsCache.get(levelId);
 }
 
-export function onLevelSuccesEvent(
+function recordLevelCompletion(
     levelId: string,
     levelSelect: HTMLSelectElement,
     isExperimentMode: boolean,
-): LevelSuccessResult {
-    if (!isExperimentMode) return { unlockedNewLevel: false };
+): void {
+    const level = levelsCache.get(levelId);
+    if (levelId === SANDBOX_LEVEL_ID || !level?.verificationScript?.trim()) return;
+    completedLevelIds.add(levelId);
+
+    if (!isExperimentMode) return;
 
     const nonSandboxOptions = [...levelSelect.options].filter(
         (option) => option.value !== SANDBOX_LEVEL_ID,
@@ -40,7 +44,7 @@ export function onLevelSuccesEvent(
             `Erro de rastreio: Nível ID ${levelId} não identificado no seletor.`,
             ShellBlocks.LogLevel.ERROR,
         );
-        return { unlockedNewLevel: false };
+        return;
     }
 
     Logger.log(
@@ -53,7 +57,7 @@ export function onLevelSuccesEvent(
             "Status: Todos os níveis concluídos.",
             ShellBlocks.LogLevel.INFO,
         );
-        return { unlockedNewLevel: false };
+        return;
     }
 
     const lastUnlockedLevelId =
@@ -81,9 +85,6 @@ export function onLevelSuccesEvent(
             isExperimentMode,
         );
 
-        levelSelect.value = newLastUnlockedLevelId;
-        levelSelect.dispatchEvent(new Event("change"));
-
         const nextTitle =
             nonSandboxOptions[newLastUnlockedLevelIndex].dataset.title;
 
@@ -91,14 +92,7 @@ export function onLevelSuccesEvent(
             `Progresso: Nível ${newLastUnlockedLevelIndex + 1} (${nextTitle}) desbloqueado.`,
             ShellBlocks.LogLevel.INFO,
         );
-
-        return {
-            unlockedNewLevel: true,
-            nextLevelTitle: nextTitle,
-        };
     }
-
-    return { unlockedNewLevel: false };
 }
 
 export interface SelectorDependencies {
@@ -107,6 +101,11 @@ export interface SelectorDependencies {
     levelFullDetails: HTMLElement;
     progressBarFill: HTMLElement;
     progressLabel: HTMLElement;
+    missionCompletion: HTMLElement;
+    missionCompletionText: HTMLElement;
+    continueBtn: HTMLButtonElement;
+    assemblyTransitionNotice: HTMLElement;
+    hasWorkspaceAssembly: () => boolean;
 }
 
 export function setupLevelSelector(
@@ -117,11 +116,15 @@ export function setupLevelSelector(
     const { levelSelect, levelSummaryText, levelFullDetails } =
         selectorDependencies;
     registerLevelSelectorListener(selectorDependencies);
+    completedLevelIds.clear();
+    renderMissionCompletion(selectorDependencies);
+    selectorDependencies.assemblyTransitionNotice.hidden = true;
 
     if (!data) {
         levelsCache.clear();
         orderedLevels = [];
         currentLevelId = SANDBOX_LEVEL_ID;
+        PersistenceManager.saveLastContextId(currentLevelId);
         levelSelect.innerHTML = "<option>Erro ao carregar níveis</option>";
         levelSummaryText.textContent = "Erro de conexão com o servidor.";
         levelFullDetails.innerHTML = "";
@@ -151,7 +154,11 @@ export function setupLevelSelector(
         isExperimentMode,
     );
 
-    levelSelect.value = SANDBOX_LEVEL_ID;
+    const savedContext = PersistenceManager.getLastContextId();
+    const savedOption = [...levelSelect.options].find(
+        (option) => option.value === savedContext && !option.disabled,
+    );
+    levelSelect.value = savedOption?.value ?? SANDBOX_LEVEL_ID;
     levelSelect.dispatchEvent(new Event("change"));
 }
 
@@ -204,7 +211,21 @@ function registerLevelSelectorListener(deps: SelectorDependencies): void {
     const { levelSelect, levelSummaryText, levelFullDetails } = deps;
 
     levelSelect.addEventListener("change", () => {
+        const previousLevelId = currentLevelId;
         currentLevelId = levelSelect.value;
+        PersistenceManager.saveLastContextId(currentLevelId);
+        deps.assemblyTransitionNotice.hidden = true;
+        if (
+            previousLevelId !== currentLevelId &&
+            levelsCache.has(previousLevelId) &&
+            levelsCache.has(currentLevelId) &&
+            deps.hasWorkspaceAssembly() &&
+            !PersistenceManager.hasSeenAssemblyTransition()
+        ) {
+            deps.assemblyTransitionNotice.hidden = false;
+            PersistenceManager.saveHasSeenAssemblyTransition();
+        }
+        renderMissionCompletion(deps);
 
         if (currentLevelId === SANDBOX_LEVEL_ID) {
             updateProgressBar(0, orderedLevels.length, deps);
@@ -223,7 +244,40 @@ function registerLevelSelectorListener(deps: SelectorDependencies): void {
         }
     });
 
+    deps.continueBtn.addEventListener("click", () => {
+        if (!completedLevelIds.has(currentLevelId)) return;
+        const next = getNextLevel(currentLevelId);
+        if (!next) return;
+        levelSelect.value = next.id;
+        levelSelect.dispatchEvent(new Event("change"));
+    });
+
     isLevelSelectorListenerRegistered = true;
+}
+
+function getNextLevel(levelId: string): Level | undefined {
+    const index = orderedLevels.findIndex((level) => level.id === levelId);
+    return index < 0 ? undefined : orderedLevels[index + 1];
+}
+
+export function markLevelCompleted(
+    levelId: string,
+    deps: SelectorDependencies,
+    isExperimentMode: boolean,
+): void {
+    recordLevelCompletion(levelId, deps.levelSelect, isExperimentMode);
+    renderMissionCompletion(deps);
+}
+
+function renderMissionCompletion(deps: SelectorDependencies): void {
+    const completed = completedLevelIds.has(currentLevelId);
+    const next = getNextLevel(currentLevelId);
+    deps.missionCompletion.hidden = !completed;
+    deps.continueBtn.hidden = !completed || !next;
+    deps.missionCompletionText.textContent = completed
+        ? next ? "Missão concluída." : "Missão concluída. Percurso concluído!"
+        : "";
+    deps.continueBtn.textContent = next ? `Continuar: ${next.title}` : "Continuar";
 }
 
 function renderSandboxMode(

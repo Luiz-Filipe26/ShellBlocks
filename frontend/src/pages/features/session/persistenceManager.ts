@@ -8,6 +8,24 @@ const LAST_UNLOCKED_LEVEL_ID_KEY = "experiment_progress_v1";
 const SIDEBAR_WIDTH_KEY = "sidebar_pref_width";
 const SIDEBAR_COLLAPSED_KEY = "sidebar_pref_collapsed";
 const KEY_HAS_SEEN_GUIDE = "shellblocks_has_seen_guide";
+const LAST_CONTEXT_KEY = "shellblocks_last_context";
+const ASSEMBLY_TRANSITION_SEEN_KEY = "shellblocks_assembly_transition_seen";
+
+export function getLastContextId(): string | null {
+    return localStorage.getItem(LAST_CONTEXT_KEY);
+}
+
+export function saveLastContextId(contextId: string): void {
+    localStorage.setItem(LAST_CONTEXT_KEY, contextId);
+}
+
+export function hasSeenAssemblyTransition(): boolean {
+    return localStorage.getItem(ASSEMBLY_TRANSITION_SEEN_KEY) === "true";
+}
+
+export function saveHasSeenAssemblyTransition(): void {
+    localStorage.setItem(ASSEMBLY_TRANSITION_SEEN_KEY, "true");
+}
 
 export function hasSeenHelpGuide(): boolean {
     return localStorage.getItem(KEY_HAS_SEEN_GUIDE) === "true";
