@@ -7,7 +7,7 @@ function getElement<T extends HTMLElement>(id: string): T {
 const pageElements = {
     blocklyArea: getElement<HTMLDivElement>("blockly-area"),
     codeOutput: getElement<HTMLPreElement>("code-output"),
-    cliOutput: getElement<HTMLPreElement>("cli-output"),
+    cliOutput: getElement<HTMLDivElement>("cli-output"),
     runBtn: getElement<HTMLButtonElement>("run-btn"),
     clearBtn: getElement<HTMLButtonElement>("clear-btn"),
     btnClearAssembly: getElement<HTMLButtonElement>("btn-clear-assembly"),

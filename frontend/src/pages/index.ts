@@ -6,6 +6,7 @@ import {
     setupLevelSelector,
 } from "./features/session/levelLoader";
 import { setupScriptHotReloader } from "./features/execution/scriptHotReloader";
+import { setupOutputClearButton } from "./features/execution/executionOutput";
 import { runScript } from "./features/execution/scriptRunner";
 import * as Blockly from "blockly";
 import * as Logger from "./features/ui/systemLogger";
@@ -115,9 +116,7 @@ function registerButtonListeners(
         );
     });
 
-    pageElements.clearBtn.addEventListener("click", () => {
-        pageElements.cliOutput.textContent = "$";
-    });
+    setupOutputClearButton(pageElements.cliOutput, pageElements.clearBtn);
 
     pageElements.btnClearAssembly.addEventListener("click", () => {
         const cleared = clearWorkspaceAssembly(workspace, () =>

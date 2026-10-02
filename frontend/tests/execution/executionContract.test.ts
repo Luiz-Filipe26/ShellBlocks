@@ -3,7 +3,7 @@ import {
     ExecutionResultSchema,
     RunRequestSchema,
 } from "@shellblocks/shared/contracts/execution";
-import { decodeStageStream } from "@/pages/features/execution/scriptRunner";
+import { decodeStageStream } from "@/pages/features/execution/executionOutput";
 
 describe("contrato de streams da execução", () => {
     it("usa Base64 como representação pública autoritativa", () => {

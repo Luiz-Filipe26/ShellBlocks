@@ -14,6 +14,82 @@
     font-size: 0.9em;
 }
 
+.execution-history {
+    white-space: normal;
+    min-height: 0;
+}
+
+.sidebar .execution-output-panel { flex-grow: 2; }
+.sidebar .action-buttons-panel .btn { min-width: 0; overflow-wrap: anywhere; }
+
+.execution-attempt + .execution-attempt { margin-top: 22px; }
+.attempt-context {
+    margin: 0 0 6px;
+    color: #bdc5ce;
+    font-size: .85em;
+    overflow-wrap: anywhere;
+}
+.attempt-frame {
+    padding: 10px;
+    border: 1px solid #59636f;
+    border-radius: 5px;
+    min-width: 0;
+}
+.attempt-heading {
+    margin: 0 0 12px;
+    font-size: 1em;
+    font-weight: 600;
+    line-height: 1.4;
+}
+.attempt-label {
+    margin: 10px 0 4px;
+    color: #bdc5ce;
+    font-size: .85em;
+    font-weight: normal;
+}
+.attempt-frame pre {
+    margin: 0;
+    font: inherit;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    tab-size: 4;
+}
+.attempt-script { color: #b8e3bd; }
+.attempt-stderr { border-left: 2px solid #f2a6a6; padding-left: 8px; }
+.attempt-stderr .attempt-label { color: #f2a6a6; }
+.attempt-exit-code {
+    margin: 12px 0 0;
+    padding-top: 8px;
+    border-top: 1px solid #414a54;
+    color: #bdc5ce;
+    font-size: .85em;
+}
+.attempt-empty { color: #bdc5ce; font-size: .85em; margin: 12px 0 0; }
+.attempt-feedback { margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
+.attempt-diagnostics { margin-top: 10px !important; }
+.attempt-verification { border-color: #819e88; }
+.attempt-environment { border-color: #baa17c; }
+.attempt-execution + .attempt-frame {
+    margin-top: 14px;
+    position: relative;
+}
+.attempt-execution + .attempt-frame::before {
+    content: "";
+    position: absolute;
+    top: -15px;
+    left: 18px;
+    height: 14px;
+    border-left: 1px solid #819e88;
+}
+
+.sidebar .btn:disabled {
+    opacity: .5;
+    filter: saturate(.35);
+    cursor: not-allowed;
+}
+.sidebar .btn-run:disabled:hover { background-color: #28a745; }
+.sidebar .btn-clear:disabled:hover { background-color: #dc3545; }
+
 .level-select-input {
     width: 100%;
     padding: 8px;
