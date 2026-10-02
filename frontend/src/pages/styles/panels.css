@@ -113,3 +113,13 @@
     min-width: 60px;
     user-select: none;
 }
+
+.system-log-panel {
+    display: block;
+    height: auto;
+    color: #495057;
+    font-size: .85rem;
+}
+
+.system-log-panel[open] { height: var(--bottom-panel-height); }
+.system-log-panel .log-display { height: calc(100% - 34px); }

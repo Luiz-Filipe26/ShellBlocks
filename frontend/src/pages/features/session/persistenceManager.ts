@@ -10,6 +10,15 @@ const SIDEBAR_COLLAPSED_KEY = "sidebar_pref_collapsed";
 const KEY_HAS_SEEN_GUIDE = "shellblocks_has_seen_guide";
 const LAST_CONTEXT_KEY = "shellblocks_last_context";
 const ASSEMBLY_TRANSITION_SEEN_KEY = "shellblocks_assembly_transition_seen";
+const INITIAL_CHOICE_MADE_KEY = "shellblocks_initial_choice_made";
+
+export function hasMadeInitialChoice(): boolean {
+    return localStorage.getItem(INITIAL_CHOICE_MADE_KEY) === "true";
+}
+
+export function saveInitialChoiceMade(): void {
+    localStorage.setItem(INITIAL_CHOICE_MADE_KEY, "true");
+}
 
 export function getLastContextId(): string | null {
     return localStorage.getItem(LAST_CONTEXT_KEY);

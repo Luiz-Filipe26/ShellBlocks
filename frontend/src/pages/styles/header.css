@@ -76,6 +76,12 @@
     overflow: hidden;
 }
 
+#btn-help-guide {
+    font-size: 1rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
 .btn-guide-urgent {
     background-color: var(--color-danger) !important;
     color: white !important;

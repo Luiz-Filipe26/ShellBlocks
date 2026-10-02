@@ -18,6 +18,7 @@ import type { GameData } from "./features/session/types";
 import { SidebarResizer } from "./features/ui/SidebarResizer";
 import { setupSidebarToggle } from "./features/ui/sidebarController";
 import { setupHelpGuide } from "./features/ui/helpController";
+import { setupInitialChoice } from "./features/ui/initialChoice";
 import { clearWorkspaceAssembly, hasWorkspaceAssembly } from "@/core/shellblocks/workspace/assembly";
 import type { SelectorDependencies } from "./features/session/levelLoader";
 import { saveWorkspaceSession } from "@/core/shellblocks/serialization/workspaceAutoSaver";
@@ -29,6 +30,10 @@ export const IS_EXPERIMENT_MODE =
 start();
 
 async function start(): Promise<void> {
+    if (!PersistenceManager.hasMadeInitialChoice()) {
+        pageElements.initialChoiceModal.oncancel = (event) => event.preventDefault();
+        pageElements.initialChoiceModal.showModal();
+    }
     new SidebarResizer(
         pageElements.sidebarResizerGutter,
         pageElements.sidebar,
@@ -77,7 +82,11 @@ async function start(): Promise<void> {
     setupLevelSelector(gameData, selectorDependencies, IS_EXPERIMENT_MODE);
 
     setupScriptHotReloader(workspace, pageElements.codeOutput);
+    for (const area of [pageElements.advancedControls, pageElements.systemLogPanel]) {
+        area.addEventListener("toggle", () => Blockly.svgResize(workspace));
+    }
     registerButtonListeners(workspace, selectorDependencies);
+    setupInitialChoice(pageElements);
 }
 
 function enforceExperimentRestrictions() {

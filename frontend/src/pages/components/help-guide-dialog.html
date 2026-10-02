@@ -1,112 +1,69 @@
-<dialog id="help-modal" class="validation-dialog help-modal">
+<dialog id="help-modal" class="validation-dialog help-modal" aria-labelledby="help-title">
     <div class="modal-content help-modal__content">
         <div class="modal-header help-modal__header">
-            <h2 class="modal-title">
+            <h2 id="help-title" class="modal-title">
                 <img src="../assets/icons/lucid/circle-question-mark.svg" class="icon-inline help-modal__header-icon" alt="" />
-                Guia de Sobrevivência
+                Como usar o ShellBlocks
             </h2>
         </div>
-
         <div class="modal-body help-modal__body">
             <section class="help-modal__section">
+                <h3>Como usar a ferramenta</h3>
+                <p>O ShellBlocks permite aprender CLI montando comandos com blocos. Escolha seu contexto no seletor <strong>Missão</strong>:</p>
+                <ul>
+                    <li><strong>Atividades guiadas:</strong> cada nível apresenta uma missão com objetivo. Monte seu programa e use <strong>Executar</strong> para rodá-lo e verificar o objetivo. Depois do sucesso, use <strong>Continuar</strong> para ir à próxima atividade.</li>
+                    <li><strong>Modo Livre (Sandbox):</strong> explore e execute comandos sem missão ou progressão pedagógica obrigatória.</li>
+                </ul>
+            </section>
+            <section class="help-modal__section">
+                <h3>Da toolbox à montagem</h3>
+                <p>A <strong>toolbox</strong> é o painel de blocos. Suas categorias agrupam famílias de comandos. Abra a subcategoria de um comando para encontrar seu bloco principal e, quando disponíveis, <strong>Opções</strong> e <strong>Operandos</strong>.</p>
+                <p>Pense assim: a subcategoria reúne <strong>o comando principal e os blocos que você pode encaixar nele</strong>.</p>
+                <p>Arraste o bloco principal da toolbox para o <strong>workspace</strong>, a área de montagem. O próximo passo é encaixá-lo no <strong>Script Principal</strong>, a raiz da montagem executável: o comando precisa estar conectado a ele para fazer parte do programa.</p>
+                <p>Opções e operandos são blocos separados. Arraste-os também para o workspace e encaixe cada um na entrada correspondente do comando.</p>
+            </section>
+            <section class="help-modal__section">
+                <h3>Encaixar é diferente de aproximar</h3>
+                <p>Para conectar um bloco, arraste-o e aproxime seu <strong>encaixe visual (o pequeno ‘dente’ do bloco)</strong> de um encaixe compatível. Solte quando os blocos se prenderem. Colocar um bloco perto de outro <strong>não significa conectá-lo</strong>.</p>
+                <p>Um bloco solto no workspace não faz parte do programa, mesmo que esteja perto do Script Principal. Comandos encaixados em sequência, pelos conectores superior e inferior, são executados nessa ordem.</p>
+            </section>
+            <section class="help-modal__section">
+                <h3>Editar e experimentar</h3>
+                <p>Você não precisa acertar de primeira: pode experimentar e voltar a ajustar a montagem.</p>
+                <ul>
+                    <li><strong>Editar blocos:</strong> uma seta indica uma lista de escolhas (<strong>dropdown</strong>); clique para selecionar. Nos <strong>campos de texto editáveis</strong>, clique e digite. Algumas opções recebem um <strong>argumento próprio</strong>, digitado no campo da opção.</li>
+                    <li><strong>Corrigir e reorganizar:</strong> mova blocos, arraste-os para desconectar e reorganize a montagem. Para remover um bloco, arraste-o para a <strong>lixeira</strong>. No desktop, você também pode usar a opção de exclusão no menu do bloco, aberto com o botão direito.</li>
+                    <li><strong>Recomeçar:</strong> use <strong>Limpar montagem</strong> para começar novamente; a ação pede confirmação antes de descartar os blocos.</li>
+                </ul>
+                <p>Trocar de missão não limpa automaticamente a montagem. Você pode reaproveitar os blocos na próxima atividade.</p>
+            </section>
+            <section class="help-modal__section">
+                <h3>Montagem, código e resultado</h3>
+                <ol>
+                    <li><strong>Montagem:</strong> monte e edite os blocos.</li>
+                    <li><strong>Código Gerado:</strong> é atualizado ao montar e editar os blocos; gerar código não o executa.</li>
+                    <li><strong>Executar:</strong> roda a montagem atual.</li>
+                    <li><strong>Saída do Terminal:</strong> mostra o resultado. <strong>Limpar Saída</strong> apaga apenas esse conteúdo.</li>
+                    <li><strong>Verificação da missão:</strong> nas atividades guiadas, a execução também verifica o objetivo da missão.</li>
+                </ol>
+                <p>Arquivos e personalização estão em <strong>Arquivos e configurações avançadas</strong>. O <strong>Log do Sistema</strong> reúne detalhes técnicos.</p>
+            </section>
+            <details class="help-modal__section">
+                <summary>Conceitos de CLI/Shell</summary>
                 <h3>O que é Linha de Comando (CLI)?</h3>
-
-                <p>
-                    A maioria das pessoas usa o computador clicando em ícones, botões e menus. Isso se chama
-                    <strong>Interface Gráfica</strong>.
-                </p>
-
-                <p>
-                    A <strong>Linha de Comando</strong> é outra forma de conversar com o computador: através do terminal, você escreve uma
-                    instrução em texto, aperta <strong>Enter</strong>, e o computador executa.
-                </p>
-
-                <p>Pense como se fosse dar ordens muito claras, uma linha por vez.</p>
-            </section>
-
-            <section class="help-modal__section">
-                <h3>Um exemplo simples</h3>
-
-                <p>Se você montar os blocos para gerar o comando abaixo:</p>
-
+                <p>Na linha de comando, uma instrução é escrita em texto. O ShellBlocks representa visualmente as partes dessa instrução com blocos, e o <strong>Código Gerado</strong> mostra a instrução textual correspondente à montagem.</p>
                 <pre class="help-modal__code">mkdir projetos</pre>
-
-                <p>
-                    Você está dizendo ao computador:
-                    <br />
-                    <em> "<strong>Crie uma pasta</strong> (<code>mkdir</code>) com o nome <strong>projetos</strong>" </em>.
-                </p>
-            </section>
-
-            <section class="help-modal__section">
-                <h3>Como um comando é estruturado</h3>
-
-                <p>A maioria dos comandos segue uma lógica parecida com uma frase:</p>
-
-                <div class="help-modal__formula">COMANDO + OPÇÕES + ALVO</div>
-
+                <p>Esse comando cria uma pasta chamada <code>projetos</code>.</p>
                 <ul>
-                    <li><strong>Comando:</strong> a ação principal (ex: <code>ls</code>, <code>mkdir</code>).</li>
-                    <li>
-                        <strong>Opções:</strong> modificadores do comando, geralmente com um traço (ex: <code>-l</code>, <code>-r</code>).
-                    </li>
-                    <li>
-                        <strong>Alvo:</strong> em quem ou onde a ação acontece (ex: <code>pasta_fotos</code>, <code>arquivo.txt</code>).
-                    </li>
+                    <li><strong>Comando:</strong> a ação principal, como <code>ls</code> ou <code>mkdir</code>.</li>
+                    <li><strong>Opção:</strong> modifica o comando, como <code>-l</code>. Algumas opções também recebem um argumento.</li>
+                    <li><strong>Operando:</strong> um valor sobre o qual o comando atua, como o nome <code>projetos</code>.</li>
                 </ul>
-            </section>
-
-            <section class="help-modal__section">
-                <h3>🧩 O que é o ShellBlocks?</h3>
-
-                <p>
-                    O ShellBlocks é um <strong>tradutor visual</strong>. Ele ajuda você a aprender linha de comando sem precisar decorar
-                    tudo de uma vez.
-                </p>
-
-                <ul>
-                    <li><strong>Blocos:</strong> representam comandos, opções e alvos.</li>
-                    <li><strong>Encaixar blocos:</strong> significa montar uma instrução válida.</li>
-                    <li><strong>Código Gerado:</strong> mostra o comando real que você montou.</li>
-                    <li><strong>Executar:</strong> roda o comando em um terminal simulado.</li>
-                </ul>
-            </section>
-
-            <section class="help-modal__section">
-                <h3>🎮 Sistema de níveis</h3>
-
-                <p>A ferramenta funciona como um jogo:</p>
-
-                <ul>
-                    <li>Cada nível apresenta um desafio</li>
-                    <li>Você monta o comando usando blocos</li>
-                    <li>Se fizer certo, desbloqueia o próximo</li>
-                </ul>
-
-                <p>Cada nível ensina um conceito novo, passo a passo.</p>
-            </section>
-
-            <div class="help-modal__tip">
-                <h4>💡 Dicas de Ouro</h4>
-                <ul>
-                    <li>
-                        <strong>Maiúsculas importam:</strong>
-                        no Linux, <code>Pasta</code> é diferente de <code>pasta</code>.
-                    </li>
-                    <li>
-                        <strong>A ordem importa:</strong>
-                        o computador lê os comandos exatamente como você monta.
-                    </li>
-                    <li>
-                        <strong>Leia a missão:</strong>
-                        ela diz exatamente o que se espera de você.
-                    </li>
-                </ul>
-            </div>
+                <p>A ordem e as maiúsculas podem importar. Leia a missão para entender o objetivo de cada atividade.</p>
+            </details>
         </div>
-
         <div class="modal-footer help-modal__footer">
-            <button id="close-help-btn" class="btn btn-close-modal help-modal__close-btn">Entendi, vamos lá!</button>
+            <button id="close-help-btn" class="btn btn-close-modal help-modal__close-btn">Fechar ajuda</button>
         </div>
     </div>
 </dialog>

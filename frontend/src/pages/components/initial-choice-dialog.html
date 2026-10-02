@@ -1,0 +1,18 @@
+<dialog id="initial-choice-modal" class="initial-choice" aria-labelledby="initial-choice-title" aria-describedby="initial-choice-description">
+    <h2 id="initial-choice-title">Como você quer começar?</h2>
+    <p id="initial-choice-description">Escolha um caminho. Você pode alternar entre as atividades e o Modo Livre pelo seletor de missão.</p>
+    <div class="initial-choice__cards">
+        <section class="initial-choice__card initial-choice__card--guided" aria-labelledby="guided-choice-title">
+            <span class="initial-choice__badge">Recomendado para iniciantes</span>
+            <h3 id="guided-choice-title">Atividades guiadas</h3>
+            <p>Aprenda CLI e conheça o ShellBlocks gradualmente, com missões, objetivos e verificação do resultado.</p>
+            <button id="guided-choice-btn" class="btn-close-modal initial-choice__primary" autofocus disabled>Começar atividades guiadas</button>
+            <p id="guided-choice-unavailable" hidden>Não há atividades disponíveis neste percurso. Você ainda pode explorar no Modo Livre.</p>
+        </section>
+        <section class="initial-choice__card" aria-labelledby="free-choice-title">
+            <h3 id="free-choice-title">Modo Livre</h3>
+            <p>Monte e execute comandos livremente no Sandbox, sem missão ou progressão pedagógica obrigatória.</p>
+            <button id="free-choice-btn" class="btn-close-modal initial-choice__secondary" disabled>Explorar no Modo Livre</button>
+        </section>
+    </div>
+</dialog>

@@ -2,6 +2,17 @@
     background-color: var(--color-brand-primary);
 }
 
+.help-modal {
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+}
+
+.help-modal summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--color-brand-primary);
+}
+
 .help-modal__header-icon {
     filter: brightness(0) invert(1);
 }

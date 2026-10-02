@@ -25,6 +25,8 @@ const pageElements = {
     validationErrorList: getElement<HTMLUListElement>("validation-error-list"),
     closeModalBtn: getElement<HTMLButtonElement>("close-modal-btn"),
     systemLogContainer: getElement<HTMLDivElement>("system-log-container"),
+    systemLogPanel: getElement<HTMLDetailsElement>("system-log-panel"),
+    advancedControls: getElement<HTMLDetailsElement>("advanced-controls"),
     btnSaveScript: getElement<HTMLButtonElement>("btn-save-script"),
     btnLoadScript: getElement<HTMLButtonElement>("btn-load-script"),
     btnLoadDefs: getElement<HTMLButtonElement>("btn-load-defs"),
@@ -38,6 +40,10 @@ const pageElements = {
     btnHelpGuide: getElement<HTMLButtonElement>("btn-help-guide"),
     helpModal: getElement<HTMLDialogElement>("help-modal"),
     closeHelpBtn: getElement<HTMLButtonElement>("close-help-btn"),
+    initialChoiceModal: getElement<HTMLDialogElement>("initial-choice-modal"),
+    guidedChoiceBtn: getElement<HTMLButtonElement>("guided-choice-btn"),
+    freeChoiceBtn: getElement<HTMLButtonElement>("free-choice-btn"),
+    guidedChoiceUnavailable: getElement<HTMLElement>("guided-choice-unavailable"),
 };
 
 export function getPageElements(): typeof pageElements {

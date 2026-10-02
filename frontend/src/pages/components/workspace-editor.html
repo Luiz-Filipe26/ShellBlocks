@@ -5,6 +5,12 @@
                 <img src="../assets/icons/lucid/trash.svg" class="btn-icon" alt="" />
                 Limpar montagem
             </button>
+        </div>
+    </div>
+
+    <details id="advanced-controls" class="advanced-controls">
+        <summary>Arquivos e configurações avançadas</summary>
+        <div class="advanced-controls__actions">
             <button id="btn-save-script" class="btn-tool" title="Baixar script atual (.json)">
                 <img src="../assets/icons/lucid/save.svg" class="btn-icon" alt="" />
                 Salvar Workspace
@@ -13,11 +19,6 @@
                 <img src="../assets/icons/lucid/folder-open.svg" class="btn-icon" alt="" />
                 Carregar Workspace
             </button>
-        </div>
-
-        <span class="divider"></span>
-
-        <div class="toolbar-group">
             <button id="btn-load-defs" class="btn-tool" title="Carregar novas definições (cli_definitions.json)">
                 <img src="../assets/icons/lucid/settings.svg" class="btn-icon" alt="" />
                 Carregar Definições
@@ -26,22 +27,17 @@
                 <img src="../assets/icons/lucid/gamepad-2.svg" class="btn-icon" alt="" />
                 Carregar Níveis
             </button>
+            <button id="btn-reset-defs" class="btn-tool btn-tool-danger" title="Voltar para as configurações padrão de fábrica">
+                <img src="../assets/icons/lucid/rotate-ccw.svg" class="btn-icon" alt="" />
+                Resetar Fábrica
+            </button>
         </div>
-
-        <span class="spacer"></span>
-
-        <button id="btn-reset-defs" class="btn-tool btn-tool-danger" title="Voltar para as configurações padrão de fábrica">
-            <img src="../assets/icons/lucid/rotate-ccw.svg" class="btn-icon" alt="" />
-            Resetar Fábrica
-        </button>
-    </div>
+    </details>
 
     <div id="blockly-area" class="blockly-workspace-area"></div>
 
-    <div class="bottom-panel system-log-panel">
-        <div class="panel-header">
-            <h2>Log do Sistema</h2>
-        </div>
+    <details id="system-log-panel" class="bottom-panel system-log-panel">
+        <summary>Log do Sistema · detalhes técnicos</summary>
         <div id="system-log-container" class="log-display"></div>
-    </div>
+    </details>
 </div>

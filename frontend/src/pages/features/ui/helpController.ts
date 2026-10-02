@@ -8,15 +8,11 @@ export function setupHelpGuide(elements: {
     const { btnHelpGuide, helpModal, closeHelpBtn } = elements;
     const makeGuideNeutral = () =>
         btnHelpGuide.classList.replace("btn-guide-urgent", "btn-guide-neutral");
-    if (PersistenceManager.hasSeenHelpGuide()) {
-        makeGuideNeutral();
-    }
+    if (PersistenceManager.hasSeenHelpGuide()) makeGuideNeutral();
     btnHelpGuide.addEventListener("click", () => {
         helpModal.showModal();
-        if (btnHelpGuide.classList.contains("btn-guide-urgent")) {
-            makeGuideNeutral();
-            PersistenceManager.saveHasSeenHelpGuide();
-        }
+        makeGuideNeutral();
+        PersistenceManager.saveHasSeenHelpGuide();
         requestAnimationFrame(() => (helpModal.scrollTop = 0));
     });
     closeHelpBtn.addEventListener("click", () => {
