@@ -91,8 +91,8 @@ export async function runScript(
     }
 
     const context = currentLevelId === SANDBOX_LEVEL_ID
-        ? "Sandbox · Modo Livre"
-        : level?.title ?? currentLevelId;
+        ? "Modo Livre"
+        : `Atividade · ${level?.title ?? currentLevelId}`;
     const attempt = startExecutionAttempt(cliOutput, payload.userScript, context);
     runBtn.disabled = true;
     clearBtn.disabled = true;

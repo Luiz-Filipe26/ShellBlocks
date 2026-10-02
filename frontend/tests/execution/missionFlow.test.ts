@@ -111,7 +111,7 @@ describe("execução e conclusão da missão", () => {
         respond(success);
         await run();
         expect(ui.elements.missionCompletion.hidden).toBe(true);
-        expect(output.textContent).toContain("Modo Livre");
+        expect(output.querySelector(".attempt-execution .attempt-context")?.textContent).toBe("Modo Livre");
         expect(output.querySelector(".attempt-verification")).toBeNull();
         expect(JSON.parse(fetchMock.mock.calls[0][1].body).verificationScript).toBeUndefined();
     });
@@ -121,6 +121,8 @@ describe("execução e conclusão da missão", () => {
         fetchMock.mockReturnValue(new Promise((resolve) => { resolveResponse = resolve; }));
         const pending = run();
         const attempt = output.firstElementChild!;
+        const context = attempt.querySelector(".attempt-context")!;
+        expect(context.parentElement).toBe(attempt.querySelector(".attempt-execution"));
         const sentScript = JSON.parse(fetchMock.mock.calls[0][1].body).userScript;
         expect(JSON.parse(fetchMock.mock.calls[0][1].body).verificationScript).toBe("verify a");
         expect(attempt.querySelector(".attempt-script")?.textContent).toBe(sentScript);
@@ -133,7 +135,8 @@ describe("execução e conclusão da missão", () => {
         expect(loader.getCurrentLevelId()).toBe("b");
         expect(ui.elements.missionCompletion.hidden).toBe(true);
         expect(showToast).not.toHaveBeenCalled();
-        expect(output.textContent).toContain("Missão A");
+        expect(context.textContent).toBe("Atividade · Missão A");
+        expect(context.parentElement).toBe(attempt.querySelector(".attempt-execution"));
         expect(output.firstElementChild).toBe(attempt);
         expect(attempt.querySelector(".attempt-script")?.textContent).toBe(sentScript);
         expect(attempt.querySelector(".attempt-stdout pre")?.textContent).toBe("resultado\n");
@@ -237,6 +240,7 @@ describe("execução e conclusão da missão", () => {
         expect(output.querySelector(".attempt-execution")).toBeNull();
         expect(output.querySelector(".attempt-exit-code")).toBeNull();
         const environment = output.querySelector(".attempt-environment")!;
+        expect(environment.querySelector(".attempt-context")?.textContent).toBe("Atividade · Missão A");
         expect(environment.textContent).toContain("não foi executado");
         expect(environment.querySelector(".attempt-stderr pre")?.textContent).toBe("<script>falha</script>");
         expect(environment.querySelector("script")).toBeNull();

@@ -24,7 +24,7 @@
 
 .execution-attempt + .execution-attempt { margin-top: 22px; }
 .attempt-context {
-    margin: 0 0 6px;
+    margin: 0 0 10px;
     color: #bdc5ce;
     font-size: .85em;
     overflow-wrap: anywhere;

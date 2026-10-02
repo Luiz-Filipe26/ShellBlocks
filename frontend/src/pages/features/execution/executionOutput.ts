@@ -3,6 +3,7 @@ import type { StageResult } from "@shellblocks/shared/contracts/execution";
 export interface ExecutionAttempt {
     root: HTMLElement;
     execution: HTMLElement;
+    context: HTMLElement;
     state: HTMLElement;
     scriptLabel: HTMLElement;
     output: HTMLElement;
@@ -26,7 +27,7 @@ export function startExecutionAttempt(
     context: string,
 ): ExecutionAttempt {
     const root = element("article", "execution-attempt");
-    root.append(element("p", "attempt-context", context));
+    const contextMetadata = element("p", "attempt-context", context);
     const execution = element("section", "attempt-frame attempt-execution");
     execution.setAttribute("aria-label", "Execução");
     const heading = element("h3", "attempt-heading", "Execução · ");
@@ -35,11 +36,11 @@ export function startExecutionAttempt(
     heading.append(state);
     const scriptLabel = element("p", "attempt-label", "Script enviado");
     const output = element("div", "attempt-output");
-    execution.append(heading, scriptLabel, element("pre", "attempt-script", script), output);
+    execution.append(heading, contextMetadata, scriptLabel, element("pre", "attempt-script", script), output);
     root.append(execution);
     history.append(root);
     history.scrollTop = history.scrollHeight;
-    return { root, execution, state, scriptLabel, output, script };
+    return { root, execution, context: contextMetadata, state, scriptLabel, output, script };
 }
 
 function appendStreams(container: HTMLElement, stage: StageResult): void {
@@ -93,6 +94,7 @@ export function failExecutionAttempt(
     // No execution result exists: do not imply an empty completed program.
     attempt.execution.remove();
     const frame = showAttemptFeedback(attempt, "environment", message, diagnostics);
+    frame.insertBefore(attempt.context, frame.children[1]);
     frame.append(element("p", "attempt-label", "Script enviado"), element("pre", "attempt-script", attempt.script));
 }
 
