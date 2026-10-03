@@ -5,7 +5,7 @@
     "main": "dist/server.js",
     "type": "module",
     "scripts": {
-        "dev": "tsx watch --env-file=.env src/server.ts",
+        "dev": "tsx watch --env-file-if-exists=.env --include src/docker/Dockerfile.sandbox --include src/docker/runner.sandbox.js src/devServer.ts",
         "test": "npm run test:all",
         "test:quick": "vitest run --exclude tests/integration/**",
         "test:integration": "vitest run tests/integration",

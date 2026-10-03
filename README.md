@@ -369,7 +369,14 @@ Para desenvolver o projeto são necessários:
 * npm;
 * Docker Engine.
 
-Frontend e backend possuem seus próprios `package.json` e `tsconfig.json`.
+Execute `npm run dev` na raiz para iniciar o frontend Vite em
+`http://localhost:5173` e o backend de API na porta `7000`. O Vite encaminha
+as chamadas `/api` ao backend. Também é possível iniciar apenas um processo
+com `npm run dev:frontend` ou `npm run dev:backend`.
+
+No modo de desenvolvimento, o frontend é servido pelo Vite e o backend não
+precisa de um build prévio. Em produção, o backend continua servindo o frontend
+integrado ao artefato gerado por `npm run build`.
 
 O frontend concentra a maior parte da lógica da aplicação. O backend deve permanecer uma camada pequena responsável por hospedagem e execução isolada.
 

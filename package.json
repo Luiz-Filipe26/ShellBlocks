@@ -8,10 +8,16 @@
     ],
     "scripts": {
         "build": "node build_project.mjs",
+        "dev": "concurrently --kill-others --names frontend,backend npm:dev:frontend npm:dev:backend",
+        "dev:frontend": "npm run dev --workspace=shell-blocks",
+        "dev:backend": "npm run dev --workspace=shell-blocks-backend",
         "type-check": "npm run type-check --workspaces --if-present && npm run type-check:test --workspaces --if-present",
         "test": "npm run test --workspaces --if-present"
     },
     "overrides": {
         "ws": "^8.21.0"
+    },
+    "devDependencies": {
+        "concurrently": "^9.2.4"
     }
 }

@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { SANDBOX_EXECUTION_TIMEOUT_MS } from "@shellblocks/shared/config/sandbox";
 import type { ExecutionResult, StageResult } from "@shellblocks/shared/contracts/execution";
@@ -64,7 +65,16 @@ describe("runInSandbox com Docker real", () => {
             throw new Error("A integração exige Docker acessível: " + String(error));
         }
         const startedAt = performance.now();
-        ensureDockerImageExists();
+        ensureDockerImageExists([
+            {
+                name: "Dockerfile.sandbox",
+                content: readFileSync(new URL("../../src/docker/Dockerfile.sandbox", import.meta.url), "utf8"),
+            },
+            {
+                name: "runner.sandbox.js",
+                content: readFileSync(new URL("../../src/docker/runner.sandbox.js", import.meta.url), "utf8"),
+            },
+        ]);
         console.log(
             "[docker-test] preparação da imagem: " +
                 Math.round(performance.now() - startedAt) +

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import {
     computeBuildFingerprint,
     ensureDockerImageExists,
+    type BuildInput,
     type DockerImageOperations,
 } from "@/services/dockerService";
 
@@ -71,11 +72,15 @@ describe("computeBuildFingerprint", () => {
 });
 
 describe("ensureDockerImageExists", () => {
+    const inputs = [
+        { name: "Dockerfile.sandbox", content: "FROM alpine" },
+        { name: "runner.sandbox.js", content: "console.log('runner')" },
+    ];
     let operations: DockerImageOperations;
-    let build: Mock<(fingerprint: string) => void>;
+    let build: Mock<(fingerprint: string, inputs: readonly BuildInput[]) => void>;
 
     beforeEach(() => {
-        build = vi.fn<(fingerprint: string) => void>();
+        build = vi.fn<(fingerprint: string, inputs: readonly BuildInput[]) => void>();
         operations = {
             imageExists: vi.fn(() => true),
             inspectLabels: vi.fn(() => ({})),
@@ -86,20 +91,20 @@ describe("ensureDockerImageExists", () => {
 
     it("constrói quando a imagem está ausente", () => {
         vi.mocked(operations.imageExists).mockReturnValue(false);
-        ensureDockerImageExists(operations);
+        ensureDockerImageExists(inputs, operations);
         expect(build).toHaveBeenCalledOnce();
         expect(operations.inspectLabels).not.toHaveBeenCalled();
     });
 
     it("constrói quando a label está ausente ou diverge", () => {
-        ensureDockerImageExists(operations);
+        ensureDockerImageExists(inputs, operations);
         expect(build).toHaveBeenCalledOnce();
 
         build.mockClear();
         vi.mocked(operations.inspectLabels).mockReturnValue({
             "shellblocks.build.sha256": "desatualizado",
         });
-        ensureDockerImageExists(operations);
+        ensureDockerImageExists(inputs, operations);
         expect(build).toHaveBeenCalledOnce();
     });
 
@@ -108,12 +113,12 @@ describe("ensureDockerImageExists", () => {
         operations.build = vi.fn((value: string) => {
             fingerprint = value;
         });
-        ensureDockerImageExists(operations);
+        ensureDockerImageExists(inputs, operations);
         vi.mocked(operations.inspectLabels).mockReturnValue({
             "shellblocks.build.sha256": fingerprint,
         });
         operations.build = vi.fn();
-        ensureDockerImageExists(operations);
+        ensureDockerImageExists(inputs, operations);
         expect(operations.build).not.toHaveBeenCalled();
     });
 
@@ -121,7 +126,7 @@ describe("ensureDockerImageExists", () => {
         vi.mocked(operations.imageExists).mockImplementation(() => {
             throw new Error("daemon indisponível");
         });
-        expect(() => ensureDockerImageExists(operations)).toThrow(
+        expect(() => ensureDockerImageExists(inputs, operations)).toThrow(
             "daemon indisponível",
         );
         expect(build).not.toHaveBeenCalled();
@@ -131,7 +136,7 @@ describe("ensureDockerImageExists", () => {
         vi.mocked(operations.inspectLabels).mockImplementation(() => {
             throw new Error("inspect falhou");
         });
-        expect(() => ensureDockerImageExists(operations)).toThrow(
+        expect(() => ensureDockerImageExists(inputs, operations)).toThrow(
             "inspect falhou",
         );
         expect(build).not.toHaveBeenCalled();

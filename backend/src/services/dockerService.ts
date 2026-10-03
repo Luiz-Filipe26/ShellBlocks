@@ -5,9 +5,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { z } from "zod";
 import { SANDBOX_IMAGE_NAME } from "@shellblocks/shared/config/sandbox";
-import dockerfileContent from "../docker/Dockerfile.sandbox?raw";
-import runnerContent from "../docker/runner.sandbox.js?raw";
-
 const BUILD_FINGERPRINT_LABEL = "shellblocks.build.sha256";
 
 export interface BuildInput {
@@ -18,13 +15,8 @@ export interface BuildInput {
 export interface DockerImageOperations {
     imageExists(): boolean;
     inspectLabels(): Record<string, string>;
-    build(fingerprint: string): void;
+    build(fingerprint: string, inputs: readonly BuildInput[]): void;
 }
-
-const BUILD_INPUTS: readonly BuildInput[] = [
-    { name: "Dockerfile.sandbox", content: dockerfileContent },
-    { name: "runner.sandbox.js", content: runnerContent },
-];
 
 const DOCKER_IMAGE_OPERATIONS: DockerImageOperations = {
     imageExists,
@@ -33,9 +25,10 @@ const DOCKER_IMAGE_OPERATIONS: DockerImageOperations = {
 };
 
 export function ensureDockerImageExists(
+    inputs: readonly BuildInput[],
     operations: DockerImageOperations = DOCKER_IMAGE_OPERATIONS,
 ): void {
-    const expectedFingerprint = computeBuildFingerprint(BUILD_INPUTS);
+    const expectedFingerprint = computeBuildFingerprint(inputs);
     console.log(`[Docker] Verificando a imagem '${SANDBOX_IMAGE_NAME}'...`);
 
     if (operations.imageExists()) {
@@ -48,7 +41,7 @@ export function ensureDockerImageExists(
     }
 
     console.log("[Docker] Imagem ausente ou desatualizada. Iniciando build...");
-    operations.build(expectedFingerprint);
+    operations.build(expectedFingerprint, inputs);
     console.log("[Docker] Imagem compilada com sucesso.");
 }
 
@@ -81,12 +74,15 @@ function inspectDockerImageLabels(): Record<string, string> {
     return DockerLabelsSchema.parse(JSON.parse(output)) ?? {};
 }
 
-function buildDockerImage(fingerprint: string): void {
+function buildDockerImage(
+    fingerprint: string,
+    inputs: readonly BuildInput[],
+): void {
     const contextDirectory = mkdtempSync(join(tmpdir(), "shellblocks-image-"));
     const dockerfilePath = join(contextDirectory, "Dockerfile.sandbox");
 
     try {
-        for (const input of BUILD_INPUTS) {
+        for (const input of inputs) {
             writeFileSync(join(contextDirectory, input.name), input.content);
         }
         // prettier-ignore

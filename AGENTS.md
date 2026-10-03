@@ -192,6 +192,11 @@ have already been installed. Run `npm run type-check` and `npm test` separately
 when validating changes. The test command includes Docker-backed integration
 tests.
 
+For development, `npm run dev` starts the Vite frontend and API-only backend
+concurrently. Use `npm run dev:frontend` or `npm run dev:backend` to run either
+process alone. Vite serves the frontend and proxies `/api` to the backend;
+production continues to serve the frontend embedded in the built backend.
+
 ### Automated Builds and Releases
 
 The GitHub Actions build workflow runs automatically on:
