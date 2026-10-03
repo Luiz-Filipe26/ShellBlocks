@@ -1,5 +1,26 @@
 import * as Blockly from "blockly";
 
+interface FlyoutSelection {
+    itemId: string | null;
+    visible: boolean;
+}
+
+/** Record flyout origin without inferring it from pointer position or block type. */
+export class OverlayFlyout extends Blockly.VerticalFlyout {
+    override createBlock(originalBlock: Blockly.BlockSvg): Blockly.BlockSvg {
+        const toolbox = this.getTargetWorkspace().getToolbox();
+        return toolbox instanceof OverlayToolbox
+            ? toolbox.createFlyoutBlock(() => super.createBlock(originalBlock))
+            : super.createBlock(originalBlock);
+    }
+
+    override getClientRect(): Blockly.utils.Rect | null {
+        const toolbox = this.getTargetWorkspace().getToolbox();
+        return toolbox instanceof OverlayToolbox && toolbox.isTemporarilyRetracted()
+            ? null : super.getClientRect();
+    }
+}
+
 /** Categories keep their real dimensions for flyout positioning, but reserve no canvas space. */
 export class OverlayWorkspaceMetrics extends Blockly.MetricsManager {
     override getAbsoluteMetrics(): Blockly.MetricsManager.AbsoluteMetrics {
@@ -25,6 +46,46 @@ export class OverlayToolbox extends Blockly.Toolbox {
     private expanded = true;
     private restoreFlyout = false;
     private savedSelectionId: string | null = null;
+    private flyoutSelectionCandidate: FlyoutSelection | null = null;
+    private restoringFlyoutSelection = false;
+    private flyoutDrag: {
+        blockId: string | null;
+        retracted: boolean;
+        confirmed: boolean;
+        selection: FlyoutSelection | null;
+    } | null = null;
+    private dragFrame: number | null = null;
+    private dragListeners: AbortController | null = null;
+    private readonly onBlockDrag = (event: Blockly.Events.Abstract): void => {
+        const drag = this.flyoutDrag;
+        if (!drag || !(event instanceof Blockly.Events.BlockDrag) || event.blockId !== drag.blockId) return;
+        if (event.isStart) {
+            drag.confirmed = true;
+            if (this.workspace_.isDragging()) {
+                drag.retracted = true;
+                this.updateDragPresentation();
+            }
+        } else if (!event.isStart) this.finishFlyoutDrag();
+    };
+    private readonly cancelFlyoutDrag = (): void => {
+        this.flyoutSelectionCandidate = null;
+        if (!this.flyoutDrag) return;
+        // Cancellation can precede delivery of the queued BlockDrag event.
+        if (this.workspace_.isDragging()) this.flyoutDrag.confirmed = true;
+        try { this.workspace_.cancelCurrentGesture(); }
+        finally { this.finishFlyoutDrag(); }
+    };
+    private readonly onDragKeyDown = (event: KeyboardEvent): void => {
+        if (event.key !== "Escape" || !this.flyoutDrag) return;
+        this.cancelFlyoutDrag();
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
+    constructor(workspace: Blockly.WorkspaceSvg) {
+        super(workspace);
+        workspace.addChangeListener(this.onBlockDrag);
+    }
 
     override init(): void {
         super.init();
@@ -61,11 +122,114 @@ export class OverlayToolbox extends Blockly.Toolbox {
         const bubbles = this.workspace_.getBubbleCanvas();
         bubbles.parentNode!.insertBefore(layer, bubbles);
         this.toolboxLayer = layer;
+        this.dragListeners = new AbortController();
+        const signal = this.dragListeners.signal;
+        const flyoutWorkspace = this.getFlyout()!.getWorkspace();
+        flyoutWorkspace.getParentSvg().addEventListener("pointerdown", (event) => {
+            if (event.button !== 0) return;
+            const target = event.target;
+            if (target instanceof Node && flyoutWorkspace.getTopBlocks(false)
+                .some((block) => block.getSvgRoot().contains(target))) {
+                this.captureFlyoutSelection();
+            }
+        }, { capture: true, signal });
+        window.addEventListener("pointerup", () => {
+            this.flyoutSelectionCandidate = null;
+        }, { capture: true, signal });
+        window.addEventListener("keydown", this.onDragKeyDown, { capture: true, signal });
+        window.addEventListener("pointercancel", this.cancelFlyoutDrag, { capture: true, signal });
+        window.addEventListener("blur", this.cancelFlyoutDrag, { signal });
         this.updateHandle();
     }
 
     override onTreeBlur(nextTree: Blockly.IFocusableTree | null): void {
-        if (document.activeElement !== this.handle) super.onTreeBlur(nextTree);
+        if (!this.flyoutDrag && document.activeElement !== this.handle) super.onTreeBlur(nextTree);
+    }
+
+    override autoHide(onlyClosePopups: boolean): void {
+        if (!this.flyoutDrag) super.autoHide(onlyClosePopups);
+    }
+
+    protected captureFlyoutSelection(): void {
+        // Chromium can clear selection in bringToFront(), before createBlock.
+        this.flyoutSelectionCandidate = {
+            itemId: this.getSelectedItem()?.getId() ?? null,
+            visible: this.getFlyout()!.isVisible(),
+        };
+    }
+
+    protected override updateFlyout_(
+        oldItem: Blockly.ISelectableToolboxItem | null,
+        newItem: Blockly.ISelectableToolboxItem | null,
+    ): void {
+        // setSelectedItem still updates selection/ARIA and emits its event;
+        // only its show()/scrollToStart() side effects are skipped on recovery.
+        if (!this.restoringFlyoutSelection) super.updateFlyout_(oldItem, newItem);
+    }
+
+    createFlyoutBlock(create: () => Blockly.BlockSvg): Blockly.BlockSvg {
+        if (this.flyoutDrag) this.finishFlyoutDrag();
+        this.flyoutDrag = {
+            blockId: null, retracted: false, confirmed: false,
+            selection: this.flyoutSelectionCandidate,
+        };
+        this.flyoutSelectionCandidate = null;
+        try {
+            const block = create();
+            this.flyoutDrag.blockId = block.id;
+            // Events are queued by Blockly. Also recover when a gesture ends
+            // without delivering an end event (or creation was not a drag).
+            this.watchDragCompletion();
+            return block;
+        } catch (error) {
+            this.finishFlyoutDrag();
+            throw error;
+        }
+    }
+
+    isTemporarilyRetracted(): boolean { return this.flyoutDrag?.retracted ?? false; }
+
+    override getClientRect(): Blockly.utils.Rect | null {
+        return this.isTemporarilyRetracted() ? null : super.getClientRect();
+    }
+
+    private watchDragCompletion(): void {
+        this.dragFrame = requestAnimationFrame(() => {
+            this.dragFrame = null;
+            if (this.workspace_.isDragging()) this.watchDragCompletion();
+            else {
+                // Let Blockly's queued start/end events confirm even a drag
+                // completed between frames before the fallback releases it.
+                this.dragFrame = requestAnimationFrame(() => this.finishFlyoutDrag());
+            }
+        });
+    }
+
+    private finishFlyoutDrag(restoreSelection = true): void {
+        if (this.dragFrame !== null) cancelAnimationFrame(this.dragFrame);
+        this.dragFrame = null;
+        const drag = this.flyoutDrag;
+        if (restoreSelection && drag?.confirmed && drag.selection) {
+            const selection = drag.selection.itemId
+                ? this.getToolboxItemById(drag.selection.itemId) : null;
+            this.restoringFlyoutSelection = true;
+            try {
+                if (this.getSelectedItem() !== selection) this.setSelectedItem(selection);
+                const flyout = this.getFlyout()!;
+                if (flyout.isVisible() !== drag.selection.visible) flyout.setVisible(drag.selection.visible);
+            } finally { this.restoringFlyoutSelection = false; }
+        }
+        this.flyoutDrag = null;
+        this.updateDragPresentation();
+    }
+
+    private updateDragPresentation(): void {
+        const hidden = this.isTemporarilyRetracted();
+        // Opacity and pointer-events preserve layout and DOM focusability.
+        // Never close/rebuild the native toolbox or flyout for a drag preview.
+        this.toolboxLayer?.classList.toggle("shellblocks-toolbox-drag-hidden", hidden);
+        this.handle?.classList.toggle("shellblocks-toolbox-drag-hidden", hidden);
+        this.workspace_.recordDragTargets();
     }
 
     isExpanded(): boolean { return this.expanded; }
@@ -116,6 +280,11 @@ export class OverlayToolbox extends Blockly.Toolbox {
     }
 
     override dispose(): void {
+        this.workspace_.removeChangeListener(this.onBlockDrag);
+        this.dragListeners?.abort();
+        this.dragListeners = null;
+        this.flyoutSelectionCandidate = null;
+        this.finishFlyoutDrag(false);
         this.handle?.remove();
         this.handle = null;
         super.dispose();

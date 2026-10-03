@@ -85,3 +85,11 @@
 .shellblocks-toolbox-surface > .blocklyToolboxFlyout {
   pointer-events: auto;
 }
+/* Temporary drag presentation only; native visibility, focus and metrics stay intact. */
+.shellblocks-toolbox-drag-hidden {
+  opacity: 0;
+}
+.shellblocks-toolbox-drag-hidden,
+.shellblocks-toolbox-drag-hidden * {
+  pointer-events: none !important;
+}
