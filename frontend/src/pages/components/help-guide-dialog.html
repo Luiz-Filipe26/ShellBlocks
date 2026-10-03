@@ -1,7 +1,7 @@
 <dialog id="help-modal" class="validation-dialog help-modal" aria-labelledby="help-title">
     <div class="modal-content help-modal__content">
         <div class="modal-header help-modal__header">
-            <h2 id="help-title" class="modal-title">
+            <h2 id="help-title" tabindex="-1" class="modal-title">
                 <img src="../assets/icons/lucid/circle-question-mark.svg" class="icon-inline help-modal__header-icon" alt="" />
                 Como usar o ShellBlocks
             </h2>
@@ -14,6 +14,15 @@
                     <li><strong>Atividades guiadas:</strong> cada nível apresenta uma missão com objetivo. Monte seu programa e use <strong>Executar</strong> para rodá-lo e verificar o objetivo. Depois do sucesso, use <strong>Continuar</strong> para ir à próxima atividade.</li>
                     <li><strong>Modo Livre (Sandbox):</strong> explore e execute comandos sem missão ou progressão pedagógica obrigatória.</li>
                 </ul>
+            </section>
+            <section class="help-modal__section">
+                <h3>A progressão das Atividades guiadas</h3>
+                <ul>
+                    <li><strong>Tutorial:</strong> aprender conceitos novos com instruções detalhadas.</li>
+                    <li><strong>Treino:</strong> praticar conceitos já apresentados com menos orientação.</li>
+                    <li><strong>Desafio:</strong> decidir como combinar o que foi aprendido com maior autonomia.</li>
+                </ul>
+                <p>Aprender com orientação → praticar com menos ajuda → resolver com autonomia.</p>
             </section>
             <section class="help-modal__section">
                 <h3>Da toolbox à montagem</h3>
@@ -63,6 +72,7 @@
             </details>
         </div>
         <div class="modal-footer help-modal__footer">
+            <button id="complete-help-btn" class="btn btn-close-modal help-modal__close-btn">Concluir explicação</button>
             <button id="close-help-btn" class="btn btn-close-modal help-modal__close-btn">Fechar ajuda</button>
         </div>
     </div>

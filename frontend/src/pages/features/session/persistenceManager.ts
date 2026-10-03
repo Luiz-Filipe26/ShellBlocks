@@ -7,6 +7,7 @@ import * as DataManager from "../session/dataManager";
 const LAST_UNLOCKED_LEVEL_ID_KEY = "experiment_progress_v1";
 const SIDEBAR_WIDTH_KEY = "sidebar_pref_width";
 const SIDEBAR_COLLAPSED_KEY = "sidebar_pref_collapsed";
+const GUIDE_COMPLETED_KEY = "shellblocks_help_guide_completed";
 const KEY_HAS_SEEN_GUIDE = "shellblocks_has_seen_guide";
 const LAST_CONTEXT_KEY = "shellblocks_last_context";
 const ASSEMBLY_TRANSITION_SEEN_KEY = "shellblocks_assembly_transition_seen";
@@ -34,6 +35,14 @@ export function hasSeenAssemblyTransition(): boolean {
 
 export function saveHasSeenAssemblyTransition(): void {
     localStorage.setItem(ASSEMBLY_TRANSITION_SEEN_KEY, "true");
+}
+
+export function hasCompletedHelpGuide(): boolean {
+    return localStorage.getItem(GUIDE_COMPLETED_KEY) === "true";
+}
+
+export function saveHelpGuideCompleted(): void {
+    localStorage.setItem(GUIDE_COMPLETED_KEY, "true");
 }
 
 export function hasSeenHelpGuide(): boolean {

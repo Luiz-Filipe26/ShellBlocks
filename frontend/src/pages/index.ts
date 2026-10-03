@@ -18,6 +18,7 @@ import { getPageElements } from "./features/ui/DOMProvider";
 import type { GameData } from "./features/session/types";
 import { SidebarResizer } from "./features/ui/SidebarResizer";
 import { setupSidebarToggle } from "./features/ui/sidebarController";
+import { setupGuidedOnboarding } from "./features/ui/guidedOnboarding";
 import { setupHelpGuide } from "./features/ui/helpController";
 import { setupInitialChoice } from "./features/ui/initialChoice";
 import { clearWorkspaceAssembly, hasWorkspaceAssembly } from "@/core/shellblocks/workspace/assembly";
@@ -46,11 +47,6 @@ async function start(): Promise<void> {
         "left",
     ).start();
     setupSidebarToggle(pageElements.btnToggleSidebar, pageElements.sidebar);
-    setupHelpGuide({
-        btnHelpGuide: pageElements.btnHelpGuide,
-        helpModal: pageElements.helpModal,
-        closeHelpBtn: pageElements.closeHelpBtn,
-    });
     Logger.initSystemLogger(pageElements.systemLogContainer);
 
     const definitions = getDefinitions();
@@ -80,6 +76,19 @@ async function start(): Promise<void> {
         ...pageElements,
         hasWorkspaceAssembly: () => hasWorkspaceAssembly(workspace),
     };
+    const onboarding = setupGuidedOnboarding({
+        levelSelect: pageElements.levelSelect,
+        workspaceSurface: workspace.getInjectionDiv(),
+        interceptor: pageElements.onboardingInterceptor,
+        notice: pageElements.onboardingNotice,
+        helpButton: pageElements.btnHelpGuide,
+        constructionControls: [pageElements.runBtn, pageElements.btnClearAssembly,
+            pageElements.btnLoadScript, pageElements.btnLoadDefs, pageElements.btnResetDefs],
+    }, () => {
+        workspace.cancelCurrentGesture();
+        workspace.hideChaff(true);
+    });
+    setupHelpGuide(pageElements, onboarding.refresh);
     setupLevelSelector(gameData, selectorDependencies, IS_EXPERIMENT_MODE);
 
     setupScriptHotReloader(workspace, pageElements.codeOutput);

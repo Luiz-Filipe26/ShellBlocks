@@ -1,0 +1,58 @@
+.onboarding-interceptor {
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    background: transparent;
+    touch-action: none;
+}
+
+.onboarding-interceptor[hidden] {
+    display: none;
+}
+
+.onboarding-interceptor:focus-visible {
+    outline: 3px solid var(--color-brand-primary);
+    outline-offset: -3px;
+}
+
+.onboarding-notice {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(540px, calc(100% - 32px));
+    box-sizing: border-box;
+    z-index: 101;
+    pointer-events: none;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    font-weight: 600;
+    color: #24354b;
+    background: #fff4ce;
+    border: 2px solid #9c6500;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 6px 24px #0003;
+}
+
+.onboarding-notice:empty {
+    width: 0;
+    height: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+}
+
+#btn-help-guide.onboarding-help-highlight {
+    animation: none;
+    outline: 4px solid #9c6500;
+    outline-offset: 4px;
+    box-shadow: 0 0 0 8px #fff4ce;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-guide-urgent,
+    .help-modal[open] {
+        animation: none;
+    }
+}
