@@ -1,3 +1,4 @@
+import { TextValueField, valuePlaceholder, valueTooltip } from "../ui/textValueField";
 import * as Blockly from "blockly";
 import * as CLI from "../types/cli";
 import * as BlockIDs from "../constants/blockIds";
@@ -117,11 +118,12 @@ function appendOperatorSlots(
         }
 
         if (slot.type === "value") {
-            const textField = new Blockly.FieldTextInput(slot.defaultValue);
+            const textField = new TextValueField(slot.defaultValue, valuePlaceholder(slot.label, slot.valueType));
+            textField.setTooltip(valueTooltip(slot.valueType, "", slot.allowEmptyValue, slot.validations));
             textField.setValidator((newValue) => {
                 validateScalarValue(
                     newValue,
-                    slot,
+                    { ...slot, label: slot.label || slot.name },
                     block,
                     `operator-slot:${slot.name}`,
                 );
@@ -131,7 +133,7 @@ function appendOperatorSlots(
             input.appendField(textField, slot.name);
             validateScalarValue(
                 slot.defaultValue,
-                slot,
+                { ...slot, label: slot.label || slot.name },
                 block,
                 `operator-slot:${slot.name}`,
             );

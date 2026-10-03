@@ -71,7 +71,7 @@ function transformCommandToCategory(
 ): ToolboxCategory {
     return {
         kind: "category",
-        name: commandDefinition.id,
+        name: commandDefinition.label,
         colour: commandDefinition.color,
         contents: [
             {

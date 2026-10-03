@@ -83,6 +83,7 @@ export function buildCommandHelpHTML(
                 <li>
                     <strong>${operand.label}</strong>:
                     <span class="help-balloon__text">${operand.description}</span>
+                    <br>Quantidade: ${formatCardinality(operand.cardinality)}.${operand.optionalWithImplicitInput ? " O mínimo é dispensado quando este comando recebe entrada implícita, como pelo pipe." : ""}
                 </li>
             `;
         }
@@ -127,4 +128,11 @@ function parseDescriptionToHtml(text: string): string {
     if (inList) html += "</ul>";
 
     return html;
+}
+
+export function formatCardinality({ min, max }: CLI.CLICardinality): string {
+    if (max === "unlimited") return `${min} ou mais`;
+    if (min === max) return String(min);
+    if (min === 0 && max === 1) return "0 ou 1";
+    return `de ${min} a ${max}`;
 }

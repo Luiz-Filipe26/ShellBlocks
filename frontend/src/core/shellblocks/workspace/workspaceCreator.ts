@@ -2,6 +2,7 @@ import * as Blockly from "blockly";
 import * as CLI from "../types/cli";
 import * as BlockIDs from "../constants/blockIds";
 import { createToolbox } from "./toolboxBuilder";
+import { OverlayToolbox, OverlayWorkspaceMetrics } from "./overlayToolbox";
 import { findScriptRoot } from "../blocks/systemBlocks";
 import { disableOrphanBlocks } from "./orphanHandler";
 import { registerBlockTypesFromDefinitions } from "../blocks/blocksBuilder";
@@ -107,6 +108,7 @@ function getBlocklyOptions(
     return {
         toolbox: createToolbox(cliDefinitions),
         renderer: "zelos",
+        plugins: { toolbox: OverlayToolbox, metricsManager: OverlayWorkspaceMetrics },
         trashcan: true,
         scrollbars: true,
         zoom: {

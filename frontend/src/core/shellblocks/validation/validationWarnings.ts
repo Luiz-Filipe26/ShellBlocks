@@ -1,49 +1,50 @@
 import * as Blockly from "blockly";
-import { getErrors } from "../validation/validationManager";
-import * as ValidationErrors from "../constants/validationErrors";
+import { getErrors } from "./validationManager";
+import { ProblemIcon } from "../ui/problemIcon";
 
-/**
- * Renderiza os erros no bloco com formatação rica e ordenação.
- */
-export function renderBlockWarnings(block: Blockly.Block): void {
-    const errors = getErrors(block);
+const observedWorkspaces = new WeakSet<Blockly.Workspace>();
 
-    if (errors.length === 0) {
-        block.setWarningText(null);
+export function getBlockProblemText(block: Blockly.Block): string {
+    const messages = getErrors(block).map((error) => error.message);
+    if (block.isCollapsed()) {
+        // The following statement remains visible when this block is collapsed.
+        const descendants = block.getChildren(false)
+            .filter((child) => child !== block.getNextBlock())
+            .flatMap((child) => child.getDescendants(false));
+        const hiddenMessages = descendants.flatMap((child) => getErrors(child).map((error) => error.message));
+        if (hiddenMessages.length) messages.push("Problemas no conteúdo recolhido:", ...hiddenMessages);
+    }
+    return messages.join("\n");
+}
+
+function updateProblemIcon(block: Blockly.Block): void {
+    // Toolbox templates are not an executable assembly to diagnose.
+    if (!(block instanceof Blockly.BlockSvg) || block.isInFlyout || block.isInsertionMarker()) return;
+    const text = getBlockProblemText(block);
+    if (!text) {
+        block.removeIcon(ProblemIcon.TYPE);
         return;
     }
+    const icon = block.getIcon(ProblemIcon.TYPE) ?? block.addIcon(new ProblemIcon(block));
+    icon.setProblems(text);
+}
 
-    const lines: string[] = [];
-
-    const cardSpecificOperands = errors.filter((error) =>
-        error.id.startsWith(
-            ValidationErrors.VALIDATION_ERROR_PREFIXES.CARDINALITY +
-            "MISSING_OPERAND_",
-        ),
-    );
-
-    if (cardSpecificOperands.length > 0) {
-        lines.push("- Faltam operandos específicos:");
-        cardSpecificOperands.forEach((error) => {
-            const cleanMsg = error.message.replace("Falta operando: ", "");
-            lines.push(`    • ${cleanMsg}`);
+export function renderBlockWarnings(block: Blockly.Block): void {
+    const workspace = block.workspace;
+    if (!observedWorkspaces.has(workspace)) {
+        observedWorkspaces.add(workspace);
+        workspace.addChangeListener((event) => {
+            if (event.isUiEvent) return;
+            if (event.type === Blockly.Events.BLOCK_MOVE || event.type === Blockly.Events.BLOCK_DELETE || event.type === Blockly.Events.FINISHED_LOADING ||
+                (event instanceof Blockly.Events.BlockChange && event.element === "collapsed")) {
+                workspace.getAllBlocks(false).forEach(updateProblemIcon);
+            }
         });
     }
-
-    const otherErrors = errors.filter(
-        (error) =>
-            !error.id.startsWith(
-                ValidationErrors.VALIDATION_ERROR_PREFIXES.CARDINALITY,
-            ),
-    );
-
-    if (otherErrors.length > 0) {
-        if (lines.length > 0) lines.push("────────────────");
-
-        otherErrors.forEach((error) => {
-            lines.push(`[ERRO] ${error.message}`);
-        });
+    updateProblemIcon(block);
+    let parent = block.getSurroundParent();
+    while (parent) {
+        if (parent.isCollapsed()) updateProblemIcon(parent);
+        parent = parent.getSurroundParent();
     }
-
-    block.setWarningText(lines.join("\n"));
 }

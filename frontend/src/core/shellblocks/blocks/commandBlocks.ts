@@ -55,11 +55,7 @@ function appendCommandHeader(
         .appendDummyInput(BlockIDs.DUMMY_INPUTS.HEADER)
         .appendField(commandDefinition.label)
         .appendField(" ")
-        .appendField(helpIcon)
-        .appendField(
-            BlockComponents.createCardinalityField(28),
-            BlockIDs.FIELDS.CARDINALITY_ICON,
-        );
+        .appendField(helpIcon);
 }
 
 function appendCommandInputs(
@@ -129,7 +125,6 @@ function setupCommandIntegrityPipeline(
         validateOperandSyntax(commandBlock, commandDefinition, operandBlocks);
 
         renderBlockWarnings(commandBlock);
-        BlockComponents.updateCardinalityIndicator(commandBlock);
     };
     addLocalChangeListener(commandBlock, validate);
     if (Blockly.Events.isEnabled()) validate();

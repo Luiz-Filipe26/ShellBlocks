@@ -1,3 +1,4 @@
+import { TextValueField, valuePlaceholder, valueTooltip } from "../ui/textValueField";
 import * as Blockly from "blockly";
 import * as BlockIDs from "../constants/blockIds";
 import * as BlockComponents from "../ui/blockComponents";
@@ -87,9 +88,11 @@ function updateOptionBlockShape(
     if (inputExists) block.removeInput(BlockIDs.INPUTS.OPTION_ARG_INPUT);
     const input = block.appendDummyInput(BlockIDs.INPUTS.OPTION_ARG_INPUT);
     input.appendField(argumentDefinition.label + ":");
-    const argField = new Blockly.FieldTextInput(
+    const argField = new TextValueField(
         argumentDefinition.defaultValue,
+        valuePlaceholder(argumentDefinition.label, argumentDefinition.type),
     );
+    argField.setTooltip(valueTooltip(argumentDefinition.type, optionDefinition.description, argumentDefinition.allowEmptyValue, argumentDefinition.validations));
 
     const validate = (newValue: string): void => {
         validateScalarValue(

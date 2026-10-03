@@ -4,6 +4,7 @@ import * as ValidationErrors from "../constants/validationErrors";
 import { clearError, setError } from "./validationManager";
 
 export interface ScalarValueDefinition {
+    label?: string;
     allowEmptyValue: boolean;
     validations: CLIValidation[];
 }
@@ -27,7 +28,7 @@ export function validateScalarValue(
 ): void {
     const emptyErrorId = ValidationErrors.valueEmptyError(errorScope);
     if (!definition.allowEmptyValue && text.length === 0) {
-        setError(block, emptyErrorId, "O valor não pode ser vazio.");
+        setError(block, emptyErrorId, definition.label ? `Digite um valor em "${definition.label}".` : "O valor não pode ser vazio.");
     } else {
         clearError(block, emptyErrorId);
     }
@@ -40,7 +41,10 @@ export function validateScalarValue(
         const regex = new RegExp(rule.regex);
 
         if (!regex.test(text)) {
-            setError(block, ruleErrorId, rule.errorMessage);
+            const message = definition.label
+                ? `"${definition.label}": ${rule.errorMessage}`
+                : rule.errorMessage;
+            setError(block, ruleErrorId, message);
         } else {
             clearError(block, ruleErrorId);
         }

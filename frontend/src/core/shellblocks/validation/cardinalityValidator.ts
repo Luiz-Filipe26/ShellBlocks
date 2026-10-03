@@ -25,7 +25,7 @@ export function validateControlCardinality(
             setError(
                 block,
                 ValidationErrors.controlMissingSlotError(slot),
-                `O campo "${(slot.label || slot.name).replace(":", "")}" é obrigatório.`,
+                `Encaixe um comando ou composição em "${(slot.label || slot.name).replace(":", "")}".`,
             );
         }
     }
@@ -99,7 +99,7 @@ export function validateOperatorIntegrity(
             setError(
                 block,
                 stackedError,
-                `Operadores aceitam apenas um comando por slot. Use um bloco de agrupamento ou subshell se precisar de sequência.`,
+                `O slot "${slot.label || slot.name}" aceita um único comando ou composição. Remova os comandos adicionais.`,
             );
         }
     }
@@ -153,7 +153,7 @@ function validateSpecificOperandsCardinality(
         setError(
             block,
             ValidationErrors.cardinalityMissingOperandError(operandDef),
-            `Falta operando: ${operandDef.label} (precisa de ${missing}).`,
+            `${missing === 1 ? "Falta" : "Faltam"} ${missing} ${missing === 1 ? "bloco" : "blocos"} de operando "${operandDef.label}". Mínimo exigido: ${min}.`,
         );
     }
 }

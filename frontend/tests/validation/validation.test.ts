@@ -74,13 +74,12 @@ describe("validação semântica do workspace", () => {
         );
         option.setFieldValue("-r", BlockIDs.FIELDS.FLAG);
 
-        expect(getErrors(option).map((error) => error.message)).toContain(
-            "O valor não pode ser vazio.",
-        );
+        expect(getErrors(option).find((error) => error.id.startsWith("VALUE_EMPTY_"))?.message)
+            .toContain(echo.options.find((option) => option.flag === "-r")!.argument!.label);
         option.setFieldValue("abc", BlockIDs.FIELDS.OPTION_ARG_VALUE);
-        expect(getErrors(option).map((error) => error.message)).toEqual([
-            "Use um número.",
-        ]);
+        expect(getErrors(option)).toHaveLength(1);
+        expect(getErrors(option)[0].id).toContain("VALUE_REGEX_RULE_");
+        expect(getErrors(option)[0].message).toContain("Use um número.");
         option.setFieldValue("2", BlockIDs.FIELDS.OPTION_ARG_VALUE);
         expect(getErrors(option)).toEqual([]);
     });
@@ -97,10 +96,11 @@ describe("validação semântica do workspace", () => {
         option.setFieldValue("-r", BlockIDs.FIELDS.FLAG);
         option.setFieldValue("abc", BlockIDs.FIELDS.OPTION_ARG_VALUE);
         setError(option, "independent-error", "Erro independente.");
-        expect(getErrors(option).map((error) => error.message)).toEqual([
-            "Use um número.",
-            "Erro independente.",
-        ]);
+        expect(getErrors(option)).toHaveLength(2);
+        expect(getErrors(option).find((error) => error.id.startsWith("VALUE_REGEX_RULE_"))?.message)
+            .toContain("Use um número.");
+        expect(getErrors(option).find((error) => error.id === "independent-error")?.message)
+            .toBe("Erro independente.");
 
         option.setFieldValue("-n", BlockIDs.FIELDS.FLAG);
 
@@ -119,9 +119,8 @@ describe("validação semântica do workspace", () => {
             BlockIDs.operatorBlockType(redirect),
         );
 
-        expect(getErrors(operator).map((error) => error.message)).toContain(
-            "O valor não pode ser vazio.",
-        );
+        expect(getErrors(operator).find((error) => error.id.startsWith("VALUE_EMPTY_"))?.message)
+            .toContain(redirect.slots[1].label || redirect.slots[1].name);
         operator.setFieldValue("saida.txt", "B");
         expect(
             getErrors(operator).filter((error) =>

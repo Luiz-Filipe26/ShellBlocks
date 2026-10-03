@@ -1,3 +1,4 @@
+import { TextValueField, valuePlaceholder, valueTooltip } from "../ui/textValueField";
 import * as Blockly from "blockly";
 import * as BlockIDs from "../constants/blockIds";
 import { validateScalarValue } from "../validation/valueValidators";
@@ -87,9 +88,11 @@ function buildOperandField(
     operandDefinition: CLI.CLIOperand,
     block: Blockly.Block,
 ): Blockly.FieldTextInput {
-    const textField = new Blockly.FieldTextInput(
+    const textField = new TextValueField(
         operandDefinition.defaultValue,
+        valuePlaceholder(operandDefinition.label, operandDefinition.type),
     );
+    textField.setTooltip(valueTooltip(operandDefinition.type, operandDefinition.description, operandDefinition.allowEmptyValue, operandDefinition.validations));
 
     const validate = (newValue: string): void => {
         validateScalarValue(
