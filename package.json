@@ -1,0 +1,7 @@
+{
+    "name": "shellblocks-build",
+    "private": true,
+    "scripts": {
+        "build": "node build_project.mjs"
+    }
+}

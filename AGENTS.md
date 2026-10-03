@@ -14,7 +14,7 @@ Do not prematurely introduce abstractions for hypothetical platforms. Generalize
 
 ## Architecture
 
-The project is entirely TypeScript.
+The project's source code is entirely TypeScript.
 
 ShellBlocks is intentionally a frontend-centric application. There is no application state that needs server-side persistence, and the application is simple enough that its domain logic does not require a backend.
 
@@ -183,12 +183,11 @@ Use the scripts defined in their respective `package.json` files.
 The canonical full-project build is:
 
 ```text
-build_project.sh
+npm run build
 ```
 
-It is used both locally and by GitHub Actions.
-
-`build_project.ps1` provides the equivalent project build for PowerShell environments.
+Run it from the repository root. It is used both locally and by GitHub Actions.
+The orchestration is maintained in `build_project.mjs`.
 
 ### Automated Builds and Releases
 

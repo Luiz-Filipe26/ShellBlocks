@@ -125,8 +125,8 @@ Uma visão resumida da organização atual:
 │   └── package.json
 │
 ├── docs/
-├── build_project.sh
-├── build_project.ps1
+├── package.json
+├── build_project.mjs
 └── dist/
     └── shellblocks-server.js
 ```
@@ -317,64 +317,13 @@ O servidor também realiza uma pequena execução de aquecimento durante a inici
 
 ## Build
 
-O projeto possui scripts de build para Linux/macOS e PowerShell:
-
-```text
-build_project.sh
-build_project.ps1
-```
-
-No Linux/macOS:
+Entre na raiz do projeto e execute:
 
 ```sh
-./build_project.sh
+npm run build
 ```
 
-O processo principal possui três etapas.
-
-### 1. Build do frontend
-
-As dependências são instaladas e o Vite compila a aplicação.
-
-O plugin Single File utilizado pelo projeto consolida a SPA em:
-
-```text
-frontend/dist/index.html
-```
-
-Esse arquivo contém o frontend necessário para executar a aplicação.
-
-### 2. Integração com o backend
-
-O HTML compilado é copiado para uma área intermediária de build do backend:
-
-```text
-backend/build/frontend/index.html
-```
-
-O backend importa esse arquivo diretamente:
-
-```ts
-import frontendPage from "../build/frontend/index.html";
-```
-
-As rotas que não correspondem à API recebem esse HTML, permitindo que o mesmo processo Node hospede a SPA.
-
-### 3. Build do backend
-
-O backend é compilado e empacotado em:
-
-```text
-backend/dist/server.js
-```
-
-O script de build copia então esse resultado para o diretório de distribuição do projeto:
-
-```text
-dist/shellblocks-server.js
-```
-
-O artefato final da aplicação é, portanto:
+O build gera o artefato final da aplicação:
 
 ```text
 ./dist/shellblocks-server.js

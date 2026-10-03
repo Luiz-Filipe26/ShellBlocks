@@ -29,11 +29,8 @@ jobs:
           cache: "npm"
           cache-dependency-path: '**/package-lock.json'
 
-      - name: Dar permissão de execução ao script
-        run: chmod +x build_project.sh
-
       - name: Executar Build Completo
-        run: ./build_project.sh
+        run: npm run build
 
       - name: Verificar Artefato Gerado
         run: |

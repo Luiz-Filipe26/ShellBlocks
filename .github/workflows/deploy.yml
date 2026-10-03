@@ -25,10 +25,7 @@ jobs:
           cache-dependency-path: "**/package-lock.json"
 
       - name: Executar Build Completo
-        run: |
-          set -euo pipefail
-          chmod +x build_project.sh
-          ./build_project.sh
+        run: npm run build
 
       - name: Configurar SSH
         env:
