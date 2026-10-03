@@ -9,7 +9,7 @@
         "test:watch": "vitest",
         "type-check:test": "tsc --noEmit -p tsconfig.test.json",
         "type-check": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
-        "build": "npm run type-check && vite build",
+        "build": "vite build",
         "preview": "vite preview"
     },
     "devDependencies": {
@@ -22,11 +22,8 @@
         "vitest": "^4.1.11"
     },
     "dependencies": {
-        "@shellblocks/shared": "file:../shared",
+        "@shellblocks/shared": "0.0.0",
         "ajv": "^8.20.0",
         "blockly": "^12.5.1"
-    },
-    "overrides": {
-        "ws": "^8.21.0"
     }
 }

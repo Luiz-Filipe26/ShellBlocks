@@ -22,9 +22,18 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: "**/package-lock.json"
+          cache-dependency-path: "package-lock.json"
 
-      - name: Executar Build Completo
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Verificar tipos
+        run: npm run type-check
+
+      - name: Executar testes
+        run: npm test
+
+      - name: Gerar artefato
         run: npm run build
 
       - name: Configurar SSH

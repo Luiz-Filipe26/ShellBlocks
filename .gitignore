@@ -1,5 +1,6 @@
 # Artefatos finais do projeto
 /dist/
+/node_modules/
 
 # Arquivos de controle pessoal
 TODO.md

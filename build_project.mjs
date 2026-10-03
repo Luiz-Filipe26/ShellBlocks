@@ -29,11 +29,7 @@ async function buildProject() {
     await mkdir(join(projectRoot, "backend/build/frontend"), { recursive: true });
     await mkdir(join(projectRoot, "dist"), { recursive: true });
 
-    console.log("--- Instalando dependências do package compartilhado ---");
-    runNpm("shared", ["ci", "--silent", "--no-fund"]);
-
     console.log("--- [1/3] Compilando o Frontend (Single File) ---");
-    runNpm("frontend", ["install", "--silent", "--no-fund"]);
     runNpm("frontend", ["run", "build", "--silent"]);
 
     console.log("--- [2/3] Integrando artefatos do Frontend ao Backend ---");
@@ -43,7 +39,6 @@ async function buildProject() {
     );
 
     console.log("--- [3/3] Gerando artefato final do servidor (Bundler) ---");
-    runNpm("backend", ["install", "--silent", "--no-fund"]);
     runNpm("backend", ["run", "build", "--silent"]);
     await copyFile(join(projectRoot, "backend/dist/server.js"), join(projectRoot, artifactPath));
 

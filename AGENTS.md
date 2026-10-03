@@ -176,9 +176,9 @@ In particular, `backend/build/frontend/index.html`, `backend/dist/server.js` and
 
 ## Build, CI/CD, Deployment and Verification
 
-The frontend and backend are separate npm packages.
-
-Use the scripts defined in their respective `package.json` files.
+The root npm package manages `shared`, `frontend` and `backend` as workspaces.
+Install dependencies from the repository root with `npm install` or `npm ci`.
+Workspace-specific scripts remain in each package's `package.json`.
 
 The canonical full-project build is:
 
@@ -187,7 +187,10 @@ npm run build
 ```
 
 Run it from the repository root. It is used both locally and by GitHub Actions.
-The orchestration is maintained in `build_project.mjs`.
+The orchestration is maintained in `build_project.mjs` and assumes dependencies
+have already been installed. Run `npm run type-check` and `npm test` separately
+when validating changes. The test command includes Docker-backed integration
+tests.
 
 ### Automated Builds and Releases
 

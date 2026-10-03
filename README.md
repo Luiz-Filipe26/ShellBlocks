@@ -317,7 +317,14 @@ O servidor também realiza uma pequena execução de aquecimento durante a inici
 
 ## Build
 
-Entre na raiz do projeto e execute:
+Na primeira preparação do projeto, ou quando as dependências mudarem, instale-as
+na raiz:
+
+```sh
+npm install
+```
+
+Depois, gere o artefato quando necessário:
 
 ```sh
 npm run build

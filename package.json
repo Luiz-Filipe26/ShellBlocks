@@ -1,7 +1,17 @@
 {
-    "name": "shellblocks-build",
+    "name": "shellblocks-app",
     "private": true,
+    "workspaces": [
+        "shared",
+        "frontend",
+        "backend"
+    ],
     "scripts": {
-        "build": "node build_project.mjs"
+        "build": "node build_project.mjs",
+        "type-check": "npm run type-check --workspaces --if-present && npm run type-check:test --workspaces --if-present",
+        "test": "npm run test --workspaces --if-present"
+    },
+    "overrides": {
+        "ws": "^8.21.0"
     }
 }
