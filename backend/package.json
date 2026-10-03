@@ -7,7 +7,7 @@
     "scripts": {
         "dev": "tsx watch --env-file-if-exists=.env --include src/docker/Dockerfile.sandbox --include src/docker/runner.sandbox.js src/devServer.ts",
         "test": "npm run test:all",
-        "test:quick": "vitest run --exclude tests/integration/**",
+        "test:quick": "vitest run --exclude \"tests/integration/**\"",
         "test:integration": "vitest run tests/integration",
         "test:all": "npm run test:quick && npm run test:integration",
         "type-check": "tsc --noEmit",
