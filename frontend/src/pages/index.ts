@@ -9,6 +9,7 @@ import {
     setupLevelSelector,
 } from "./features/session/levelLoader";
 import { setupScriptHotReloader } from "./features/execution/scriptHotReloader";
+import { setupShellDownloadButton } from "./features/execution/scriptDownload";
 import { setupOutputClearButton } from "./features/execution/executionOutput";
 import { runScript } from "./features/execution/scriptRunner";
 import * as Blockly from "blockly";
@@ -101,7 +102,8 @@ async function start(): Promise<void> {
             (message) => Logger.log(message, ShellBlocks.LogLevel.WARN))
         : null;
 
-    setupScriptHotReloader(workspace, pageElements.codeOutput);
+    const getCurrentShell = setupScriptHotReloader(workspace, pageElements.codeOutput);
+    setupShellDownloadButton(pageElements.btnDownloadShell, getCurrentShell);
     for (const area of [pageElements.advancedControls, pageElements.systemLogPanel]) {
         area.addEventListener("toggle", () => Blockly.svgResize(workspace));
     }

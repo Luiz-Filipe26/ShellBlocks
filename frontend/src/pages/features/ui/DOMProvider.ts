@@ -10,6 +10,7 @@ const pageElements = {
     workspaceMaximizeIcon: getElement<HTMLImageElement>("workspace-maximize-icon"),
     workspaceMinimizeIcon: getElement<HTMLImageElement>("workspace-minimize-icon"),
     editorToolbar: getElement<HTMLElement>("editor-toolbar"),
+    btnDownloadShell: getElement<HTMLButtonElement>("btn-download-shell"),
     codeOutput: getElement<HTMLPreElement>("code-output"),
     cliOutput: getElement<HTMLDivElement>("cli-output"),
     runBtn: getElement<HTMLButtonElement>("run-btn"),

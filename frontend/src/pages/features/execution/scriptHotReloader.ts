@@ -1,7 +1,7 @@
 import * as ShellBlocks from "shellblocks";
 import * as Blockly from "blockly";
 import * as Logger from "../ui/systemLogger";
-import { generateShellScript } from "@/core/shellblocks/generation/scriptGenerator";
+import { generateCurrentShell } from "./generatedShell";
 
 const MIN_INTERVAL_MS = 700;
 
@@ -11,8 +11,8 @@ let pendingTimer: number | null = null;
 export function setupScriptHotReloader(
     workspace: Blockly.WorkspaceSvg,
     codeOutput: HTMLPreElement,
-): void {
-    updateScriptOutput(workspace, codeOutput);
+): () => string | null {
+    let currentShellScript = updateScriptOutput(workspace, codeOutput);
 
     workspace.addChangeListener((event) => {
         if (event.isUiEvent) return;
@@ -25,7 +25,7 @@ export function setupScriptHotReloader(
                 clearTimeout(pendingTimer);
                 pendingTimer = null;
             }
-            updateScriptOutput(workspace, codeOutput);
+            currentShellScript = updateScriptOutput(workspace, codeOutput);
             return;
         }
 
@@ -34,33 +34,34 @@ export function setupScriptHotReloader(
 
         pendingTimer = window.setTimeout(() => {
             pendingTimer = null;
-            updateScriptOutput(workspace, codeOutput);
+            currentShellScript = updateScriptOutput(workspace, codeOutput);
         }, wait);
     });
+
+    return () => currentShellScript;
 }
 
 function updateScriptOutput(
     workspace: Blockly.WorkspaceSvg,
     codeOutput: HTMLPreElement,
-): void {
+): string | null {
     lastStartTime = Date.now();
 
-    const ast = ShellBlocks.serializeWorkspaceToAST(workspace);
-
-    if (!ast) {
+    const generated = generateCurrentShell(workspace);
+    if (generated.kind === "empty") {
         codeOutput.textContent =
             '// Monte seu script dentro do bloco "Script Principal"';
-        return;
+        return null;
     }
 
-    try {
-        const script = generateShellScript(ast);
-        codeOutput.textContent = script;
-    } catch (error) {
+    if (generated.kind === "error") {
         codeOutput.textContent = "// Erro ao gerar script localmente";
         Logger.log(
             "Erro interno na geração do script",
             ShellBlocks.LogLevel.ERROR,
         );
+        return null;
     }
+    codeOutput.textContent = generated.content;
+    return generated.content;
 }

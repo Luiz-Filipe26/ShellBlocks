@@ -55,7 +55,7 @@ it("o bootstrap reutiliza um controller nas importações e no reset, consultand
         "instructionsSidebar", "btnToggleSidebar", "systemLogContainer", "blocklyArea", "onboardingInterceptor",
         "onboardingNotice", "btnHelpGuide", "runBtn", "btnClearAssembly", "btnLoadScript", "btnLoadDefs", "btnResetDefs",
         "advancedControls", "systemLogPanel", "cliOutput", "clearBtn", "btnSaveScript", "btnLoadGame", "btnMaximizeWorkspace",
-        "workspaceMaximizeIcon", "workspaceMinimizeIcon", "appHeader", "editorToolbar"]) state.elements[name] = new EventTarget();
+        "workspaceMaximizeIcon", "workspaceMinimizeIcon", "appHeader", "editorToolbar", "btnDownloadShell"]) state.elements[name] = new EventTarget();
     state.elements.levelSelect = select;
     state.definitions = parseCliDefinitions(rawDefinitions).definitions;
     state.data = mission("ls");
