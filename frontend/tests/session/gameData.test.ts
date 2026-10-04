@@ -73,14 +73,15 @@ function uploadJson(content: string, onSuccess: (data: ReturnType<typeof parseGa
 
 describe("parseGameData", () => {
     it("aceita o asset oficial e preserva propriedades extras, strings vazias e níveis fora da ordem", () => {
-        expect(parseGameData(defaultGameData)).toBe(defaultGameData);
+        expect(parseGameData(defaultGameData)).toMatchObject(defaultGameData);
+        expect(parseGameData(defaultGameData).levels.every((level) => Array.isArray(level.toolboxGuidance))).toBe(true);
 
         const input = {
             levels: [{ id: "", title: "", summary: "", extra: true }, { id: "draft", title: "" }],
             levelOrder: ["", ""],
             extra: "permitido",
         };
-        expect(parseGameData(input)).toBe(input);
+        expect(parseGameData(input)).toMatchObject({ ...input, levels: input.levels.map((level) => ({ ...level, toolboxGuidance: [] })) });
     });
 
     it.each([
@@ -132,12 +133,12 @@ describe("fronteiras de GameData", () => {
 
         uploadJson(JSON.stringify(input), onSuccess);
 
-        expect(onSuccess).toHaveBeenCalledWith(input);
+        expect(onSuccess).toHaveBeenCalledWith({ ...input, levels: input.levels.map((level) => ({ ...level, toolboxGuidance: [] })) });
         expect(JSON.parse(storage.getItem(STORAGE_KEY)!)).toMatchObject({
             origin: "user",
-            data: input,
+            data: { ...input, levels: input.levels.map((level) => ({ ...level, toolboxGuidance: [] })) },
         });
-        expect(getGameData()).toEqual(input);
+        expect(getGameData()).toMatchObject({ ...input, levels: input.levels.map((level) => ({ ...level, toolboxGuidance: [] })) });
     });
 
     it("rejeita upload inválido sem salvar nem chamar o callback", () => {
@@ -163,7 +164,8 @@ describe("fronteiras de GameData", () => {
             lastUpdated: Date.now(),
         }));
 
-        expect(getGameData()).toBe(defaultGameData);
+        expect(getGameData()).toMatchObject(defaultGameData);
+        expect(getGameData().levels.every((level) => Array.isArray(level.toolboxGuidance))).toBe(true);
         expect(storage.getItem(STORAGE_KEY)).toBeNull();
         expect(log).toHaveBeenCalledWith(
             expect.stringContaining("Níveis locais inválidos foram descartados"),

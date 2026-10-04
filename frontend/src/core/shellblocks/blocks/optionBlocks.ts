@@ -1,3 +1,4 @@
+import { ToolboxOptionDropdown } from "../ui/toolboxOptionDropdown";
 import { TextValueField, valuePlaceholder, valueTooltip } from "../ui/textValueField";
 import * as Blockly from "blockly";
 import * as BlockIDs from "../constants/blockIds";
@@ -177,5 +178,5 @@ function buildOptionDropdown(
         return newValue;
     };
 
-    return new Blockly.FieldDropdown(dropdownPairs, validator);
+    return new ToolboxOptionDropdown(dropdownPairs, validator);
 }

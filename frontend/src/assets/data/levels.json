@@ -7,7 +7,13 @@
             "fullGuideHtml": "<h1>Bem-vindo ao Terminal</h1><p>O terminal é como uma conversa: você escreve um comando, e o computador responde em texto.</p><h3>Sua Ferramenta: ls</h3><p>O comando <strong>ls</strong> (do inglês <em>list</em>) serve para perguntar: <em>'O que tem nesta pasta?'</em></p><div class=\"terminal-display\">$ ls<br>fotos_viagem relatorio.txt</div><h3>Sua Missão</h3><ol><li>Abra a categoria <strong>Diretórios</strong> e arraste o bloco <strong>ls</strong> para o Script Principal.</li><li>Clique no botão <strong>Executar</strong>.</li><li>Observe a lista de arquivos na saída do console.</li></ol>",
             "verificationScript": "if [ -e \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\" ] && grep -q 'relatorio.txt' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\" && grep -q 'fotos_viagem' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then echo 'OK'; exit 0; else echo 'Não encontrei a lista de arquivos. Você executou o bloco ls?'; exit 1; fi",
             "difficulty": "tutorial",
-            "setupScript": "rm -rf * &&\ntouch relatorio.txt &&\ntouch notas_pessoais.txt &&\nmkdir fotos_viagem"
+            "setupScript": "rm -rf * &&\ntouch relatorio.txt &&\ntouch notas_pessoais.txt &&\nmkdir fotos_viagem",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "ls"
+                }
+            ]
         },
         {
             "id": "02_ls_options",
@@ -16,7 +22,19 @@
             "fullGuideHtml": "<h1>Modificando o Comando</h1><p>O <code>ls</code> sozinho funciona, mas podemos alterar <strong>como</strong> ele funciona usando Opções (Flags).</p><h3>O que é uma Opção?</h3><p>Opções modificam como um comando funciona. As opções de <code>ls</code> apresentadas aqui começam com um traço (<code>-</code>).</p><ul><li><code>-l</code> (long): Ativa o modo detalhado (tamanho, datas).</li><li><code>-h</code> (human): Deixa o tamanho legível (Ex: 2.5K em vez de 2560 bytes).</li></ul><div class=\"terminal-display\">$ ls -lh<br>-rw-r--r-- 1 user 2.5K Dez 19 backup.data</div><h3>Sua Missão</h3><ol><li>Arraste o bloco <strong>ls</strong>.</li><li>Adicione um bloco de opção com <strong>-l</strong> e outro com <strong>-h</strong>.</li><li>Execute para ver o tamanho legível do arquivo de backup.</li></ol>",
             "verificationScript": "if grep -q 'backup.data' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then if grep -qE '[0-9]+[KMG]' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then echo 'OK'; exit 0; else echo 'O arquivo apareceu, mas o tamanho não está legível. Você lembrou da opção -h?'; exit 1; fi; else echo 'O arquivo backup.data não foi listado.'; exit 1; fi",
             "difficulty": "tutorial",
-            "setupScript": "rm -rf * &&\ndd if=/dev/zero of=backup.data bs=1024 count=3 2>/dev/null &&\necho 'final' >> backup.data"
+            "setupScript": "rm -rf * &&\ndd if=/dev/zero of=backup.data bs=1024 count=3 2>/dev/null &&\necho 'final' >> backup.data",
+            "toolboxGuidance": [
+                {
+                    "entity": "option",
+                    "commandId": "ls",
+                    "flag": "-l"
+                },
+                {
+                    "entity": "option",
+                    "commandId": "ls",
+                    "flag": "-h"
+                }
+            ]
         },
         {
             "id": "03_mkdir",
@@ -25,7 +43,18 @@
             "fullGuideHtml": "<h1>Ação e Reação (Operandos)</h1><p>Alguns comandos funcionam sozinhos (como o <code>ls</code>). Outros precisam de um <strong>alvo</strong>, chamado de operando.</p><h3>O que é um Operando?</h3><p>É o complemento do verbo. Se o comando é \"Crie uma pasta\", o operando responde \"Com qual nome?\". Diferente de uma opção, ele não ativa uma variação do comando: informa sobre qual valor o comando deve agir.</p><h3>Sua Missão</h3><ol><li>Use o bloco <strong>mkdir</strong> (Make Directory).</li><li>Na subcategoria do <strong>mkdir</strong>, pegue o bloco de operando <strong>Diretórios</strong> e encaixe-o na entrada <strong>Operandos</strong> do comando.</li><li>Digite <code>projetos</code> no campo de texto desse operando.</li><li>Execute para criar sua pasta.</li></ol>",
             "verificationScript": "if [ -d projetos ]; then echo 'OK'; exit 0; elif [ -d Projetos ] || [ -d PROJETOS ]; then echo 'Atenção: O Linux diferencia maiúsculas de minúsculas. Você criou Projetos, mas pedimos projetos.'; exit 1; else echo 'A pasta projetos não foi encontrada. Você preencheu o operando com o nome correto?'; exit 1; fi",
             "difficulty": "tutorial",
-            "setupScript": "rm -rf *"
+            "setupScript": "rm -rf *",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "mkdir"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "mkdir",
+                    "operandId": "directories"
+                }
+            ]
         },
         {
             "id": "04_cd",
@@ -34,7 +63,18 @@
             "fullGuideHtml": "<h1>Navegação (GPS)</h1><p>Criar a pasta não significa que você está <em>dentro</em> dela. O terminal tem um 'foco' chamado diretório de trabalho.</p><h3>O Comando cd</h3><p>Significa <em>Change Directory</em> (Mudar Diretório). É o equivalente a dar um clique duplo em uma pasta no Windows.</p><h3>Sua Missão</h3><p>A pasta <code>projetos</code> já está preparada para esta missão. Use o bloco <strong>cd</strong> com o operando <code>projetos</code> para torná-la seu diretório de trabalho.</p><p><em>Dica: O comando cd normalmente não mostra texto. A verificação da missão confirmará se você entrou na pasta correta.</em></p>",
             "verificationScript": "if [ \"$SHELLBLOCKS_FINAL_CWD\" = '/home/aluno/projetos' ]; then echo 'OK'; exit 0; else echo 'Você ainda não está dentro da pasta projetos.'; exit 1; fi",
             "difficulty": "tutorial",
-            "setupScript": "rm -rf * &&\nmkdir -p projetos"
+            "setupScript": "rm -rf * &&\nmkdir -p projetos",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "cd"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "cd",
+                    "operandId": "directory"
+                }
+            ]
         },
         {
             "id": "05_cp",
@@ -43,7 +83,23 @@
             "fullGuideHtml": "<h1>A Arte de Copiar</h1><p>O comando <strong>cp</strong> (Copy) é o nosso copiador. Diferente do 'Mover', o arquivo original permanece lá.</p><h3>Dois Operandos</h3><p>Este comando precisa de duas informações, nesta ordem exata:</p><ol><li><strong>Origem:</strong> O que você quer copiar? (<code>plano.txt</code>)</li><li><strong>Destino:</strong> Qual será o nome da cópia? (<code>backup.txt</code>)</li></ol><h3>Sua Missão</h3><p>Configure o bloco <strong>cp</strong> para copiar o arquivo <code>plano.txt</code> e criar o <code>backup.txt</code>.</p>",
             "verificationScript": "if [ ! -f plano.txt ]; then\n    echo 'O arquivo original plano.txt deve permanecer após a cópia.'; exit 1\nfi\nif [ ! -f backup.txt ]; then\n    echo 'O arquivo backup.txt não foi criado.'; exit 1\nfi\nif ! cmp -s plano.txt backup.txt; then\n    echo 'backup.txt deve conter uma cópia completa de plano.txt.'; exit 1\nfi\necho 'OK'",
             "difficulty": "tutorial",
-            "setupScript": "rm -rf * &&\necho 'Dominar o mundo' > plano.txt"
+            "setupScript": "rm -rf * &&\necho 'Dominar o mundo' > plano.txt",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "cp"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "cp",
+                    "operandId": "source"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "cp",
+                    "operandId": "destination"
+                }
+            ]
         },
         {
             "id": "06_cat",
@@ -52,7 +108,18 @@
             "fullGuideHtml": "<h1>Arquivos têm Conteúdo</h1><p>Até agora, os arquivos eram apenas nomes na lista. Mas eles guardam informações.</p><h3>O Comando cat</h3><p>O nome vem de <em>Concatenate</em> (Concatenar). Ele pega todo o texto de um arquivo e joga na tela.</p><h3>Sua Missão</h3><p>Interceptamos uma mensagem. Use o bloco <strong>cat</strong> para ler o arquivo <code>mensagem_secreta.txt</code> e descobrir a senha.</p>",
             "verificationScript": "if grep -q 'BATATA-123' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then echo 'OK'; exit 0; else echo 'O conteúdo da mensagem não apareceu na tela. Você leu o arquivo certo?'; exit 1; fi",
             "difficulty": "tutorial",
-            "setupScript": "rm -rf * &&\necho 'A senha do cofre é: BATATA-123' > mensagem_secreta.txt &&\ntouch lixo.txt"
+            "setupScript": "rm -rf * &&\necho 'A senha do cofre é: BATATA-123' > mensagem_secreta.txt &&\ntouch lixo.txt",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "cat"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "cat",
+                    "operandId": "file"
+                }
+            ]
         },
         {
             "id": "07_grep",
@@ -61,7 +128,23 @@
             "fullGuideHtml": "<h1>Agulha no Palheiro</h1><p>Ler arquivos pequenos com <code>cat</code> é fácil. Mas e se o arquivo tiver 1.000 linhas?</p><h3>O Comando grep</h3><p>Ele funciona como uma busca. Você diz o que quer procurar, e ele mostra <strong>apenas</strong> as linhas que contêm aquele texto.</p><h3>Sua Missão</h3><p>O arquivo <code>server.log</code> está cheio de mensagens. Use o <strong>grep</strong> para encontrar apenas a linha com a palavra <strong>ERRO</strong>.</p>",
             "verificationScript": "resultado=$(sed -E 's/^[0-9]+://' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\")\nif [ \"$resultado\" = 'ERRO: Falha crítica no disco' ]; then\n    echo 'OK'; exit 0\nfi\necho 'Mostre somente a linha completa que contém ERRO, sem as mensagens INFO ou WARN.'\nexit 1",
             "difficulty": "tutorial",
-            "setupScript": "rm -rf * &&\necho 'INFO: Sistema iniciou' > server.log &&\necho 'WARN: Uso de memória alto' >> server.log &&\necho 'ERRO: Falha crítica no disco' >> server.log &&\necho 'INFO: Tudo normal' >> server.log"
+            "setupScript": "rm -rf * &&\necho 'INFO: Sistema iniciou' > server.log &&\necho 'WARN: Uso de memória alto' >> server.log &&\necho 'ERRO: Falha crítica no disco' >> server.log &&\necho 'INFO: Tudo normal' >> server.log",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "grep"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "grep",
+                    "operandId": "pattern"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "grep",
+                    "operandId": "files"
+                }
+            ]
         },
         {
             "id": "08_redirect",
@@ -70,7 +153,13 @@
             "fullGuideHtml": "<h1>Persistência de Dados</h1><p>Normalmente, o resultado de um comando aparece na tela e desaparece logo depois. E se quisermos salvar essa resposta?</p><h3>O Operador Maior Que (>)</h3><p>Esse símbolo pega o resultado do comando encaixado no lado esquerdo e <strong>salva dentro do arquivo</strong> indicado à direita.</p><div class=\"terminal-display\">$ ls > inventario.txt</div><h3>Sua Missão</h3><ol><li>Abra a categoria <strong>Fluxo</strong> e coloque o operador <strong>&gt; (Redirecionar)</strong> no Script Principal.</li><li>Encaixe o comando <strong>ls</strong> dentro do primeiro espaço do operador (slot A).</li><li>No campo de texto ao lado de <code>&gt;</code>, digite o destino <code>inventario.txt</code>.</li><li>Execute para salvar a lista de arquivos!</li></ol>",
             "verificationScript": "if [ ! -f inventario.txt ]; then\n    echo 'O arquivo inventario.txt não foi criado.'; exit 1\nfi\nfor arquivo in caixa_A.doc caixa_B.doc; do\n    if ! awk -v arquivo=\"$arquivo\" '{ for (i = 1; i <= NF; i++) if ($i == arquivo) found = 1 } END { exit !found }' inventario.txt; then\n        echo \"A listagem em inventario.txt deve incluir $arquivo.\"; exit 1\n    fi\ndone\necho 'OK'",
             "difficulty": "tutorial",
-            "setupScript": "rm -rf * &&\ntouch caixa_A.doc &&\ntouch caixa_B.doc"
+            "setupScript": "rm -rf * &&\ntouch caixa_A.doc &&\ntouch caixa_B.doc",
+            "toolboxGuidance": [
+                {
+                    "entity": "operator",
+                    "operatorId": "redirect_out"
+                }
+            ]
         },
         {
             "id": "09_pipe",
@@ -79,7 +168,13 @@
             "fullGuideHtml": "<h1>Encanamento de Dados (|)</h1><p>No terminal, você pode conectar comandos para criar soluções poderosas usando o <strong>| (Pipe)</strong>.</p><h3>Como o Pipe funciona?</h3><p>Ele funciona como um cano invisível: conecta a saída de um comando à entrada de outro. Assim, o segundo comando pode trabalhar com o texto recebido sem que você precise salvá-lo antes em um arquivo intermediário. Essa composição também funciona com outros comandos que produzem texto.</p><div class=\"terminal-display\">$ cat nomes.txt | grep Ana</div><h3>Sua Missão</h3><ol><li>Abra a categoria <strong>Fluxo</strong> e coloque o operador <strong>| (Pipe)</strong> no Script Principal.</li><li>No slot A, à esquerda, encaixe <strong>cat</strong> com o operando <code>nomes.txt</code>.</li><li>No slot B, à direita de <code>|</code>, encaixe <strong>grep</strong> apenas com o padrão <code>Ana</code>. O texto de entrada chegará pelo pipe, portanto não adicione um arquivo ao grep.</li><li>Execute para ver somente os nomes que contêm Ana.</li></ol>",
             "verificationScript": "python3 - <<'CHECK_PIPE'\nimport os\nfrom pathlib import Path\nimport shlex\nimport sys\n\nsource = Path(os.environ['SHELLBLOCKS_USER_SCRIPT_FILE']).read_text()\nlexer = shlex.shlex(source, posix=True, punctuation_chars='|;&()<>\\n')\nlexer.whitespace = ' \\t\\r'\nlexer.whitespace_split = True\ntry:\n    tokens = list(lexer)\nexcept ValueError:\n    print('Monte um pipe entre cat nomes.txt e grep com um padrão de busca.')\n    sys.exit(1)\n\n# Check the composition without requiring one spelling of the entire script.\nboundaries = set('|;&()<>\\n')\ndef boundary(token):\n    return all(character in boundaries for character in token)\n\ndef names_file(argument):\n    return os.path.abspath(argument) == '/home/aluno/nomes.txt'\n\nhas_pipe = False\nfor index, token in enumerate(tokens):\n    if token != '|':\n        continue\n    start, end = index, index + 1\n    while start > 0 and not boundary(tokens[start - 1]):\n        start -= 1\n    while end < len(tokens) and not boundary(tokens[end]):\n        end += 1\n    left, right = tokens[start:index], tokens[index + 1:end]\n    if not left or not right or left[0] != 'cat' or right[0] != 'grep':\n        continue\n    arguments = [argument for argument in right[1:] if not argument.startswith('-')]\n    if any(names_file(argument) for argument in left[1:]) and len(arguments) == 1:\n        has_pipe = True\n        break\nif not has_pipe:\n    print('Use cat para ler nomes.txt e envie sua saída pelo pipe ao grep, sem dar um arquivo ao grep.')\n    sys.exit(1)\nCHECK_PIPE\nif [ \"$?\" -ne 0 ]; then exit 1; fi\nresultado=$(sed -E 's/^[0-9]+://; s/^[[:blank:]]*[0-9]+[[:blank:]]+//' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\")\nif [ \"$resultado\" = \"$(printf 'Ana Maria\\nAna Paula')\" ]; then\n    echo 'OK'; exit 0\nfi\necho 'O pipe deve mostrar somente as duas linhas que contêm Ana.'\nexit 1",
             "difficulty": "tutorial",
-            "setupScript": "rm -rf * &&\necho 'Carlos' > nomes.txt &&\necho 'Ana Maria' >> nomes.txt &&\necho 'Pedro' >> nomes.txt &&\necho 'Ana Paula' >> nomes.txt"
+            "setupScript": "rm -rf * &&\necho 'Carlos' > nomes.txt &&\necho 'Ana Maria' >> nomes.txt &&\necho 'Pedro' >> nomes.txt &&\necho 'Ana Paula' >> nomes.txt",
+            "toolboxGuidance": [
+                {
+                    "entity": "operator",
+                    "operatorId": "pipe"
+                }
+            ]
         },
         {
             "id": "10_ping",
@@ -88,7 +183,23 @@
             "fullGuideHtml": "<h1>O Infinito e Além</h1><p>No Linux, o comando <strong>ping</strong> roda para sempre! Se você não limitá-lo, ele nunca para.</p><h3>A Opção de Contagem (-c)</h3><p>Para evitar que o terminal fique preso eternamente, usamos a opção <strong>-c</strong> (count) para definir quantas vezes queremos testar.</p><h3>Sua Missão</h3><p>Use o bloco <strong>ping</strong>:</p><ol><li>Encaixe a opção <strong>-c</strong> no comando <strong>ping</strong> e preencha seu argumento <strong>contagem</strong> com <strong>4</strong>.</li><li>No operando <strong>Endereço</strong>, digite <code>127.0.0.1</code>.</li></ol>",
             "verificationScript": "respostas=$(grep -c '^64 bytes from 127\\.0\\.0\\.1:' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\")\nif [ \"$respostas\" = 4 ] && grep -Eq '^4 packets transmitted, 4 received,' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then\n    echo 'OK'; exit 0\nfi\necho 'Use a contagem 4 para enviar quatro solicitações a 127.0.0.1 e receber as quatro respostas.'\nexit 1",
             "difficulty": "tutorial",
-            "setupScript": "rm -rf *"
+            "setupScript": "rm -rf *",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "ping"
+                },
+                {
+                    "entity": "option",
+                    "commandId": "ping",
+                    "flag": "-c"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "ping",
+                    "operandId": "host"
+                }
+            ]
         },
         {
             "id": "11_curl",
@@ -97,7 +208,18 @@
             "fullGuideHtml": "<h1>O Navegador em Texto</h1><p>O comando <strong>curl</strong> busca o conteúdo de endereços (URLs) e mostra na tela.</p><h3>Sua Missão</h3><p>Existe um mini-servidor rodando neste computador na porta 8000. Use o <strong>curl</strong> para ler o conteúdo deste endereço:</p><code>http://127.0.0.1:8000/sucesso.txt</code>",
             "verificationScript": "if grep -Fxq 'PARABENS! VOCE COMPLETOU O TUTORIAL!' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then\n    echo 'OK'; exit 0\nfi\necho 'O conteúdo esperado não apareceu na saída. Confira a URL solicitada e a resposta do curl.'\nexit 1",
             "difficulty": "tutorial",
-            "setupScript": "pkill -9 -f http.server || true &&\necho 'PARABENS! VOCE COMPLETOU O TUTORIAL!' > sucesso.txt &&\n(python3 -m http.server 8000 --bind 127.0.0.1 > /dev/null 2>&1 & true) &&\nsleep 3"
+            "setupScript": "pkill -9 -f http.server || true &&\necho 'PARABENS! VOCE COMPLETOU O TUTORIAL!' > sucesso.txt &&\n(python3 -m http.server 8000 --bind 127.0.0.1 > /dev/null 2>&1 & true) &&\nsleep 3",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "curl"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "curl",
+                    "operandId": "url"
+                }
+            ]
         },
         {
             "id": "12_ps",
@@ -106,7 +228,18 @@
             "fullGuideHtml": "<h1>O Sistema está Vivo</h1><p>Mesmo quando você não digita nada, o computador está rodando vários programas invisíveis.</p><h3>O Comando ps</h3><p>O comando <strong>ps</strong> (Process Status) lista os programas que estão ativos no momento. É como o Gerenciador de Tarefas do Windows.</p><h3>Sua Missão</h3><p>Existe um processo chamado <code>servidor_oculto</code> rodando agora. Use o comando <strong>ps</strong> para encontrá-lo na lista de processos ativos.</p>",
             "verificationScript": "pid=$(cat /tmp/shellblocks-level-12.pid)\nif awk -v pid=\"$pid\" '$1 == pid && /(^|[[:space:]])servidor_oculto([[:space:]]|$)/ { found = 1 } END { exit !found }' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then\n    echo 'OK'; exit 0\nfi\necho 'A listagem deve mostrar o processo servidor_oculto e seu PID. Use ps para encontrá-lo.'\nexit 1",
             "difficulty": "tutorial",
-            "setupScript": "pkill -f servidor_oculto || true\nrm -rf *\nsh -c 'sleep 200; :' servidor_oculto > /dev/null 2>&1 &\npid=$!\nprintf '%s\\n' \"$pid\" > /tmp/shellblocks-level-12.pid\nfor tentativa in $(seq 1 100); do\n    if tr '\\0' ' ' < \"/proc/$pid/cmdline\" 2>/dev/null | grep -q servidor_oculto; then\n        exit 0\n    fi\n    sleep 0.01\ndone\necho 'Não foi possível preparar o processo servidor_oculto.' >&2\nexit 1"
+            "setupScript": "pkill -f servidor_oculto || true\nrm -rf *\nsh -c 'sleep 200; :' servidor_oculto > /dev/null 2>&1 &\npid=$!\nprintf '%s\\n' \"$pid\" > /tmp/shellblocks-level-12.pid\nfor tentativa in $(seq 1 100); do\n    if tr '\\0' ' ' < \"/proc/$pid/cmdline\" 2>/dev/null | grep -q servidor_oculto; then\n        exit 0\n    fi\n    sleep 0.01\ndone\necho 'Não foi possível preparar o processo servidor_oculto.' >&2\nexit 1",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "ps"
+                },
+                {
+                    "entity": "option",
+                    "commandId": "ps",
+                    "flag": "aux"
+                }
+            ]
         },
         {
             "id": "13_background",
@@ -115,7 +248,13 @@
             "fullGuideHtml": "<h1>Multitarefa (&)</h1><p>Alguns comandos demoram muito ou nunca param de rodar (como o <code>ping</code>). Para não travar o terminal, podemos enviá-los para o segundo plano.</p><h3>O Operador E-Comercial (&)</h3><p>O operador acrescenta <code>&</code> ao comando colocado dentro dele e pede ao sistema que o execute em segundo plano.</p><h3>Sua Missão</h3><ol><li>Abra a categoria <strong>Fluxo</strong> e coloque o operador <strong>background (&)</strong> no Script Principal.</li><li>Configure o comando <code>ping</code> com o destino <code>127.0.0.1</code>.</li><li>Encaixe esse comando dentro do slot A do operador de background.</li><li>Execute. O sistema vai confirmar que o processo começou a rodar em segundo plano!</li></ol>",
             "verificationScript": "for status in /proc/[0-9]*/status; do\n    diretorio=${status%/status}\n    if grep -qx ping \"$diretorio/comm\" 2>/dev/null &&\n       awk '$1 == \"State:\" && $2 != \"Z\" { active = 1 } END { exit !active }' \"$status\" 2>/dev/null &&\n       tr '\\0' '\\n' < \"$diretorio/cmdline\" 2>/dev/null | grep -Fxq '127.0.0.1'; then\n        echo 'OK'; exit 0\n    fi\ndone\necho 'Não há um ping ativo para 127.0.0.1 após o script. Execute-o em segundo plano; uma contagem muito curta pode fazê-lo terminar antes da verificação.'\nexit 1",
             "difficulty": "training",
-            "setupScript": "rm -rf *"
+            "setupScript": "rm -rf *",
+            "toolboxGuidance": [
+                {
+                    "entity": "operator",
+                    "operatorId": "background"
+                }
+            ]
         },
         {
             "id": "14_organizar",

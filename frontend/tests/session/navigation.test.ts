@@ -8,9 +8,9 @@ import * as BlockIDs from "@/core/shellblocks/constants/blockIds";
 
 const game: GameData = {
     levels: [
-        { id: "first", title: "Primeiro", verificationScript: "verify" },
-        { id: "second", title: "Segundo", verificationScript: "verify" },
-        { id: "last", title: "Último", verificationScript: "verify" },
+        { id: "first", title: "Primeiro", verificationScript: "verify", toolboxGuidance: [] },
+        { id: "second", title: "Segundo", verificationScript: "verify", toolboxGuidance: [] },
+        { id: "last", title: "Último", verificationScript: "verify", toolboxGuidance: [] },
     ],
     levelOrder: ["second", "first", "last"],
 };
@@ -69,7 +69,7 @@ describe("contexto e conclusão das atividades", () => {
     });
 
     it("não oferece avanço antes do sucesso nem conclui Sandbox ou nível sem verificação", () => {
-        const input = { ...game, levels: [...game.levels, { id: "unchecked", title: "Sem verificação" }], levelOrder: [...game.levelOrder, "unchecked"] };
+        const input = { ...game, levels: [...game.levels, { id: "unchecked", title: "Sem verificação", toolboxGuidance: [] }], levelOrder: [...game.levelOrder, "unchecked"] };
         loader.setupLevelSelector(input, ui.deps, false);
         loader.markLevelCompleted("sandbox", ui.deps, false);
         expect(ui.elements.missionCompletion.hidden).toBe(true);

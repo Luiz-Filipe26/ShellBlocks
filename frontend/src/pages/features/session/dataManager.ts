@@ -67,7 +67,7 @@ export function getGameData(): GameData {
     const rawGameData = resourceResolver.resolveResource(GAME_DATA_CONFIG);
 
     try {
-        return parseGameData(rawGameData);
+        return parseGameData(rawGameData, rawGameData === defaultGameData ? parseDefinitions(defaultDefinitions) : undefined);
     } catch (error) {
         if (rawGameData === defaultGameData) throw error;
 
@@ -76,7 +76,7 @@ export function getGameData(): GameData {
             ShellBlocks.LogLevel.WARN,
         );
         resourceResolver.clearResource(GAME_DATA_CONFIG);
-        return parseGameData(defaultGameData);
+        return parseGameData(defaultGameData, parseDefinitions(defaultDefinitions));
     }
 }
 

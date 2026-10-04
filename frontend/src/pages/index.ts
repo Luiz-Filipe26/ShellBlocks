@@ -1,7 +1,10 @@
+import { setupToolboxGuidance } from "./features/ui/toolboxGuidanceController";
+import { OverlayToolbox } from "@/core/shellblocks/workspace/overlayToolbox";
 import "blockly/blocks";
 import "blockly/msg/pt";
 import {
     getCurrentLevelId,
+    getCachedLevelData,
     markLevelCompleted,
     setupLevelSelector,
 } from "./features/session/levelLoader";
@@ -91,12 +94,18 @@ async function start(): Promise<void> {
     });
     setupHelpGuide(pageElements, onboarding.refresh);
     setupLevelSelector(gameData, selectorDependencies, IS_EXPERIMENT_MODE);
+    const toolbox = workspace.getToolbox();
+    const toolboxGuidance = toolbox instanceof OverlayToolbox
+        ? setupToolboxGuidance(toolbox, pageElements.levelSelect,
+            () => getCachedLevelData(getCurrentLevelId()), getDefinitions,
+            (message) => Logger.log(message, ShellBlocks.LogLevel.WARN))
+        : null;
 
     setupScriptHotReloader(workspace, pageElements.codeOutput);
     for (const area of [pageElements.advancedControls, pageElements.systemLogPanel]) {
         area.addEventListener("toggle", () => Blockly.svgResize(workspace));
     }
-    registerButtonListeners(workspace, selectorDependencies);
+    registerButtonListeners(workspace, selectorDependencies, toolboxGuidance?.refresh);
     setupInitialChoice(pageElements);
     setupWorkspaceMaximization({
         surface: pageElements.blocklyArea,
@@ -125,6 +134,7 @@ function enforceExperimentRestrictions() {
 function registerButtonListeners(
     workspace: Blockly.WorkspaceSvg,
     selectorDependencies: SelectorDependencies,
+    refreshToolboxGuidance?: () => void,
 ) {
     pageElements.runBtn.addEventListener("click", async () => {
         runScript(workspace, pageElements, getCurrentLevelId(), (levelId) =>
@@ -178,6 +188,7 @@ function registerButtonListeners(
                     selectorDependencies,
                     IS_EXPERIMENT_MODE,
                 );
+                refreshToolboxGuidance?.();
             });
         }
     });
@@ -186,6 +197,7 @@ function registerButtonListeners(
         PersistenceManager.uploadGameData(workspace, (data) => {
             gameData = data;
             setupLevelSelector(gameData, selectorDependencies, IS_EXPERIMENT_MODE);
+            refreshToolboxGuidance?.();
         });
     });
 }

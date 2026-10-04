@@ -33,9 +33,9 @@ describe("execução e conclusão da missão", () => {
         ui = createSelectorDependencies();
         loader.setupLevelSelector({
             levels: [
-                { id: "a", title: "Missão A", verificationScript: "verify a" },
-                { id: "b", title: "Missão B", verificationScript: "verify b" },
-                { id: "unchecked", title: "Sem verificação" },
+                { id: "a", title: "Missão A", verificationScript: "verify a", toolboxGuidance: [] },
+                { id: "b", title: "Missão B", verificationScript: "verify b", toolboxGuidance: [] },
+                { id: "unchecked", title: "Sem verificação", toolboxGuidance: [] },
             ],
             levelOrder: ["a", "b", "unchecked"],
         }, ui.deps, false);
@@ -149,7 +149,7 @@ describe("execução e conclusão da missão", () => {
         fetchMock.mockReturnValue(new Promise((resolve) => { resolveResponse = resolve; }));
         const pending = run();
         loader.setupLevelSelector({
-            levels: [{ id: "a", title: "Nova missão", verificationScript: "new verification" }],
+            levels: [{ id: "a", title: "Nova missão", verificationScript: "new verification", toolboxGuidance: [] }],
             levelOrder: ["a"],
         }, ui.deps, false);
         resolveResponse({ ok: true, json: async () => success });

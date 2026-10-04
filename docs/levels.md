@@ -40,7 +40,37 @@ Cada item de `levels` possui a seguinte estrutura:
 | `fullGuideHtml`      | Guia completo da atividade, armazenado como HTML.                                           |
 | `setupScript`        | Script Shell opcional que prepara o ambiente antes do script do usuário.                    |
 | `verificationScript` | Script opcional executado após o script do usuário para verificar o resultado da atividade. |
+| `toolboxGuidance`    | Lista opcional de entidades relevantes da toolbox, destacadas enquanto a missão está ativa. |
 | `difficulty`         | Classificação do nível. Atualmente: `tutorial`, `training` ou `challenge`.                  |
+
+## Orientação de descoberta (`toolboxGuidance`)
+
+A lista opcional identifica ferramentas relevantes por identidade de domínio:
+
+```json
+"toolboxGuidance": [
+    { "entity": "command", "commandId": "ls" },
+    { "entity": "option", "commandId": "ls", "flag": "-l" },
+    { "entity": "operand", "commandId": "cp", "operandId": "source" },
+    { "entity": "operator", "operatorId": "pipe" },
+    { "entity": "control", "controlId": "if_statement" }
+]
+```
+
+Options usam a flag canônica local ao comando; operands usam seu ID local.
+Não usar `longFlag`, labels ou tipos Blockly. Cada variante aceita somente os
+campos mostrados. Duplicatas pela identidade completa são inválidas. A ordem
+não tem semântica; ausência ou lista vazia significa nenhum destaque.
+
+O destaque é automático, independe de drag e indica somente relevância.
+Categorias refletem seus alvos relevantes, mesmo fechadas, sem serem entidades
+declaradas. O bloco único de options e as flags relevantes em seu dropdown
+recebem indicação visual, sem alterar valores, seleção ou disponibilidade.
+
+Os dados oficiais são validados contra as definições CLI oficiais e a toolbox.
+Com definições personalizadas, referências sem entidade ou alvo são ignoradas
+individualmente e diagnosticadas sem impedir o uso da missão. O JSON não
+especifica aparência, montagem, sequência ou prioridade.
 
 ## Execução do nível
 

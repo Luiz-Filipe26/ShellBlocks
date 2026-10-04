@@ -1,4 +1,6 @@
-import { LevelDifficulty, type GameData } from "./types";
+import type { CliDefinitions } from "../../../core/shellblocks/types/cli";
+import { toolboxGuidanceListSchema, guidanceIdentity, resolveToolboxGuidance } from "./toolboxGuidance";
+import { LevelDifficulty, type GameData, type Level } from "./types";
 
 const LEVEL_DIFFICULTIES: ReadonlySet<string> = new Set(Object.values(LevelDifficulty));
 
@@ -6,7 +8,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function assertGameData(value: unknown): asserts value is GameData {
+type GameDataInput = Omit<GameData, "levels"> & {
+    [key: string]: unknown;
+    levels: (Omit<Level, "toolboxGuidance"> & { toolboxGuidance?: unknown; [key: string]: unknown })[];
+};
+
+function assertGameData(value: unknown): asserts value is GameDataInput {
     if (
         !isRecord(value) ||
         !Array.isArray(value.levels) ||
@@ -59,7 +66,21 @@ function assertGameData(value: unknown): asserts value is GameData {
     }
 }
 
-export function parseGameData(value: unknown): GameData {
+export function parseGameData(value: unknown, officialDefinitions?: CliDefinitions): GameData {
     assertGameData(value);
-    return value;
+    const levels = value.levels.map((level, index) => {
+        const guidance = toolboxGuidanceListSchema.safeParse(level.toolboxGuidance);
+        if (!guidance.success) {
+            throw new Error(`GameData inválido: levels[${index}].toolboxGuidance: ${guidance.error.message}`);
+        }
+        return { ...level, toolboxGuidance: guidance.data };
+    });
+    const gameData: GameData = { ...value, levels };
+    if (officialDefinitions) {
+        for (const level of gameData.levels) {
+            const { unresolved } = resolveToolboxGuidance(level.toolboxGuidance, officialDefinitions);
+            if (unresolved.length) throw new Error(`GameData inválido: ${level.id}.toolboxGuidance: ${unresolved.map(({ reference, reason }) => `${guidanceIdentity(reference)}: ${reason}`).join("; ")}`);
+        }
+    }
+    return gameData;
 }

@@ -19,7 +19,7 @@ class Button extends TestElement {
 }
 
 const game: GameData = {
-    levels: [{ id: "a", title: "A" }, { id: "b", title: "B" }],
+    levels: [{ id: "a", title: "A", toolboxGuidance: [] }, { id: "b", title: "B", toolboxGuidance: [] }],
     levelOrder: ["b", "a"],
 };
 

@@ -1,3 +1,4 @@
+import { ToolboxRelevance } from "./toolboxRelevance";
 import * as Blockly from "blockly";
 
 interface FlyoutSelection {
@@ -7,6 +8,12 @@ interface FlyoutSelection {
 
 /** Record flyout origin without inferring it from pointer position or block type. */
 export class OverlayFlyout extends Blockly.VerticalFlyout {
+    override show(definition: Parameters<Blockly.VerticalFlyout["show"]>[0]): void {
+        super.show(definition);
+        const toolbox = this.getTargetWorkspace().getToolbox();
+        if (toolbox instanceof OverlayToolbox) toolbox.refreshRelevance();
+    }
+
     override createBlock(originalBlock: Blockly.BlockSvg): Blockly.BlockSvg {
         const toolbox = this.getTargetWorkspace().getToolbox();
         return toolbox instanceof OverlayToolbox
@@ -41,6 +48,26 @@ export class OverlayWorkspaceMetrics extends Blockly.MetricsManager {
 
 /** Native categories/flyout, with an explicit presentation-only collapse control. */
 export class OverlayToolbox extends Blockly.Toolbox {
+    private readonly relevance = new ToolboxRelevance();
+    private readonly contentsListeners = new Set<() => void>();
+
+    setRelevantBlocks(targets: ReadonlyMap<string, ReadonlySet<string>>): void {
+        this.relevance.setTargets(targets, this);
+    }
+
+    refreshRelevance(): void { this.relevance.refresh(this); }
+
+    onContentsChanged(listener: () => void): () => void {
+        this.contentsListeners.add(listener);
+        return () => this.contentsListeners.delete(listener);
+    }
+
+    override render(definition: Parameters<Blockly.Toolbox["render"]>[0]): void {
+        super.render(definition);
+        for (const listener of this.contentsListeners) listener();
+        this.refreshRelevance();
+    }
+
     private handle: HTMLButtonElement | null = null;
     private toolboxLayer: SVGForeignObjectElement | null = null;
     private expanded = true;
@@ -167,6 +194,17 @@ export class OverlayToolbox extends Blockly.Toolbox {
         if (!this.restoringFlyoutSelection) super.updateFlyout_(oldItem, newItem);
     }
 
+    /** Re-present existing content after Chromium's focusout, without show/scrollToStart. */
+    restoreFlyoutSelection(selection: FlyoutSelection): void {
+        const item = selection.itemId ? this.getToolboxItemById(selection.itemId) : null;
+        this.restoringFlyoutSelection = true;
+        try {
+            if (this.getSelectedItem() !== item) this.setSelectedItem(item);
+            const flyout = this.getFlyout()!;
+            if (flyout.isVisible() !== selection.visible) flyout.setVisible(selection.visible);
+        } finally { this.restoringFlyoutSelection = false; }
+    }
+
     createFlyoutBlock(create: () => Blockly.BlockSvg): Blockly.BlockSvg {
         if (this.flyoutDrag) this.finishFlyoutDrag();
         this.flyoutDrag = {
@@ -210,14 +248,7 @@ export class OverlayToolbox extends Blockly.Toolbox {
         this.dragFrame = null;
         const drag = this.flyoutDrag;
         if (restoreSelection && drag?.confirmed && drag.selection) {
-            const selection = drag.selection.itemId
-                ? this.getToolboxItemById(drag.selection.itemId) : null;
-            this.restoringFlyoutSelection = true;
-            try {
-                if (this.getSelectedItem() !== selection) this.setSelectedItem(selection);
-                const flyout = this.getFlyout()!;
-                if (flyout.isVisible() !== drag.selection.visible) flyout.setVisible(drag.selection.visible);
-            } finally { this.restoringFlyoutSelection = false; }
+            this.restoreFlyoutSelection(drag.selection);
         }
         this.flyoutDrag = null;
         this.updateDragPresentation();
@@ -280,6 +311,8 @@ export class OverlayToolbox extends Blockly.Toolbox {
     }
 
     override dispose(): void {
+        this.relevance.dispose();
+        this.contentsListeners.clear();
         this.workspace_.removeChangeListener(this.onBlockDrag);
         this.dragListeners?.abort();
         this.dragListeners = null;

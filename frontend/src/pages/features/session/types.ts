@@ -1,3 +1,5 @@
+import type { ToolboxGuidance } from "./toolboxGuidance";
+
 export const LevelDifficulty = {
     TUTORIAL: "tutorial",
     TRAINING: "training",
@@ -15,6 +17,7 @@ export interface Level {
     difficulty?: LevelDifficulty;
     setupScript?: string;
     verificationScript?: string;
+    toolboxGuidance: ToolboxGuidance[];
 }
 
 export interface GameData {
