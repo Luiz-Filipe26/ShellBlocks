@@ -24,6 +24,7 @@ import { setupInitialChoice } from "./features/ui/initialChoice";
 import { clearWorkspaceAssembly, hasWorkspaceAssembly } from "@/core/shellblocks/workspace/assembly";
 import type { SelectorDependencies } from "./features/session/levelLoader";
 import { saveWorkspaceSession } from "@/core/shellblocks/serialization/workspaceAutoSaver";
+import { setupWorkspaceMaximization } from "./features/ui/workspaceMaximization";
 
 const pageElements = getPageElements();
 let gameData: GameData | null = null;
@@ -97,6 +98,16 @@ async function start(): Promise<void> {
     }
     registerButtonListeners(workspace, selectorDependencies);
     setupInitialChoice(pageElements);
+    setupWorkspaceMaximization({
+        surface: pageElements.blocklyArea,
+        button: pageElements.btnMaximizeWorkspace,
+        maximizeIcon: pageElements.workspaceMaximizeIcon,
+        minimizeIcon: pageElements.workspaceMinimizeIcon,
+        outside: [pageElements.appHeader, pageElements.instructionsSidebar,
+            pageElements.instructionsResizerGutter, pageElements.sidebar,
+            pageElements.sidebarResizerGutter, pageElements.editorToolbar,
+            pageElements.advancedControls, pageElements.systemLogPanel],
+    }, workspace);
 }
 
 function enforceExperimentRestrictions() {

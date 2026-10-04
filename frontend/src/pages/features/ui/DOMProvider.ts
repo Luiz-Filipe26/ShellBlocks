@@ -6,6 +6,10 @@ function getElement<T extends HTMLElement>(id: string): T {
 
 const pageElements = {
     blocklyArea: getElement<HTMLDivElement>("blockly-area"),
+    btnMaximizeWorkspace: getElement<HTMLButtonElement>("btn-maximize-workspace"),
+    workspaceMaximizeIcon: getElement<HTMLImageElement>("workspace-maximize-icon"),
+    workspaceMinimizeIcon: getElement<HTMLImageElement>("workspace-minimize-icon"),
+    editorToolbar: getElement<HTMLElement>("editor-toolbar"),
     codeOutput: getElement<HTMLPreElement>("code-output"),
     cliOutput: getElement<HTMLDivElement>("cli-output"),
     runBtn: getElement<HTMLButtonElement>("run-btn"),

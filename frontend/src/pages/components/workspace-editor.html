@@ -1,5 +1,5 @@
 <div class="editor-column">
-    <div class="editor-toolbar">
+    <div id="editor-toolbar" class="editor-toolbar">
         <div class="toolbar-group">
             <button id="btn-clear-assembly" class="btn-tool" title="Remover os blocos e manter o Script Principal">
                 <img src="../assets/icons/lucid/trash.svg" class="btn-icon" alt="" />
@@ -35,6 +35,11 @@
     </details>
 
     <div id="blockly-area" class="blockly-workspace-area">
+        <button id="btn-maximize-workspace" class="workspace-maximize-button" type="button"
+            aria-label="Maximizar workspace" title="Maximizar workspace" aria-pressed="false">
+            <img id="workspace-maximize-icon" src="../assets/icons/lucid/maximize.svg" alt="" />
+            <img id="workspace-minimize-icon" src="../assets/icons/lucid/minimize.svg" alt="" hidden />
+        </button>
         <div id="onboarding-interceptor" class="onboarding-interceptor" role="button" tabindex="0" aria-label="Montagem indisponível: conclua Explicar Ferramenta para começar as Atividades guiadas" hidden></div>
         <div id="onboarding-notice" class="onboarding-notice" role="status" aria-live="polite" aria-atomic="true"></div>
     </div>
