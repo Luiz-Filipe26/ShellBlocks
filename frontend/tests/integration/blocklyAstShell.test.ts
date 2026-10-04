@@ -5,6 +5,11 @@ import { generateShellScript } from "@/core/shellblocks/generation/scriptGenerat
 import { serializeWorkspaceToAST } from "@/core/shellblocks/serialization/serializer";
 import { createBlock, connectInput, createHeadlessWorkspace } from "../helpers/blockly";
 import { validDefinitions } from "../helpers/cliFixtures";
+import officialDefinitions from "@/assets/data/cli_definitions.json";
+import { parseCliDefinitions } from "@/core/shellblocks/definitions/cliDefinitionsParser";
+import { validateCardinality } from "@/core/shellblocks/validation/cardinalityValidator";
+import { validateOperandSyntax } from "@/core/shellblocks/validation/syntaxValidator";
+import { getErrors } from "@/core/shellblocks/validation/validationManager";
 
 function serialize(workspace: Blockly.Workspace): string {
     const ast = serializeWorkspaceToAST(workspace);
@@ -12,6 +17,49 @@ function serialize(workspace: Blockly.Workspace): string {
 }
 
 describe("Blockly → AST → Shell", () => {
+    it.each([
+        { level: 9, sourceId: "cat", value: "nomes.txt", pattern: "Ana", destination: "", expected: "cat nomes.txt | grep Ana" },
+        { level: 18, sourceId: "curl", value: "http://127.0.0.1:8000/boletim.txt", pattern: "ERRO", destination: "incidentes.txt", expected: "curl 'http://127.0.0.1:8000/boletim.txt' | grep ERRO > incidentes.txt" },
+        { level: 19, sourceId: "cat", value: "operacao.log", pattern: "ERRO", destination: "relatorios/erros.txt", expected: "cat operacao.log | grep ERRO > relatorios/erros.txt" },
+    ])("permite a composição do nível $level com as definições oficiais, sem arquivo no grep", ({ sourceId, value, pattern, destination, expected }) => {
+        const definitions = parseCliDefinitions(officialDefinitions).definitions;
+        const sourceDefinition = definitions.commands.find((command) => command.id === sourceId)!;
+        const grepDefinition = definitions.commands.find((command) => command.id === "grep")!;
+        const pipeDefinition = definitions.operators.find((operator) => operator.id === "pipe")!;
+        const redirectDefinition = definitions.operators.find((operator) => operator.id === "redirect_out")!;
+        const workspace = createHeadlessWorkspace(definitions);
+        try {
+            const root = createBlock(workspace, BlockIDs.ROOT_BLOCK_TYPE);
+            const pipe = createBlock(workspace, BlockIDs.operatorBlockType(pipeDefinition));
+            const source = createBlock(workspace, BlockIDs.commandBlockType(sourceDefinition));
+            const sourceOperand = createBlock(workspace, BlockIDs.commandOperandBlockType(sourceDefinition, sourceDefinition.operands[0]));
+            const grep = createBlock(workspace, BlockIDs.commandBlockType(grepDefinition));
+            const patternOperand = createBlock(workspace, BlockIDs.commandOperandBlockType(grepDefinition, grepDefinition.operands[0]));
+            sourceOperand.setFieldValue(value, BlockIDs.FIELDS.VALUE);
+            patternOperand.setFieldValue(pattern, BlockIDs.FIELDS.VALUE);
+            connectInput(source, BlockIDs.INPUTS.OPERANDS, sourceOperand);
+            connectInput(grep, BlockIDs.INPUTS.OPERANDS, patternOperand);
+            connectInput(pipe, "A", source);
+            connectInput(pipe, "B", grep);
+            if (destination) {
+                const redirect = createBlock(workspace, BlockIDs.operatorBlockType(redirectDefinition));
+                redirect.setFieldValue(destination, "B");
+                connectInput(redirect, "A", pipe);
+                connectInput(root, BlockIDs.INPUTS.STACK, redirect);
+            } else {
+                connectInput(root, BlockIDs.INPUTS.STACK, pipe);
+            }
+
+            validateCardinality(grep, grepDefinition, [patternOperand]);
+            validateOperandSyntax(grep, grepDefinition, [patternOperand]);
+            expect(getErrors(grep)).toEqual([]);
+            expect(getErrors(sourceOperand)).toEqual([]);
+            expect(serialize(workspace)).toBe(expected);
+        } finally {
+            workspace.dispose();
+        }
+    });
+
     it("serializa comando com option argumentada vazia e operando", () => {
         const definitions = validDefinitions();
         const echo = definitions.commands[0];
