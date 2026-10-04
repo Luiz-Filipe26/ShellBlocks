@@ -5,26 +5,21 @@ import * as BlockTraversal from "../helpers/blockTraversal";
 import { showToast } from "../ui/toast";
 import { LogLevel } from "../types/logger";
 import { coreLog } from "../services/logging";
+import { findDuplicateBlock, findExclusiveOptionConflict, getExcessOperands } from "./structuralConstraints";
 
 export function unplugDuplicatesFromList(
     blocks: Blockly.Block[],
     valueFn: (block: Blockly.Block) => string,
 ): void {
-    const seen = new Set<string>();
     const workspace = BlockTraversal.getWorkspaceFromBlocks(blocks);
-
-    for (const block of blocks) {
-        const value = valueFn(block);
-        if (seen.has(value)) {
-            block.unplug(true);
-            const message = `Opção "${value}" removida por duplicata`;
-            if (workspace) {
-                showToast(workspace, message, LogLevel.WARN);
-                coreLog(workspace, message, LogLevel.WARN);
-            }
-            return;
-        }
-        seen.add(value);
+    const block = findDuplicateBlock(blocks, valueFn);
+    if (!block) return;
+    const value = valueFn(block);
+    block.unplug(true);
+    const message = `Opção "${value}" removida por duplicata`;
+    if (workspace) {
+        showToast(workspace, message, LogLevel.WARN);
+        coreLog(workspace, message, LogLevel.WARN);
     }
 }
 
@@ -48,14 +43,9 @@ function resolveGroupConflicts(
     const workspace = BlockTraversal.getWorkspaceFromBlocks(remainingBlocks);
 
     while (true) {
-        const foundBlocks = remainingBlocks.filter((block) =>
-            group.includes(String(block.getFieldValue(BlockIDs.FIELDS.FLAG))),
-        );
-
-        if (foundBlocks.length <= 1) return;
-
-        const keeper = foundBlocks[0];
-        const intruder = foundBlocks[1];
+        const conflict = findExclusiveOptionConflict(remainingBlocks, group);
+        if (!conflict) return;
+        const [keeper, intruder] = conflict;
 
         const keeperFlag = String(keeper.getFieldValue(BlockIDs.FIELDS.FLAG));
         const intruderFlag = String(intruder.getFieldValue(BlockIDs.FIELDS.FLAG));
@@ -79,29 +69,9 @@ export function autoFixExcessOperands(
     if (operandBlocks.length === 0) return;
 
     const workspace = BlockTraversal.getWorkspaceFromBlocks(operandBlocks);
-    const blocksByType = new Map<string, Blockly.Block[]>();
-
-    for (const block of operandBlocks) {
-        const list = blocksByType.get(block.type) || [];
-        list.push(block);
-        blocksByType.set(block.type, list);
-    }
-
-    for (const operandDef of commandDefinition.operands) {
-        const max = operandDef.cardinality.max;
-        if (max === "unlimited") continue;
-
-        const operandType = BlockIDs.commandOperandBlockType(
-            commandDefinition,
-            operandDef,
-        );
-        const blocksOfType = blocksByType.get(operandType);
-
-        if (!blocksOfType || blocksOfType.length <= max) continue;
-
-        blocksOfType.slice(max).forEach((block) => block.unplug(true));
-
-        const message = `Limite de ${max} excedido para "${operandDef.label}".`;
+    for (const { operand, blocks } of getExcessOperands(operandBlocks, commandDefinition)) {
+        blocks.forEach((block) => block.unplug(true));
+        const message = `Limite de ${operand.cardinality.max} excedido para "${operand.label}".`;
         if (workspace) {
             showToast(workspace, message);
             coreLog(workspace, message, LogLevel.WARN);

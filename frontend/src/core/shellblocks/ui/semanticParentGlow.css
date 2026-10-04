@@ -1,0 +1,7 @@
+/* Applied to the public primary path: colours, labels and nested blocks stay intact. */
+.shellblocks-semantic-parent {
+    stroke: #d6a000 !important;
+    stroke-width: 2.5px !important;
+    vector-effect: non-scaling-stroke;
+    filter: drop-shadow(0 0 2px rgb(255 193 7 / 65%));
+}

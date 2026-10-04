@@ -20,6 +20,7 @@ export function createCommandBlock(commandDefinition: CLI.CLICommand): void {
     setBlockTypeSemanticData(blockType, {
         nodeType: "command",
         name: commandDefinition.shellCommand,
+        definition: { command: commandDefinition },
         bindings: [
             {
                 key: "options",

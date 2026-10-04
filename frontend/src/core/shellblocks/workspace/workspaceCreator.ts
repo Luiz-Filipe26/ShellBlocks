@@ -14,6 +14,7 @@ import {
 import { LogFunction, LogLevel } from "../types/logger";
 import { setLoggerForWorkspace } from "../services/logging";
 import { clearWorkspaceAssembly } from "./assembly";
+import { SemanticParentDragger } from "./semanticParentDragger";
 
 export interface WorkspaceConfig {
     externalLogger: LogFunction;
@@ -111,6 +112,7 @@ function getBlocklyOptions(
         toolbox: createToolbox(cliDefinitions),
         renderer: "zelos",
         plugins: {
+            blockDragger: SemanticParentDragger,
             toolbox: OverlayToolbox,
             metricsManager: OverlayWorkspaceMetrics,
             flyoutsVerticalToolbox: OverlayFlyout,

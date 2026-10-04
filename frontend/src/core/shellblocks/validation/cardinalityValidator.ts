@@ -6,6 +6,7 @@ import * as BlockTraversal from "../helpers/blockTraversal";
 import * as ValidationErrors from "../constants/validationErrors";
 import { OperatorSlotType } from "../types/cli";
 import { receivesImplicitInput } from "./implicitInput";
+import { OPERATOR_STATEMENT_CAPACITY } from "./structuralConstraints";
 
 export function validateControlCardinality(
     block: Blockly.Block,
@@ -118,7 +119,7 @@ function isOperatorStatementSlotStacked(
     slot: CLI.CLIStatementOperatorSlot,
 ): boolean {
     const targetBlock = block.getInputTargetBlock(slot.name);
-    return Boolean(targetBlock?.getNextBlock());
+    return BlockTraversal.getBlocksList(targetBlock).length > OPERATOR_STATEMENT_CAPACITY;
 }
 
 function validateSpecificOperandsCardinality(

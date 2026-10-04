@@ -1,3 +1,5 @@
+import type { CLICommand } from "./cli";
+
 export interface Binding {
     key: string;
     source: "field" | "input";
@@ -43,7 +45,12 @@ export interface BaseSemanticData {
 }
 
 export interface StructuralSemanticData extends BaseSemanticData {
-    nodeType: "script" | "command" | "option" | "operand";
+    nodeType: "script" | "option" | "operand";
+}
+
+export interface CommandSemanticData extends BaseSemanticData {
+    nodeType: "command";
+    definition: { command: CLICommand };
 }
 
 export interface ControlSemanticData extends BaseSemanticData {
@@ -58,5 +65,6 @@ export interface OperatorSemanticData extends BaseSemanticData {
 
 export type SemanticData =
     | StructuralSemanticData
+    | CommandSemanticData
     | ControlSemanticData
     | OperatorSemanticData;
