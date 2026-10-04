@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { viteSingleFile } from "vite-plugin-singlefile";
 import posthtml from "posthtml";
 import type PostHTML from "posthtml";
@@ -25,6 +26,48 @@ type PostHTMLProcessOptions = PostHTML.Options & {
 const postHTMLProcessOptions: PostHTMLProcessOptions = {
     recognizeSelfClosing: true,
 };
+
+const nonRelativeUrlPattern = /^(?:[a-z][a-z\d+.-]*:|\/|#)/i;
+
+export async function transformHtmlAssetReferences(
+    html: string,
+    htmlRoot: string,
+    isDevServer: boolean,
+): Promise<string> {
+    if (!isDevServer) return html;
+
+    const result = await posthtml([
+        (tree) =>
+            tree.walk((node) => {
+                const source = node.attrs?.src;
+                if (
+                    node.tag === "img" &&
+                    node.attrs &&
+                    typeof source === "string"
+                ) {
+                    node.attrs.src = resolveDevAssetUrl(source, htmlRoot);
+                }
+                return node;
+            }),
+    ]).process(html, postHTMLProcessOptions);
+
+    return result.html;
+}
+
+function resolveDevAssetUrl(reference: string, htmlRoot: string): string {
+    if (nonRelativeUrlPattern.test(reference)) return reference;
+
+    const suffixStart = reference.search(/[?#]/);
+    const pathname = suffixStart === -1
+        ? reference
+        : reference.slice(0, suffixStart);
+    if (!pathname) return reference;
+
+    const suffix = suffixStart === -1 ? "" : reference.slice(suffixStart);
+    const htmlEntry = pathToFileURL(path.join(htmlRoot, "index.html"));
+    const assetPath = fileURLToPath(new URL(pathname, htmlEntry));
+    return `/@fs${pathToFileURL(assetPath).pathname}${suffix}`;
+}
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), "");
@@ -91,7 +134,12 @@ export default defineConfig(({ mode }) => {
                         const result = await posthtml([
                             components({ root: componentRoot }),
                         ]).process(html, postHTMLProcessOptions);
-                        return result.html;
+                        return transformHtmlAssetReferences(
+                            result.html,
+                            context.server?.config.root ??
+                                path.dirname(context.filename),
+                            context.server != null,
+                        );
                     },
                 },
             } satisfies Plugin,

@@ -99,7 +99,9 @@ export function createScriptRoot(workspace: Blockly.WorkspaceSvg): void {
     const rootBlock = workspace.newBlock(BlockIDs.ROOT_BLOCK_TYPE);
     rootBlock.initSvg();
     rootBlock.render();
-    rootBlock.moveBy(50, 50);
+    const toolboxWidth = workspace.getToolbox()?.getWidth() ?? 0;
+    const gap = 24;
+    rootBlock.moveBy((toolboxWidth + gap) / workspace.scale, 50);
 }
 
 function getBlocklyOptions(
