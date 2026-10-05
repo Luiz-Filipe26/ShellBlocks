@@ -32,6 +32,7 @@ vi.mock("@/pages/features/ui/toolboxGuidanceController", async (original) => {
     return { ...actual, setupToolboxGuidance: vi.fn(actual.setupToolboxGuidance) };
 });
 vi.mock("@/pages/features/ui/SidebarResizer", () => ({ SidebarResizer: class { start() {} } }));
+vi.mock("@/pages/features/ui/compactLayout", () => ({ setupCompactLayout: vi.fn() }));
 vi.mock("@/pages/features/ui/sidebarController", () => ({ setupSidebarToggle: vi.fn() }));
 vi.mock("@/pages/features/ui/systemLogger", () => ({ initSystemLogger: vi.fn(), log: vi.fn() }));
 vi.mock("@/pages/features/ui/guidedOnboarding", () => ({ setupGuidedOnboarding: () => ({ refresh: vi.fn() }) }));
@@ -73,6 +74,7 @@ it("o bootstrap reutiliza um controller nas importações e no reset, consultand
         getToolbox: () => toolbox,
         getInjectionDiv: () => ({}),
     });
+    vi.stubGlobal("window", new EventTarget());
     vi.stubGlobal("confirm", () => true);
     await import("@/pages/index");
     await vi.waitFor(() => expect(vi.mocked(setupToolboxGuidance)).toHaveBeenCalled());

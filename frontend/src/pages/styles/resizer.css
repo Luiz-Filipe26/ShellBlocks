@@ -1,5 +1,6 @@
 .sidebar-resizer-gutter {
     width: 6px;
+    touch-action: none;
     cursor: col-resize;
     background-color: var(--color-border-default);
     transition: background-color 0.2s;
@@ -13,8 +14,8 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    left: -4px;
-    right: -4px;
+    left: calc((6px - var(--gutter-hit-size))/2);
+    right: calc((6px - var(--gutter-hit-size))/2);
 }
 
 .sidebar-resizer-gutter:hover {

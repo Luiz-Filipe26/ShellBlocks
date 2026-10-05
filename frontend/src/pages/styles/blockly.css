@@ -27,36 +27,43 @@
 
 /* Surface alpha only: category colours, text and blocks remain fully opaque. */
 .shellblocks-toolbox-overlay {
-  background-color: rgb(226 232 240 / 40%) !important;
+  background-color: rgb(226 232 240 / 82%) !important;
   /* Painted edge keeps geometry unchanged and opens into the 48px side tab. */
   background-image: linear-gradient(to bottom,
-    rgb(100 116 139 / 45%) calc(50% - 24px),
+    rgb(71 85 105 / 60%) calc(50% - 24px),
     transparent calc(50% - 24px),
     transparent calc(50% + 24px),
-    rgb(100 116 139 / 45%) calc(50% + 24px));
+    rgb(71 85 105 / 60%) calc(50% + 24px));
   background-size: 1px 100%;
   background-position: right top;
   background-repeat: no-repeat;
-  box-shadow: 3px 0 8px rgb(15 23 42 / 12%);
+  border-radius: 0 0 0 4px;
+  box-shadow: inset 0 1px rgb(71 85 105 / 60%), inset 0 -1px rgb(71 85 105 / 60%), 3px 0 8px rgb(15 23 42 / 14%);
   max-width: calc(100% - 24px);
   overflow-x: auto;
   z-index: 70;
 }
 .shellblocks-toolbox-surface > .blocklyToolboxFlyout .blocklyFlyoutBackground {
-  fill: rgb(226 232 240 / 40%);
+  fill: rgb(241 245 249 / 88%);
   fill-opacity: 1;
+  stroke: rgb(71 85 105 / 60%);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+.shellblocks-toolbox-surface > .blocklyToolboxFlyout {
+  box-shadow: 3px 2px 8px rgb(15 23 42 / 14%);
 }
 .shellblocks-toolbox-handle {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;
+  width: var(--toolbox-handle-width);
   height: 48px;
   padding: 0 3px 3px 0;
-  border: 1px solid rgb(100 116 139 / 45%);
+  border: 1px solid rgb(71 85 105 / 60%);
   border-left: 0;
   border-radius: 0 24px 24px 0;
-  background: rgb(226 232 240 / 70%);
+  background: rgb(226 232 240 / 88%);
   box-shadow: 3px 0 8px rgb(15 23 42 / 12%);
   color: #334155;
   font: 32px/1 sans-serif;
@@ -117,3 +124,42 @@
   border-radius: 3px;
   font-weight: 600;
 }
+
+.compact-layout .shellblocks-toolbox-overlay {
+  width: min(240px, 65%) !important;
+  height: min(140px, 32%) !important;
+  overflow: auto;
+  /* The flyout's top edge supplies the horizontal seam when open. */
+  border-radius: 0 4px 0 0;
+}
+.compact-layout .shellblocks-toolbox-handle[data-scroll-above]::before,
+.compact-layout .shellblocks-toolbox-handle[data-scroll-below]::after {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  font: 10px/1 sans-serif;
+  color: #475569;
+  pointer-events: none;
+}
+.compact-layout .shellblocks-toolbox-handle[data-scroll-above]::before {
+  content: "▴";
+  top: 2px;
+}
+.compact-layout .shellblocks-toolbox-handle[data-scroll-below]::after {
+  content: "▾";
+  bottom: 2px;
+}
+.compact-layout .shellblocks-toolbox-overlay .blocklyToolboxCategoryLabel {
+  white-space: normal;
+}
+/* Native dropdown menu elements: wrap labels while keeping every item selectable. */
+.blocklyDropDownDiv { max-width: calc(100vw - 16px); box-sizing: border-box; }
+.blocklyDropDownContent { max-width: calc(100vw - 32px); max-height: 60dvh; overflow: auto; }
+.blocklyDropDownContent .blocklyMenu { min-width: 0 !important; max-width: 100%; }
+.blocklyDropDownContent .blocklyMenuItem { white-space: normal; overflow-wrap: anywhere; }
+@media (pointer: coarse) {
+  .blocklyDropDownContent .blocklyMenuItem { min-height: 44px; box-sizing: border-box; }
+}
+
+.shellblocks-problem-hitarea { pointer-events: none; }
+@media (pointer: coarse) { .shellblocks-problem-hitarea { pointer-events: all; } }

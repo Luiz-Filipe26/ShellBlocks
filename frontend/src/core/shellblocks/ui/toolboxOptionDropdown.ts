@@ -1,3 +1,4 @@
+import { compactBlockPresentation } from "./compactBlockPresentation";
 import { OverlayToolbox } from "../workspace/overlayToolbox";
 import * as Blockly from "blockly";
 
@@ -21,6 +22,10 @@ export class ToolboxOptionDropdown extends Blockly.FieldDropdown {
                 return [element, flag];
             });
         }, validator);
+    }
+
+    protected override getText_(): string | null {
+        return compactBlockPresentation() ? this.getValue() : super.getText_();
     }
 
     override isClickableInFlyout(): boolean { return true; }

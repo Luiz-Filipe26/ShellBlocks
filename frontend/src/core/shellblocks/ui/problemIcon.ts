@@ -40,6 +40,7 @@ export class ProblemIcon extends Blockly.icons.Icon implements Blockly.IHasBubbl
                 this.onClick();
             }
         });
+        Blockly.utils.dom.createSvgElement("circle", { class: "shellblocks-problem-hitarea", cx: 14, cy: 14, r: 20, fill: "transparent" }, root);
         Blockly.utils.dom.createSvgElement("circle", { cx: 14, cy: 14, r: 12, fill: "#ffe08a", stroke: "#6b3900", "stroke-width": 2 }, root);
         Blockly.utils.dom.createSvgElement("path", { d: "M14 7v9 M14 20v1", stroke: "#482600", "stroke-width": 3, "stroke-linecap": "round" }, root);
     }

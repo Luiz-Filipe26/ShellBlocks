@@ -1,3 +1,4 @@
+import { ParentIndicatorField } from "../ui/compactBlockPresentation";
 import { ToolboxOptionDropdown } from "../ui/toolboxOptionDropdown";
 import { TextValueField, valuePlaceholder, valueTooltip } from "../ui/textValueField";
 import * as Blockly from "blockly";
@@ -130,7 +131,7 @@ function appendOptionInputs(
     block
         .appendDummyInput(BlockIDs.FIELDS.MAIN_INPUT)
         .appendField(
-            `(opção de: ${commandDefinition.shellCommand})`,
+            new ParentIndicatorField(`(opção de: ${commandDefinition.shellCommand})`, commandDefinition.shellCommand),
             BlockIDs.FIELDS.PARENT_INDICATOR,
         )
         .appendField(" ")

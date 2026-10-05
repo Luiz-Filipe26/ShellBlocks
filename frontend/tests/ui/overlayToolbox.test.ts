@@ -320,3 +320,38 @@ describe("recuperação da seleção perdida no pointerdown da flyout", () => {
         expect(test.toolbox.getSelectedItem()).toBeNull();
     });
 });
+
+it("updates compact scroll hints from current tree geometry without retaining rebuild state", () => {
+    vi.stubGlobal("document", { documentElement: {} });
+    let compact = "1";
+    vi.stubGlobal("getComputedStyle", () => ({ getPropertyValue: () => compact }));
+    const test = dragToolbox();
+    const attributes = new Set<string>();
+    const tree = { scrollTop: 0, scrollHeight: 258, clientHeight: 140, getBoundingClientRect: () => ({ height: 140 }) };
+    const handle = {
+        classList: { toggle: vi.fn() },
+        style: {}, setAttribute: vi.fn(), remove: vi.fn(),
+        toggleAttribute: (name: string, enabled: boolean) => enabled ? attributes.add(name) : attributes.delete(name),
+    };
+    Object.assign(test.toolbox, { HtmlDiv: tree, handle });
+    vi.spyOn(Blockly.Toolbox.prototype, "position").mockImplementation(() => {});
+    vi.spyOn(test.toolbox, "getWidth").mockReturnValue(240);
+    vi.spyOn(test.toolbox, "getFlyout").mockReturnValue(null);
+    try {
+        test.toolbox.position();
+        expect(attributes).toEqual(new Set(["data-scroll-below"]));
+        tree.scrollTop = 40; test.toolbox.position();
+        expect(attributes).toEqual(new Set(["data-scroll-above", "data-scroll-below"]));
+        tree.scrollTop = 118; test.toolbox.position();
+        expect(attributes).toEqual(new Set(["data-scroll-above"]));
+        // A rebuilt tree whose contents fit must clear both hints.
+        tree.scrollTop = 0; tree.scrollHeight = 140; test.toolbox.position();
+        expect(attributes.size).toBe(0);
+        tree.scrollHeight = 258; compact = "0"; test.toolbox.position();
+        expect(attributes.size).toBe(0);
+        compact = "1"; test.toolbox.setExpanded(false);
+        expect(attributes.size).toBe(0);
+    } finally { test.dispose(); }
+    expect(handle.remove).toHaveBeenCalledOnce();
+    expect(test.listeners.size).toBe(0);
+});

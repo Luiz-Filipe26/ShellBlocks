@@ -1,3 +1,4 @@
+import { setupCompactLayout } from "./features/ui/compactLayout";
 import { setupToolboxGuidance } from "./features/ui/toolboxGuidanceController";
 import { OverlayToolbox } from "@/core/shellblocks/workspace/overlayToolbox";
 import "blockly/blocks";
@@ -51,6 +52,10 @@ async function start(): Promise<void> {
         pageElements.instructionsSidebar,
         "left",
     ).start();
+    setupCompactLayout({ instructions: pageElements.instructionsSidebar, results: pageElements.sidebar,
+        controls: pageElements.compactControls, instructionsButton: pageElements.btnCompactInstructions,
+        resultsButton: pageElements.btnCompactResults, closeInstructions: pageElements.btnCloseInstructions,
+        closeResults: pageElements.btnToggleSidebar, runButton: pageElements.runBtn, advancedControls: pageElements.advancedControls, systemLog: pageElements.systemLogPanel, toolbar: pageElements.editorToolbar });
     setupSidebarToggle(pageElements.btnToggleSidebar, pageElements.sidebar);
     Logger.initSystemLogger(pageElements.systemLogContainer);
 
@@ -102,6 +107,16 @@ async function start(): Promise<void> {
             (message) => Logger.log(message, ShellBlocks.LogLevel.WARN))
         : null;
 
+    const refreshBlockPresentation = () => {
+        for (const surface of [workspace, workspace.getFlyout()!.getWorkspace()]) {
+            for (const block of surface.getAllBlocks(false)) {
+                for (const input of block.inputList) for (const field of input.fieldRow) field.forceRerender();
+            }
+        }
+        workspace.getFlyout()!.reflow();
+        Blockly.svgResize(workspace);
+    };
+    window.addEventListener("resize", refreshBlockPresentation);
     const getCurrentShell = setupScriptHotReloader(workspace, pageElements.codeOutput);
     setupShellDownloadButton(pageElements.btnDownloadShell, getCurrentShell);
     for (const area of [pageElements.advancedControls, pageElements.systemLogPanel]) {
@@ -114,7 +129,7 @@ async function start(): Promise<void> {
         button: pageElements.btnMaximizeWorkspace,
         maximizeIcon: pageElements.workspaceMaximizeIcon,
         minimizeIcon: pageElements.workspaceMinimizeIcon,
-        outside: [pageElements.appHeader, pageElements.instructionsSidebar,
+        outside: [pageElements.compactControls, pageElements.appHeader, pageElements.instructionsSidebar,
             pageElements.instructionsResizerGutter, pageElements.sidebar,
             pageElements.sidebarResizerGutter, pageElements.editorToolbar,
             pageElements.advancedControls, pageElements.systemLogPanel],

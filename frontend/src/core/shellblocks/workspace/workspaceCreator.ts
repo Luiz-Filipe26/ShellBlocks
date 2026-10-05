@@ -1,3 +1,4 @@
+import { compactBlockPresentation } from "../ui/compactBlockPresentation";
 import * as Blockly from "blockly";
 import * as CLI from "../types/cli";
 import * as BlockIDs from "../constants/blockIds";
@@ -102,7 +103,10 @@ export function createScriptRoot(workspace: Blockly.WorkspaceSvg): void {
     rootBlock.render();
     const toolboxWidth = workspace.getToolbox()?.getWidth() ?? 0;
     const gap = 24;
-    rootBlock.moveBy((toolboxWidth + gap) / workspace.scale, 50);
+    const compact = compactBlockPresentation();
+    const toolbox = workspace.getToolbox();
+    const top = compact && toolbox instanceof Blockly.Toolbox ? toolbox.HtmlDiv?.getBoundingClientRect().height ?? 0 : 0;
+    rootBlock.moveBy((compact ? gap : toolboxWidth + gap) / workspace.scale, compact ? (top + gap) / workspace.scale : 50);
 }
 
 function getBlocklyOptions(

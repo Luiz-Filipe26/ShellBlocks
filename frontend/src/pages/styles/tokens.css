@@ -1,5 +1,13 @@
 :root {
-    --is-small-screen: 0;
+    --compact-block-fields: 0;
+    --control-size: 32px;
+    --gutter-hit-size: 14px;
+    --toolbar-gap: 5px;
+    --surface-margin: 8px;
+    --toolbox-handle-width: 24px;
+    --compact-bar-height: 52px;
+    --compact-instructions-height: 50%;
+    --compact-results-height: 60%;
     --header-brand-height: 40px;
     --header-context-height: 60px;
     --header-height-collapsed: calc(var(--header-brand-height) + var(--header-context-height));
@@ -24,4 +32,13 @@
 
     --font-sans: Arial, Helvetica, sans-serif;
     --font-mono: "SF Mono", "Consolas", "Liberation Mono", Menlo, monospace;
+}
+
+.compact-layout {
+    --compact-block-fields: 1;
+    --control-size: 44px;
+    --toolbar-gap: 6px;
+}
+@media (pointer: coarse) {
+    :root { --gutter-hit-size: 28px; --toolbox-handle-width: 32px; }
 }

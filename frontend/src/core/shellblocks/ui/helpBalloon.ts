@@ -1,7 +1,7 @@
 import "./helpBalloon.css";
 import * as CLI from "../types/cli";
 
-let currentHelpBalloon: HTMLDivElement | null = null;
+let closeCurrentHelp: (() => void) | null = null;
 
 /**
  * Mostra um balão de ajuda posicionado ao lado de um elemento SVG.
@@ -10,33 +10,39 @@ export function showHelpBalloon(
     baloonHtml: string,
     sourceElement: SVGElement,
 ): void {
-    if (currentHelpBalloon) {
-        currentHelpBalloon.remove();
-        currentHelpBalloon = null;
-    }
+    closeCurrentHelp?.();
 
     const balloon = document.createElement("div");
     balloon.className = "help-balloon";
     balloon.innerHTML = baloonHtml;
     document.body.appendChild(balloon);
-    currentHelpBalloon = balloon;
+    const listeners = new AbortController();
+    const { signal } = listeners;
+    closeCurrentHelp = () => { listeners.abort(); balloon.remove(); closeCurrentHelp = null; };
 
-    const rect = sourceElement.getBoundingClientRect();
-    balloon.style.left = `${window.scrollX + rect.right + 5}px`;
-    balloon.style.top = `${window.scrollY + rect.top}px`;
+    const position = (): void => {
+        const margin = 8;
+        const rect = sourceElement.getBoundingClientRect();
+        balloon.style.maxWidth = `${Math.max(0, window.innerWidth - margin * 2)}px`;
+        balloon.style.maxHeight = `${Math.max(0, window.innerHeight - margin * 2)}px`;
+        const box = balloon.getBoundingClientRect();
+        const right = rect.right + margin;
+        const left = right + box.width <= window.innerWidth - margin ? right : rect.left - box.width - margin;
+        balloon.style.left = `${window.scrollX + Math.max(margin, Math.min(left, window.innerWidth - box.width - margin))}px`;
+        balloon.style.top = `${window.scrollY + Math.max(margin, Math.min(rect.top, window.innerHeight - box.height - margin))}px`;
+    };
+    position();
+    window.addEventListener("resize", position, { signal });
 
     const closeListener = (event: Event): void => {
         const target = event.target as Node;
-        if (currentHelpBalloon?.contains(target)) return;
-        if (sourceElement.contains(target)) return;
-        currentHelpBalloon?.remove();
-        currentHelpBalloon = null;
-        document.removeEventListener("click", closeListener, true);
+        if (balloon.contains(target) || sourceElement.contains(target)) return;
+        closeCurrentHelp?.();
     };
 
     // Evita fechar o balão no mesmo clique que o abriu
     requestAnimationFrame(() =>
-        document.addEventListener("click", closeListener, true),
+        document.addEventListener("click", closeListener, { capture: true, signal }),
     );
 }
 

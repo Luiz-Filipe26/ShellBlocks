@@ -1,3 +1,4 @@
+import { compactBlockPresentation } from "../ui/compactBlockPresentation";
 import { ToolboxRelevance } from "./toolboxRelevance";
 import * as Blockly from "blockly";
 
@@ -8,6 +9,34 @@ interface FlyoutSelection {
 
 /** Record flyout origin without inferring it from pointer position or block type. */
 export class OverlayFlyout extends Blockly.VerticalFlyout {
+    override getX(): number { return compactBlockPresentation() ? 0 : super.getX(); }
+    override getY(): number {
+        const toolbox = this.getTargetWorkspace().getToolbox();
+        return compactBlockPresentation() && toolbox instanceof Blockly.Toolbox ? toolbox.HtmlDiv?.getBoundingClientRect().height ?? 0 : super.getY();
+    }
+    override position(): void {
+        super.position();
+        if (!compactBlockPresentation() || !this.isVisible()) return;
+        // Stack the existing flyout below the category browser. Native scrolling,
+        // block creation and hit testing continue using these flyout dimensions.
+        this.height_ = Math.max(0, this.getTargetWorkspace().getMetricsManager().getViewMetrics().height - this.getY());
+        // Native position() paints the full workspace height before the compact
+        // viewport is shortened. Update only its background, not block coordinates.
+        const radius = this.CORNER_RADIUS;
+        const right = this.toolboxPosition_ === Blockly.utils.toolbox.Position.RIGHT;
+        const direction = right ? -1 : 1;
+        const width = this.getWidth() - radius;
+        this.svgBackground_!.setAttribute("d", [
+            `M ${right ? this.getWidth() : 0},0`,
+            `h ${direction * width}`,
+            `a ${radius},${radius} 0 0 ${right ? 0 : 1} ${direction * radius},${radius}`,
+            `v ${Math.max(0, this.height_ - 2 * radius)}`,
+            `a ${radius},${radius} 0 0 ${right ? 0 : 1} ${-direction * radius},${radius}`,
+            `h ${-direction * width} z`,
+        ].join(" "));
+        this.positionAt_(this.getWidth(), this.height_, this.getX(), this.getY());
+    }
+
     override show(definition: Parameters<Blockly.VerticalFlyout["show"]>[0]): void {
         super.show(definition);
         const toolbox = this.getTargetWorkspace().getToolbox();
@@ -66,6 +95,7 @@ export class OverlayToolbox extends Blockly.Toolbox {
         super.render(definition);
         for (const listener of this.contentsListeners) listener();
         this.refreshRelevance();
+        this.updateScrollIndicator();
     }
 
     private handle: HTMLButtonElement | null = null;
@@ -151,6 +181,7 @@ export class OverlayToolbox extends Blockly.Toolbox {
         this.toolboxLayer = layer;
         this.dragListeners = new AbortController();
         const signal = this.dragListeners.signal;
+        this.HtmlDiv!.addEventListener("scroll", () => this.updateScrollIndicator(), { signal });
         const flyoutWorkspace = this.getFlyout()!.getWorkspace();
         flyoutWorkspace.getParentSvg().addEventListener("pointerdown", (event) => {
             if (event.button !== 0) return;
@@ -290,6 +321,7 @@ export class OverlayToolbox extends Blockly.Toolbox {
 
     override position(): void {
         if (this.expanded) super.position();
+        this.getFlyout()?.position();
         this.updateHandle();
     }
 
@@ -302,12 +334,23 @@ export class OverlayToolbox extends Blockly.Toolbox {
 
     private updateHandle(): void {
         if (!this.handle) return;
+        this.handle.style.top = compactBlockPresentation() ? `${Math.max(24, this.HtmlDiv!.getBoundingClientRect().height / 2)}px` : "50%";
         this.handle.style.left = `${this.expanded ? this.getWidth() : 0}px`;
         this.handle.setAttribute("aria-expanded", String(this.expanded));
         const label = this.expanded ? "Recolher toolbox" : "Expandir toolbox";
         this.handle.setAttribute("aria-label", label);
         this.handle.title = label;
         this.handle.textContent = this.expanded ? "‹" : "›";
+        this.updateScrollIndicator();
+    }
+
+    private updateScrollIndicator(): void {
+        if (!this.handle) return;
+        const tree = this.HtmlDiv!;
+        const compact = this.expanded && compactBlockPresentation();
+        // Hints live inside the existing side tab, outside category/block content.
+        this.handle.toggleAttribute("data-scroll-above", compact && tree.scrollTop > 1);
+        this.handle.toggleAttribute("data-scroll-below", compact && tree.scrollHeight - tree.clientHeight - tree.scrollTop > 1);
     }
 
     override dispose(): void {

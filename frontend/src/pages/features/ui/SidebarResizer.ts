@@ -1,96 +1,85 @@
 import * as PersistenceManager from "../session/persistenceManager";
+import { compactLayout } from "./compactLayout";
 
-const SIDEBAR_WIDTH_VAR = "--sidebar-width" as const;
-const RESIZING_CLASS = "layout-drag-resizing" as const;
-
-const SIDEBAR_LEFT_WIDTH_VAR = "--sidebar-left-width" as const;
-const SIDEBAR_LEFT_WIDTH_KEY = "sidebar-left-width" as const;
-
+/** One captured pointer resizes the existing panel; layout determines the axis. */
 export class SidebarResizer {
-    private isResizing = false;
-    private animationFrameId: number | null = null;
-    private mouseOffsetAtResizeStart = 0;
-
+    private pointer: { id: number; coordinate: number; size: number; compact: boolean } | null = null;
     constructor(
         private readonly sidebarResizerGutter: HTMLElement,
         private readonly sidebar: HTMLElement,
         private readonly direction: "left" | "right" = "right",
     ) {}
 
-    start() {
+    start(): void {
         this.restoreWidth();
-        this.sidebarResizerGutter.addEventListener(
-            "mousedown",
-            this.onMouseDown,
-        );
-    }
-
-    stop() {
-        this.sidebarResizerGutter.removeEventListener(
-            "mousedown",
-            this.onMouseDown,
-        );
-        window.removeEventListener("mousemove", this.onMouseMove);
-        window.removeEventListener("mouseup", this.onMouseUp);
-        document.body.classList.remove(RESIZING_CLASS);
-        if (this.animationFrameId) {
-            cancelAnimationFrame(this.animationFrameId);
-            this.animationFrameId = null;
+        this.sidebarResizerGutter.addEventListener("pointerdown", this.onPointerDown);
+        this.sidebarResizerGutter.addEventListener("pointermove", this.onPointerMove);
+        for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
+            this.sidebarResizerGutter.addEventListener(type, this.finish);
         }
+        window.addEventListener("resize", this.restoreWidth);
     }
 
-    private get cssVar() {
-        return this.direction === "right" ? SIDEBAR_WIDTH_VAR : SIDEBAR_LEFT_WIDTH_VAR;
-    }
-
-    private restoreWidth() {
-        const key = this.direction === "right" ? undefined : SIDEBAR_LEFT_WIDTH_KEY;
-        const savedWidth = key
-            ? localStorage.getItem(key)
-            : PersistenceManager.getSidebarWidth();
-        if (!savedWidth) return;
-        document.documentElement.style.setProperty(this.cssVar, `${savedWidth}px`);
-    }
-
-    private onMouseDown = (e: MouseEvent) => {
-        this.isResizing = true;
-        const currentWidth = this.sidebar.getBoundingClientRect().width;
-
-        this.mouseOffsetAtResizeStart = this.direction === "right"
-            ? window.innerWidth - e.clientX - currentWidth
-            : e.clientX - currentWidth;
-
-        document.body.classList.add(RESIZING_CLASS);
-        window.addEventListener("mousemove", this.onMouseMove);
-        window.addEventListener("mouseup", this.onMouseUp);
-    };
-
-    private onMouseMove = (e: MouseEvent) => {
-        if (!this.isResizing) return;
-        if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
-
-        this.animationFrameId = requestAnimationFrame(() => {
-            const newWidth = this.direction === "right"
-                ? window.innerWidth - e.clientX - this.mouseOffsetAtResizeStart
-                : e.clientX - this.mouseOffsetAtResizeStart;
-
-            document.documentElement.style.setProperty(this.cssVar, `${newWidth}px`);
-        });
-    };
-
-    private onMouseUp = () => {
-        this.isResizing = false;
-        document.body.classList.remove(RESIZING_CLASS);
-        window.removeEventListener("mousemove", this.onMouseMove);
-        window.removeEventListener("mouseup", this.onMouseUp);
-
-        const finalWidth = this.sidebar.getBoundingClientRect().width;
-        if (this.direction === "right") {
-            PersistenceManager.saveSidebarWidth(finalWidth);
-        } else {
-            localStorage.setItem(SIDEBAR_LEFT_WIDTH_KEY, String(finalWidth));
+    stop(): void {
+        this.finish();
+        this.sidebarResizerGutter.removeEventListener("pointerdown", this.onPointerDown);
+        this.sidebarResizerGutter.removeEventListener("pointermove", this.onPointerMove);
+        for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
+            this.sidebarResizerGutter.removeEventListener(type, this.finish);
         }
+        window.removeEventListener("resize", this.restoreWidth);
+    }
 
-        window.dispatchEvent(new Event("resize"));
+    private get widthVar(): string { return this.direction === "right" ? "--sidebar-width" : "--sidebar-left-width"; }
+    private limits(compact: boolean): { min: number; max: number } {
+        const parent = this.sidebar.parentElement!;
+        if (compact) return { min: 120, max: Math.max(120, parent.getBoundingClientRect().height - 152) };
+        const other = parent.querySelector<HTMLElement>(this.direction === "right" ? ".instructions-sidebar" : ".sidebar");
+        const max = parent.getBoundingClientRect().width - (other?.getBoundingClientRect().width ?? 0) - 332;
+        const min = this.direction === "right" ? 250 : 160;
+        return { min, max: Math.max(min, max) };
+    }
+    private clamp(value: number, compact: boolean): number {
+        const { min, max } = this.limits(compact);
+        return Math.min(max, Math.max(min, value));
+    }
+    private restoreWidth = (): void => {
+        if (this.pointer) this.finish();
+        if (compactLayout()) return;
+        const saved = this.direction === "right" ? PersistenceManager.getSidebarWidth() : localStorage.getItem("sidebar-left-width");
+        if (!saved) return;
+        const width = Number(saved);
+        if (Number.isFinite(width)) document.documentElement.style.setProperty(this.widthVar, `${this.clamp(width, false)}px`);
+    };
+    private onPointerDown = (event: PointerEvent): void => {
+        if (this.pointer || event.button !== 0) return;
+        const compact = compactLayout();
+        const box = this.sidebar.getBoundingClientRect();
+        this.pointer = { id: event.pointerId, compact, coordinate: compact ? event.clientY : event.clientX, size: compact ? box.height : box.width };
+        this.sidebarResizerGutter.setPointerCapture(event.pointerId);
+        document.body.classList.add("layout-drag-resizing");
+        event.preventDefault();
+    };
+    private onPointerMove = (event: PointerEvent): void => {
+        const pointer = this.pointer;
+        if (!pointer || event.pointerId !== pointer.id) return;
+        const delta = (pointer.compact ? event.clientY : event.clientX) - pointer.coordinate;
+        const size = this.clamp(pointer.size + (pointer.compact || this.direction === "right" ? -delta : delta), pointer.compact);
+        const variable = pointer.compact
+            ? this.direction === "right" ? "--compact-results-height" : "--compact-instructions-height"
+            : this.widthVar;
+        document.documentElement.style.setProperty(variable, `${size}px`);
+    };
+    private finish = (event?: Event): void => {
+        const pointer = this.pointer;
+        if (!pointer || (event && "pointerId" in event && event.pointerId !== pointer.id)) return;
+        this.pointer = null;
+        if (this.sidebarResizerGutter.hasPointerCapture(pointer.id)) this.sidebarResizerGutter.releasePointerCapture(pointer.id);
+        document.body.classList.remove("layout-drag-resizing");
+        if (!pointer.compact) {
+            const width = this.sidebar.getBoundingClientRect().width;
+            if (this.direction === "right") PersistenceManager.saveSidebarWidth(width);
+            else localStorage.setItem("sidebar-left-width", String(width));
+        }
     };
 }

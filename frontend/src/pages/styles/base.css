@@ -6,10 +6,12 @@
 
 html,
 body {
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
     font-family: var(--font-sans);
     background-color: var(--color-background-app);
-    overflow-y: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
 }
 
@@ -28,10 +30,4 @@ code {
     color: #2c3e50 !important;
     font-size: 0.95em !important;
     font-weight: 600 !important;
-}
-
-@media (max-width: 768px) {
-    :root {
-        --is-small-screen: 1;
-    }
 }

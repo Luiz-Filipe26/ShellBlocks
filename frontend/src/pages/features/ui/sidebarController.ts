@@ -1,15 +1,11 @@
+import { compactLayout, COMPACT_LAYOUT_QUERY } from "./compactLayout";
 import * as PersistenceManager from "../session/persistenceManager";
 
 export function setupSidebarToggle(
     toggleBtn: HTMLButtonElement,
     sidebar: HTMLElement,
 ): void {
-    const getScreenSize = () =>
-        getComputedStyle(document.documentElement)
-            .getPropertyValue("--is-small-screen")
-            .trim() === "1"
-            ? "small"
-            : "big";
+    const getScreenSize = () => compactLayout() ? "small" : "big";
 
     let lastSize = getScreenSize();
     let userChoiceSmall: boolean | null = null;
@@ -21,7 +17,7 @@ export function setupSidebarToggle(
         sidebar.classList.add("is-collapsed");
     }
 
-    window.addEventListener("resize", () => {
+    window.matchMedia(COMPACT_LAYOUT_QUERY).addEventListener("change", () => {
         const currentSize = getScreenSize();
         if (currentSize !== lastSize) {
             const shouldCollapse =
@@ -52,11 +48,13 @@ export function setupSidebarToggle(
     };
 
     toggleBtn.addEventListener("click", (e) => {
+        if (compactLayout()) return;
         e.stopPropagation();
         handleToggle();
     });
 
     sidebar.addEventListener("click", () => {
+        if (compactLayout()) return;
         if (sidebar.classList.contains("is-collapsed")) handleToggle(true);
     });
 

@@ -1,3 +1,4 @@
+import { ParentIndicatorField } from "../ui/compactBlockPresentation";
 import { TextValueField, valuePlaceholder, valueTooltip } from "../ui/textValueField";
 import * as Blockly from "blockly";
 import * as BlockIDs from "../constants/blockIds";
@@ -58,7 +59,7 @@ function appendOperandInputs(
     block
         .appendDummyInput(BlockIDs.FIELDS.MAIN_INPUT)
         .appendField(
-            `(operando de: ${commandDefinition.shellCommand})`,
+            new ParentIndicatorField(`(operando de: ${commandDefinition.shellCommand})`, commandDefinition.shellCommand),
             BlockIDs.FIELDS.PARENT_INDICATOR,
         )
         .appendField(`${operandDefinition.label}:`)

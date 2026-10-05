@@ -5,6 +5,10 @@ function getElement<T extends HTMLElement>(id: string): T {
 }
 
 const pageElements = {
+    compactControls: getElement<HTMLElement>("compact-controls"),
+    btnCompactInstructions: getElement<HTMLButtonElement>("btn-compact-instructions"),
+    btnCompactResults: getElement<HTMLButtonElement>("btn-compact-results"),
+    btnCloseInstructions: getElement<HTMLButtonElement>("btn-close-instructions"),
     blocklyArea: getElement<HTMLDivElement>("blockly-area"),
     btnMaximizeWorkspace: getElement<HTMLButtonElement>("btn-maximize-workspace"),
     workspaceMaximizeIcon: getElement<HTMLImageElement>("workspace-maximize-icon"),

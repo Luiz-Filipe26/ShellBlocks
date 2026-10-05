@@ -7,7 +7,11 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     z-index: 2000;
     max-width: 320px;
-    min-width: 200px;
+    width: 320px;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: auto;
+    overscroll-behavior: contain;
     font-family: var(--font-sans, sans-serif);
     color: #333;
     font-size: 14px;
