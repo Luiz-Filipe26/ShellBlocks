@@ -294,6 +294,18 @@ export class OverlayToolbox extends Blockly.Toolbox {
         this.workspace_.recordDragTargets();
     }
 
+    /** The tree and its collapse handle occupy space even without an open flyout. */
+    getInitialRootObstruction(): Pick<DOMRectReadOnly, "left" | "top" | "right" | "bottom"> {
+        const tree = this.HtmlDiv!.getBoundingClientRect();
+        const handle = this.handle!.getBoundingClientRect();
+        return {
+            left: this.expanded ? Math.min(tree.left, handle.left) : handle.left,
+            top: this.expanded ? Math.min(tree.top, handle.top) : handle.top,
+            right: this.expanded ? Math.max(tree.right, handle.right) : handle.right,
+            bottom: this.expanded ? Math.max(tree.bottom, handle.bottom) : handle.bottom,
+        };
+    }
+
     isExpanded(): boolean { return this.expanded; }
 
     setExpanded(expanded: boolean): void {

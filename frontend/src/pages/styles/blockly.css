@@ -155,6 +155,10 @@
   content: "▾";
   bottom: 2px;
 }
+/* Wrapped labels must contribute their full height to the native category flow. */
+.compact-layout .shellblocks-toolbox-overlay .blocklyToolboxCategory {
+  height: auto;
+}
 .compact-layout .shellblocks-toolbox-overlay .blocklyToolboxCategoryLabel {
   white-space: normal;
 }
@@ -178,6 +182,8 @@
 }
 .blocklyDropDownArrow { background-color: var(--color-surface) !important; }
 .blocklyMenuItem { color: var(--color-text-primary); }
+/* Zelos sets white on the content itself; inherit the themed item/state colour. */
+.blocklyDropDownDiv .blocklyMenuItemContent { color: inherit !important; }
 .blocklyMenuItemDisabled { color: var(--color-text-muted); }
 .blocklyMenuItemHighlight, .blocklyMenuItem:hover {
   background-color: var(--color-control-hover);

@@ -32,6 +32,27 @@ describe("contexto e conclusão das atividades", () => {
     });
     afterEach(() => vi.unstubAllGlobals());
 
+    it("notifica Continuar somente depois de renderizar as instruções da próxima missão", () => {
+        const nextInstructions = "<p>Instruções da próxima atividade.</p>";
+        const course = { ...game, levels: game.levels.map(level => level.id === "first"
+            ? { ...level, fullGuideHtml: nextInstructions } : level) };
+        const onContinue = vi.fn(() => {
+            expect(loader.getCurrentLevelId()).toBe("first");
+            expect(ui.elements.levelFullDetails.innerHTML).toBe(nextInstructions);
+        });
+        loader.setupLevelSelector(course, { ...ui.deps, onContinue }, false);
+        selectContext(ui.elements.levelSelect, "second");
+        ui.elements.continueBtn.click();
+        expect(onContinue).not.toHaveBeenCalled();
+        loader.markLevelCompleted("second", ui.deps, false);
+        ui.elements.continueBtn.click();
+        expect(onContinue).toHaveBeenCalledOnce();
+        selectContext(ui.elements.levelSelect, "last");
+        loader.markLevelCompleted("last", ui.deps, false);
+        ui.elements.continueBtn.click();
+        expect(onContinue).toHaveBeenCalledOnce();
+    });
+
     it("numera os 20 níveis pela ordem oficial e avança até os dois desafios finais", () => {
         const course = parseGameData(officialLevels);
         loader.setupLevelSelector(course, ui.deps, false);

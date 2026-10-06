@@ -9,7 +9,7 @@ export function setupCompactLayout(elements: {
     instructionsButton: HTMLButtonElement; resultsButton: HTMLButtonElement;
     closeInstructions: HTMLButtonElement; closeResults: HTMLButtonElement;
     runButton: HTMLButtonElement; advancedControls: HTMLElement; systemLog: HTMLElement; toolbar: HTMLElement;
-}): { dispose(): void } {
+}): { showInstructions(): void; getVisibleWorkspaceArea(surface: HTMLElement): Pick<DOMRectReadOnly, "left" | "top" | "right" | "bottom">; dispose(): void } {
     const media = window.matchMedia(COMPACT_LAYOUT_QUERY);
     const listeners = new AbortController();
     const { signal } = listeners;
@@ -41,14 +41,16 @@ export function setupCompactLayout(elements: {
             for (const { element, parent, next } of [...secondary].reverse()) parent.insertBefore(element, next);
         }
     }
-    const toggle = (name: "instructions" | "results"): void => {
+    const selectPanel = (name: typeof panel): void => {
         if (!media.matches) return;
-        panel = panel === name ? null : name;
+        panel = name;
         if (panel !== null) localStorage.setItem(BOTTOM_PANEL_KEY, panel === "results" ? "result" : "instructions");
         render();
     };
+    const toggle = (name: "instructions" | "results"): void => selectPanel(panel === name ? null : name);
     elements.instructionsButton.addEventListener("click", () => toggle("instructions"), { signal });
     elements.resultsButton.addEventListener("click", () => toggle("results"), { signal });
+    elements.runButton.addEventListener("click", () => selectPanel("results"), { signal });
     for (const button of [elements.closeInstructions, elements.closeResults]) {
         button.addEventListener("click", () => {
             if (!media.matches) return;
@@ -66,7 +68,18 @@ export function setupCompactLayout(elements: {
     }, { signal });
     if (media.matches) restorePanel();
     render();
-    return { dispose() {
+    return { showInstructions: () => selectPanel("instructions"),
+        getVisibleWorkspaceArea(surface) {
+            const bounds = surface.getBoundingClientRect();
+            const bottomPanel = media.matches && panel !== null && !surface.classList.contains("is-maximized")
+                ? (panel === "instructions" ? elements.instructions : elements.results) : null;
+            return {
+                left: Math.max(0, bounds.left), top: Math.max(0, bounds.top),
+                right: Math.min(window.innerWidth, bounds.right),
+                bottom: Math.min(window.innerHeight, bounds.bottom,
+                    bottomPanel ? bottomPanel.getBoundingClientRect().top : bounds.bottom),
+            };
+        }, dispose() {
         listeners.abort();
         runParent.insertBefore(elements.runButton, runNext);
         for (const { element, parent, next } of [...secondary].reverse()) parent.insertBefore(element, next);

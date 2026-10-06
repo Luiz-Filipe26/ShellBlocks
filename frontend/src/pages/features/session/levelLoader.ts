@@ -104,6 +104,7 @@ export interface SelectorDependencies {
     missionCompletion: HTMLElement;
     missionCompletionText: HTMLElement;
     continueBtn: HTMLButtonElement;
+    onContinue?: () => void;
     assemblyTransitionNotice: HTMLElement;
     hasWorkspaceAssembly: () => boolean;
 }
@@ -250,6 +251,7 @@ function registerLevelSelectorListener(deps: SelectorDependencies): void {
         if (!next) return;
         levelSelect.value = next.id;
         levelSelect.dispatchEvent(new Event("change"));
+        deps.onContinue?.();
     });
 
     isLevelSelectorListenerRegistered = true;

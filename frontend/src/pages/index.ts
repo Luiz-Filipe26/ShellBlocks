@@ -54,7 +54,7 @@ async function start(): Promise<void> {
         pageElements.instructionsSidebar,
         "left",
     ).start();
-    setupCompactLayout({ instructions: pageElements.instructionsSidebar, results: pageElements.sidebar,
+    const compactPanels = setupCompactLayout({ instructions: pageElements.instructionsSidebar, results: pageElements.sidebar,
         controls: pageElements.compactControls, instructionsButton: pageElements.btnCompactInstructions,
         resultsButton: pageElements.btnCompactResults, closeInstructions: pageElements.btnCloseInstructions,
         closeResults: pageElements.btnToggleSidebar, runButton: pageElements.runBtn, advancedControls: pageElements.advancedControls, systemLog: pageElements.systemLogPanel, toolbar: pageElements.editorToolbar });
@@ -69,6 +69,7 @@ async function start(): Promise<void> {
             externalLogger: Logger.log,
             workspaceId: MAIN_WORKSPACE_ID,
             shouldSetupAutosave: true,
+            getInitialRootArea: () => compactPanels.getVisibleWorkspaceArea(pageElements.blocklyArea),
         },
     );
     if (workspace == null) {
@@ -90,6 +91,7 @@ async function start(): Promise<void> {
     const selectorDependencies: SelectorDependencies = {
         ...pageElements,
         hasWorkspaceAssembly: () => hasWorkspaceAssembly(workspace),
+        onContinue: () => compactPanels.showInstructions(),
     };
     const onboarding = setupGuidedOnboarding({
         levelSelect: pageElements.levelSelect,

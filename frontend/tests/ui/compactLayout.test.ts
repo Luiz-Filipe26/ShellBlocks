@@ -5,7 +5,9 @@ class Element extends EventTarget {
     inert = false; parentElement: Element | null = null;
     get nextSibling(): Element | null { return this.parentElement?.children[this.parentElement.children.indexOf(this) + 1] ?? null; }
     attributes = new Map<string, string>(); children: Element[] = [];
-    classList = { toggle: vi.fn(), remove: vi.fn() }; focus = vi.fn();
+    classList = { toggle: vi.fn(), remove: vi.fn(), contains: () => false }; focus = vi.fn();
+    bounds = { left: 0, top: 0, right: 600, bottom: 400 };
+    getBoundingClientRect() { return this.bounds; }
     setAttribute(k: string, v: string) { this.attributes.set(k, v); }
     appendChild(child: Element) { child.parentElement?.children.splice(child.parentElement.children.indexOf(child), 1); this.children.push(child); child.parentElement = this; }
     insertBefore(child: Element, next: Element | null) {
@@ -24,7 +26,7 @@ function compactFixture(matches: boolean, storage = new MemoryStorage()) {
     const media = Object.assign(new EventTarget(), { matches });
     const document = Object.assign(new EventTarget(), { documentElement: new Element(), querySelector: () => null });
     vi.stubGlobal("localStorage", storage);
-    vi.stubGlobal("window", Object.assign(new EventTarget(), { matchMedia: () => media }));
+    vi.stubGlobal("window", Object.assign(new EventTarget(), { matchMedia: () => media, innerWidth: 600, innerHeight: 400 }));
     vi.stubGlobal("document", document);
     const elements = { instructions: new Element(), results: new Element(), controls: new Element(), instructionsButton: new Element(), resultsButton: new Element(), closeInstructions: new Element(), closeResults: new Element(), runButton: new Element(), advancedControls: new Element(), systemLog: new Element(), toolbar: new Element() };
     const original = new Element(); original.appendChild(elements.toolbar); original.appendChild(elements.advancedControls); original.appendChild(elements.systemLog);
@@ -35,10 +37,65 @@ function compactFixture(matches: boolean, storage = new MemoryStorage()) {
         media.matches = compact;
         media.dispatchEvent(new Event("change"));
     };
-    return { elements, storage, document, original, actions, changeLayout };
+    return { elements, storage, document, original, actions, changeLayout, controller };
 }
 
 const PANEL_KEY = "shellblocks_compact_bottom_panel";
+
+it.each(["instructions", "result", "closed"])("run explicitly selects result from %s, overriding storage", (previous) => {
+    const { elements, storage, changeLayout } = compactFixture(true);
+    if (previous === "result") elements.resultsButton.dispatchEvent(new Event("click"));
+    if (previous === "closed") elements.closeInstructions.dispatchEvent(new Event("click"));
+    storage.setItem(PANEL_KEY, "instructions");
+    elements.runButton.dispatchEvent(new Event("click"));
+    expect(elements.results.inert).toBe(false);
+    expect(elements.instructions.inert).toBe(true);
+    expect(storage.getItem(PANEL_KEY)).toBe("result");
+    elements.runButton.dispatchEvent(new Event("click"));
+    expect(elements.results.inert).toBe(false);
+    changeLayout(false); changeLayout(true);
+    expect(elements.results.inert).toBe(false);
+});
+
+it.each(["instructions", "result", "closed"])("continuation explicitly selects instructions from %s, overriding storage", (previous) => {
+    const { elements, storage, changeLayout, controller } = compactFixture(true);
+    if (previous === "result") elements.resultsButton.dispatchEvent(new Event("click"));
+    if (previous === "closed") elements.closeInstructions.dispatchEvent(new Event("click"));
+    storage.setItem(PANEL_KEY, "result");
+    controller.showInstructions();
+    expect(elements.instructions.inert).toBe(false);
+    expect(elements.results.inert).toBe(true);
+    expect(storage.getItem(PANEL_KEY)).toBe("instructions");
+    controller.showInstructions();
+    expect(elements.instructions.inert).toBe(false);
+    changeLayout(false); changeLayout(true);
+    expect(elements.instructions.inert).toBe(false);
+});
+
+it("run and continuation leave desktop UI and compact preference unchanged", () => {
+    const storage = new MemoryStorage(); storage.setItem(PANEL_KEY, "result");
+    const { elements, controller, original, actions } = compactFixture(false, storage);
+    const render = vi.spyOn(elements.instructionsButton, "setAttribute");
+    elements.runButton.dispatchEvent(new Event("click"));
+    controller.showInstructions();
+    expect(render).not.toHaveBeenCalled();
+    expect(elements.instructions.inert).toBe(false);
+    expect(elements.results.inert).toBe(false);
+    expect(elements.instructionsButton.attributes.get("aria-expanded")).toBe("false");
+    expect(elements.resultsButton.attributes.get("aria-expanded")).toBe("false");
+    expect(storage.getItem(PANEL_KEY)).toBe("result");
+    expect(elements.runButton.parentElement).toBe(actions);
+    expect(original.children).toEqual([elements.toolbar, elements.advancedControls, elements.systemLog]);
+});
+
+it("dispose removes the run listener", () => {
+    const { elements, storage, controller } = compactFixture(true);
+    controller.dispose();
+    elements.runButton.dispatchEvent(new Event("click"));
+    expect(storage.getItem(PANEL_KEY)).toBeNull();
+    expect(elements.instructions.inert).toBe(false);
+    expect(elements.results.inert).toBe(false);
+});
 
 it.each([true, false])("opens instructions by default on first compact entry (initial compact=%s)", (initialCompact) => {
     const { elements, storage, changeLayout } = compactFixture(initialCompact);
@@ -120,7 +177,7 @@ it("keeps one run control and mutually exclusive panels across layout changes", 
     vi.stubGlobal("localStorage", new MemoryStorage());
     const media = Object.assign(new EventTarget(), { matches: true });
     const document = Object.assign(new EventTarget(), { documentElement: new Element(), querySelector: () => null });
-    vi.stubGlobal("window", Object.assign(new EventTarget(), { matchMedia: () => media })); vi.stubGlobal("document", document);
+    vi.stubGlobal("window", Object.assign(new EventTarget(), { matchMedia: () => media, innerWidth: 600, innerHeight: 400 })); vi.stubGlobal("document", document);
     const elements = { instructions: new Element(), results: new Element(), controls: new Element(), instructionsButton: new Element(), resultsButton: new Element(), closeInstructions: new Element(), closeResults: new Element(), runButton: new Element(), advancedControls: new Element(), systemLog: new Element(), toolbar: new Element() };
     const original = new Element(); original.appendChild(elements.toolbar); original.appendChild(elements.advancedControls); original.appendChild(elements.systemLog);
     const actions = new Element(); actions.appendChild(elements.runButton);
@@ -138,4 +195,19 @@ it("keeps one run control and mutually exclusive panels across layout changes", 
     controller.dispose();
     expect(original.children).toEqual([elements.toolbar, elements.advancedControls, elements.systemLog]); expect(elements.runButton.parentElement).toBe(actions);
     elements.resultsButton.dispatchEvent(new Event("click")); expect(elements.results.inert).toBe(false);
+});
+
+it("reports visible space above the selected compact panel without changing panel state", () => {
+    const { controller, elements, changeLayout } = compactFixture(true);
+    const surface = new Element(); surface.bounds.top = 50;
+    elements.instructions.bounds.top = 250;
+    elements.results.bounds.top = 200;
+    const getArea = () => controller.getVisibleWorkspaceArea(surface as unknown as HTMLElement);
+    expect(getArea()).toEqual({ left: 0, top: 50, right: 600, bottom: 250 });
+    elements.resultsButton.dispatchEvent(new Event("click"));
+    expect(getArea().bottom).toBe(200);
+    elements.closeResults.dispatchEvent(new Event("click"));
+    expect(getArea().bottom).toBe(400);
+    changeLayout(false);
+    expect(getArea().bottom).toBe(400);
 });

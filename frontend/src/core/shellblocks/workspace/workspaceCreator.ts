@@ -1,4 +1,3 @@
-import { compactBlockPresentation } from "../ui/compactBlockPresentation";
 import * as Blockly from "blockly";
 import * as CLI from "../types/cli";
 import * as BlockIDs from "../constants/blockIds";
@@ -16,11 +15,15 @@ import { LogFunction, LogLevel } from "../types/logger";
 import { setLoggerForWorkspace } from "../services/logging";
 import { clearWorkspaceAssembly } from "./assembly";
 import { SemanticParentDragger } from "./semanticParentDragger";
+import { initialRootPosition, type PlacementBounds } from "./initialRootPosition";
+
+const initialRootAreas = new WeakMap<Blockly.WorkspaceSvg, () => PlacementBounds>();
 
 export interface WorkspaceConfig {
     externalLogger: LogFunction;
     workspaceId: string;
     shouldSetupAutosave?: boolean;
+    getInitialRootArea?: () => PlacementBounds;
 }
 
 const FALLBACK_DEFINITIONS: CLI.CliDefinitions = {
@@ -58,6 +61,7 @@ export async function setupWorkspace(
         getBlocklyOptions(definitions),
     );
 
+    if (config.getInitialRootArea) initialRootAreas.set(workspace, config.getInitialRootArea);
     setLoggerForWorkspace(workspace, config.externalLogger);
     disableOrphanBlocks(workspace);
 
@@ -101,12 +105,23 @@ export function createScriptRoot(workspace: Blockly.WorkspaceSvg): void {
     const rootBlock = workspace.newBlock(BlockIDs.ROOT_BLOCK_TYPE);
     rootBlock.initSvg();
     rootBlock.render();
-    const toolboxWidth = workspace.getToolbox()?.getWidth() ?? 0;
-    const gap = 24;
-    const compact = compactBlockPresentation();
+    const viewport = workspace.getInjectionDiv().getBoundingClientRect();
+    const available = initialRootAreas.get(workspace)?.() ?? viewport;
+    const area = {
+        left: Math.max(viewport.left, available.left),
+        top: Math.max(viewport.top, available.top),
+        right: Math.min(viewport.right, available.right),
+        bottom: Math.min(viewport.bottom, available.bottom),
+    };
     const toolbox = workspace.getToolbox();
-    const top = compact && toolbox instanceof Blockly.Toolbox ? toolbox.HtmlDiv?.getBoundingClientRect().height ?? 0 : 0;
-    rootBlock.moveBy((compact ? gap : toolboxWidth + gap) / workspace.scale, compact ? (top + gap) / workspace.scale : 50);
+    const obstruction = toolbox instanceof OverlayToolbox
+        ? toolbox.getInitialRootObstruction()
+        : toolbox instanceof Blockly.Toolbox && toolbox.HtmlDiv!.getClientRects().length > 0
+            ? toolbox.HtmlDiv!.getBoundingClientRect() : null;
+    const bounds = rootBlock.getSvgRoot().getBoundingClientRect();
+    const position = initialRootPosition(area, bounds, obstruction);
+    rootBlock.moveBy((position.x - bounds.left) / workspace.scale,
+        (position.y - bounds.top) / workspace.scale);
 }
 
 function getBlocklyOptions(
