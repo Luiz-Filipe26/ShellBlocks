@@ -2,6 +2,8 @@
 export const COMPACT_LAYOUT_QUERY = "(max-width: 1100px), (max-height: 500px)";
 export function compactLayout(): boolean { return window.matchMedia(COMPACT_LAYOUT_QUERY).matches; }
 
+const BOTTOM_PANEL_KEY = "shellblocks_compact_bottom_panel";
+
 export function setupCompactLayout(elements: {
     instructions: HTMLElement; results: HTMLElement; controls: HTMLElement;
     instructionsButton: HTMLButtonElement; resultsButton: HTMLButtonElement;
@@ -16,6 +18,9 @@ export function setupCompactLayout(elements: {
     const secondary = [elements.toolbar, elements.advancedControls, elements.systemLog].map(element => ({ element, parent: element.parentElement!, next: element.nextSibling }));
     let panel: "instructions" | "results" | null = null;
     const initialInert = [elements.instructions.inert, elements.results.inert];
+    function restorePanel(): void {
+        panel = localStorage.getItem(BOTTOM_PANEL_KEY) === "result" ? "results" : "instructions";
+    }
     function render(): void {
         document.documentElement.classList.toggle("compact-layout", media.matches);
         for (const [name, element, button] of [
@@ -36,7 +41,12 @@ export function setupCompactLayout(elements: {
             for (const { element, parent, next } of [...secondary].reverse()) parent.insertBefore(element, next);
         }
     }
-    const toggle = (name: typeof panel): void => { panel = panel === name ? null : name; render(); };
+    const toggle = (name: "instructions" | "results"): void => {
+        if (!media.matches) return;
+        panel = panel === name ? null : name;
+        if (panel !== null) localStorage.setItem(BOTTOM_PANEL_KEY, panel === "results" ? "result" : "instructions");
+        render();
+    };
     elements.instructionsButton.addEventListener("click", () => toggle("instructions"), { signal });
     elements.resultsButton.addEventListener("click", () => toggle("results"), { signal });
     for (const button of [elements.closeInstructions, elements.closeResults]) {
@@ -50,7 +60,11 @@ export function setupCompactLayout(elements: {
         if (event.key !== "Escape" || !media.matches || !panel || document.querySelector(".blockly-workspace-area.is-maximized")) return;
         panel = null; render(); event.preventDefault();
     }, { signal });
-    media.addEventListener("change", () => { render(); window.dispatchEvent(new Event("resize")); }, { signal });
+    media.addEventListener("change", () => {
+        if (media.matches) restorePanel();
+        render(); window.dispatchEvent(new Event("resize"));
+    }, { signal });
+    if (media.matches) restorePanel();
     render();
     return { dispose() {
         listeners.abort();
