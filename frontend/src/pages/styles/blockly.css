@@ -25,6 +25,12 @@
   filter: var(--blockly-trash-filter);
 }
 
+.shellblocks-flyout-heading > .blocklyFlyoutLabelText {
+  fill: var(--color-text-secondary) !important;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 /* Surface alpha only: category colours, text and blocks remain fully opaque. */
 .shellblocks-toolbox-overlay {
   background-color: var(--color-toolbox-surface) !important;

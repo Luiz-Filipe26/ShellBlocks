@@ -44,7 +44,7 @@ export function resolveToolboxGuidance(references: readonly ToolboxGuidance[], d
     function visit(items: typeof toolbox.contents[number]["contents"]): void {
         for (const item of items) {
             if (item.kind === "block") available.add(item.type);
-            else visit(item.contents);
+            else if (item.kind === "category") visit(item.contents);
         }
     }
     visit(toolbox.contents);

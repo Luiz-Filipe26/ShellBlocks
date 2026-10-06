@@ -1,4 +1,4 @@
-import { compactBlockPresentation } from "./compactBlockPresentation";
+import { compactBlockPresentation, isContextualToolboxFlyout } from "./compactBlockPresentation";
 import { OverlayToolbox } from "../workspace/overlayToolbox";
 import * as Blockly from "blockly";
 
@@ -25,6 +25,12 @@ export class ToolboxOptionDropdown extends Blockly.FieldDropdown {
     }
 
     protected override getText_(): string | null {
+        if (isContextualToolboxFlyout(this.getSourceBlock())) {
+            const fullText = super.getText_();
+            if (fullText === null) return null;
+            const characters = Array.from(fullText);
+            return characters.length <= 12 ? fullText : characters.slice(0, 9).join("") + "...";
+        }
         return compactBlockPresentation() ? this.getValue() : super.getText_();
     }
 

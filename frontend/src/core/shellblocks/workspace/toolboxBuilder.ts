@@ -6,11 +6,17 @@ interface ToolboxBlock {
     type: string;
 }
 
+interface ToolboxLabel {
+    kind: "label";
+    text: string;
+    "web-class": string;
+}
+
 interface ToolboxCategory {
     kind: "category";
     name: string;
     colour?: string;
-    contents: (ToolboxCategory | ToolboxBlock)[];
+    contents: (ToolboxCategory | ToolboxBlock | ToolboxLabel)[];
 }
 
 interface ToolboxConfig {
@@ -81,12 +87,20 @@ function transformCommandToCategory(
             ...(commandDefinition.options.length
                 ? [
                     {
+                        kind: "label" as const,
+                        text: "Opções",
+                        "web-class": "shellblocks-flyout-heading",
+                    },
+                    {
                         kind: "block" as const,
                         type: BlockIDs.commandOptionBlockType(
                             commandDefinition,
                         ),
                     },
                 ]
+                : []),
+            ...(commandDefinition.operands.length
+                ? [{ kind: "label" as const, text: "Operandos", "web-class": "shellblocks-flyout-heading" }]
                 : []),
             ...commandDefinition.operands.map((operand) => ({
                 kind: "block" as const,

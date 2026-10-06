@@ -13,3 +13,17 @@ export class ParentIndicatorField extends Blockly.FieldLabel {
         return super.getText_();
     }
 }
+
+/** Only the main toolbox supplies the command context; other flyouts do not. */
+export function isContextualToolboxFlyout(block: Blockly.Block | null): boolean {
+    const workspace = block?.workspace;
+    return workspace instanceof Blockly.WorkspaceSvg && workspace.isFlyout
+        && workspace.targetWorkspace?.getToolbox()?.getFlyout()?.getWorkspace() === workspace;
+}
+
+export class ContextualParentIndicatorField extends ParentIndicatorField {
+    override initModel(): void {
+        super.initModel();
+        this.setVisible(!isContextualToolboxFlyout(this.getSourceBlock()));
+    }
+}
