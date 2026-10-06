@@ -57,22 +57,37 @@
             ]
         },
         {
-            "id": "04_cd",
-            "title": "Entrando em Pastas",
-            "summary": "Mude seu local de trabalho para a pasta 'projetos'.",
-            "fullGuideHtml": "<h1>Navegação (GPS)</h1><p>Criar a pasta não significa que você está <em>dentro</em> dela. O terminal tem um 'foco' chamado diretório de trabalho.</p><h3>O Comando cd</h3><p>Significa <em>Change Directory</em> (Mudar Diretório). É o equivalente a dar um clique duplo em uma pasta no Windows.</p><h3>Sua Missão</h3><p>A pasta <code>projetos</code> já está preparada para esta missão. Use o bloco <strong>cd</strong> com o operando <code>projetos</code> para torná-la seu diretório de trabalho.</p><p><em>Dica: O comando cd normalmente não mostra texto. A verificação da missão confirmará se você entrou na pasta correta.</em></p>",
-            "verificationScript": "if [ \"$SHELLBLOCKS_FINAL_CWD\" = '/home/aluno/projetos' ]; then echo 'OK'; exit 0; else echo 'Você ainda não está dentro da pasta projetos.'; exit 1; fi",
+            "id": "10_ping",
+            "title": "Opções que recebem valores",
+            "summary": "Diferencie o argumento de uma opção do operando do comando.",
+            "fullGuideHtml": "<h1>Opções que recebem valores</h1><p>Algumas opções precisam de um valor próprio. No <strong>ping</strong>, a opção <code>-c</code> recebe a quantidade de solicitações que serão enviadas. Esse valor é o <strong>argumento da opção</strong>; o endereço de destino é um <strong>operando do comando</strong>.</p><p>O ping testa respostas de um endereço. Usaremos <code>127.0.0.1</code>, que representa o próprio computador, sem depender de acesso à Internet. Sem limite de contagem, o ping continua enviando solicitações.</p><h3>Sua Missão</h3><ol><li>Arraste o comando <strong>ping</strong>.</li><li>Encaixe sua opção <code>-c</code> e preencha o argumento <strong>contagem</strong> com <code>4</code>.</li><li>No operando <strong>Endereço</strong>, informe <code>127.0.0.1</code>.</li><li>Execute para obter quatro respostas.</li></ol>",
+            "verificationScript": "respostas=$(grep -c '^64 bytes from 127\\.0\\.0\\.1:' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\")\nif [ \"$respostas\" = 4 ] && grep -Eq '^4 packets transmitted, 4 received,' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then\n    echo 'OK'; exit 0\nfi\necho 'Use a contagem 4 para enviar quatro solicitações a 127.0.0.1 e receber as quatro respostas.'\nexit 1",
             "difficulty": "tutorial",
-            "setupScript": "rm -rf * &&\nmkdir -p projetos",
+            "setupScript": "rm -rf *",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "ping"
+                },
+                {
+                    "entity": "option",
+                    "commandId": "ping",
+                    "flag": "-c"
+                }
+            ]
+        },
+        {
+            "id": "04_cd",
+            "title": "Onde o script trabalha",
+            "summary": "Mude o diretório de trabalho e consulte seu conteúdo.",
+            "fullGuideHtml": "<h1>Onde o script trabalha</h1><p>Todo script começa em um <strong>diretório de trabalho</strong>. Aqui, ele começa em <code>/home/aluno</code>. O comando <strong>cd</strong> muda esse diretório para os comandos seguintes do mesmo script.</p><p>Um caminho <strong>relativo</strong>, como <code>projetos</code>, parte do diretório atual. Um caminho <strong>absoluto</strong>, como <code>/home/aluno/projetos</code>, começa pela raiz <code>/</code>.</p><h3>Sua Missão</h3><p>A pasta <code>projetos</code> já existe e contém <code>roteiro.txt</code>. Monte dois comandos no Script Principal, um abaixo do outro: primeiro <strong>cd</strong> com o operando <code>projetos</code>, depois <strong>ls</strong> sem operandos. Ao terminar, o diretório de trabalho deve ser <code>/home/aluno/projetos</code> e a saída deve mostrar <code>roteiro.txt</code>.</p><p>O cd normalmente não produz texto; a listagem vem do comando seguinte. Monte o script completo antes de executar: uma nova execução começa novamente no diretório inicial.</p>",
+            "verificationScript": "if [ \"$SHELLBLOCKS_FINAL_CWD\" != '/home/aluno/projetos' ]; then\n    echo 'O script deve terminar dentro de /home/aluno/projetos.'; exit 1\nfi\nif ! grep -Eq '(^|[[:space:]])roteiro\\.txt([[:space:]]|$)' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then\n    echo 'Mostre o conteúdo da pasta projetos: roteiro.txt deve aparecer na saída.'; exit 1\nfi\necho 'OK'",
+            "difficulty": "tutorial",
+            "setupScript": "mkdir projetos\nprintf 'Planejamento do projeto.\\n' > projetos/roteiro.txt",
             "toolboxGuidance": [
                 {
                     "entity": "command",
                     "commandId": "cd"
-                },
-                {
-                    "entity": "operand",
-                    "commandId": "cd",
-                    "operandId": "directory"
                 }
             ]
         },
@@ -81,7 +96,7 @@
             "title": "Clonando Arquivos",
             "summary": "Faça uma cópia de segurança do arquivo.",
             "fullGuideHtml": "<h1>A Arte de Copiar</h1><p>O comando <strong>cp</strong> (Copy) é o nosso copiador. Diferente do 'Mover', o arquivo original permanece lá.</p><h3>Dois Operandos</h3><p>Este comando precisa de duas informações, nesta ordem exata:</p><ol><li><strong>Origem:</strong> O que você quer copiar? (<code>plano.txt</code>)</li><li><strong>Destino:</strong> Qual será o nome da cópia? (<code>backup.txt</code>)</li></ol><h3>Sua Missão</h3><p>Configure o bloco <strong>cp</strong> para copiar o arquivo <code>plano.txt</code> e criar o <code>backup.txt</code>.</p>",
-            "verificationScript": "if [ ! -f plano.txt ]; then\n    echo 'O arquivo original plano.txt deve permanecer após a cópia.'; exit 1\nfi\nif [ ! -f backup.txt ]; then\n    echo 'O arquivo backup.txt não foi criado.'; exit 1\nfi\nif ! cmp -s plano.txt backup.txt; then\n    echo 'backup.txt deve conter uma cópia completa de plano.txt.'; exit 1\nfi\necho 'OK'",
+            "verificationScript": "python3 - <<'CHECK_RESULT'\nfrom pathlib import Path\nimport os\nhome = Path('/home/aluno')\nproblems = []\npath = home / 'plano.txt'\nif not path.is_file():\n    problems.append('plano.txt deve existir como arquivo.')\nelif path.read_bytes() != b'Dominar o mundo\\n':\n    problems.append('plano.txt não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\npath = home / 'backup.txt'\nif not path.is_file():\n    problems.append('backup.txt deve existir como arquivo.')\nelif path.read_bytes() != b'Dominar o mundo\\n':\n    problems.append('backup.txt não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\nif problems:\n    print('\\n'.join(problems))\n    raise SystemExit(1)\nprint('OK')\nCHECK_RESULT",
             "difficulty": "tutorial",
             "setupScript": "rm -rf * &&\necho 'Dominar o mundo' > plano.txt",
             "toolboxGuidance": [
@@ -102,10 +117,73 @@
             ]
         },
         {
+            "id": "mv_basics",
+            "title": "Mover e renomear",
+            "summary": "Mova um arquivo para um novo nome, sem deixar o original.",
+            "difficulty": "tutorial",
+            "fullGuideHtml": "<h1>Mover e renomear</h1><p>O comando <strong>mv</strong> (Move) transfere um arquivo: ao contrário de cp, não deixa uma cópia no caminho de origem. Se o destino for um novo nome, isso também renomeia o arquivo.</p><h3>Sua Missão</h3><p>O arquivo <code>rascunho.txt</code> já existe. O nome <code>plano.txt</code> ainda não existe. Use <strong>mv</strong> com o operando <strong>Origem</strong> igual a <code>rascunho.txt</code> e <strong>Destino</strong> igual a <code>plano.txt</code>, nessa ordem. Preserve integralmente o conteúdo; ao terminar, rascunho.txt não deve existir.</p><p>Um destino também pode ser uma pasta existente: o arquivo passa para dentro dela, conservando seu nome. Para transferir vários arquivos para a mesma pasta, encadeie seus operandos de Origem antes do Destino.</p>",
+            "setupScript": "python3 - <<'PREPARE_FILES'\nfrom pathlib import Path\nPath('rascunho.txt').write_bytes(b'Planejamento da equipe.\\nEntrega: sexta-feira.\\n')\nPREPARE_FILES",
+            "verificationScript": "python3 - <<'CHECK_RESULT'\nfrom pathlib import Path\nimport os\nhome = Path('/home/aluno')\nproblems = []\npath = home / 'plano.txt'\nif not path.is_file():\n    problems.append('plano.txt deve existir como arquivo.')\nelif path.read_bytes() != b'Planejamento da equipe.\\nEntrega: sexta-feira.\\n':\n    problems.append('plano.txt não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\nif os.path.lexists(home / 'rascunho.txt'):\n    problems.append('rascunho.txt não deve permanecer no diretório inicial.')\nimport shlex\n\n# Tokenize command invocations, not mentions in comments or string arguments.\nsource = Path(os.environ['SHELLBLOCKS_USER_SCRIPT_FILE']).read_text()\nlexer = shlex.shlex(source, posix=True, punctuation_chars=';&|()<>\\n')\nlexer.whitespace = ' \\t\\r'\nlexer.whitespace_split = True\ncommands = []\ncommand = []\ntry:\n    for token in lexer:\n        if token and all(character in ';&|()<>\\n' for character in token):\n            if command:\n                commands.append(command)\n                command = []\n        else:\n            command.append(token)\nexcept ValueError:\n    problems.append('Neste tutorial, use mv para mover rascunho.txt para plano.txt, preservando seu conteúdo.')\nif command:\n    commands.append(command)\n\ncwd = home\nused_tool = False\nfor command in commands:\n    executable, *arguments = command\n    if executable == 'cd' and len(arguments) == 1:\n        cwd = Path(os.path.abspath(cwd / arguments[0]))\n        continue\n    if executable not in ('mv', '/bin/mv', '/usr/bin/mv'):\n        continue\n    arguments = [argument for argument in arguments if not argument.startswith('-')]\n    paths = [Path(os.path.abspath(cwd / argument)) for argument in arguments]\n    if len(arguments) == 2 and paths == [home / 'rascunho.txt', home / 'plano.txt']:\n        used_tool = True\nif not used_tool:\n    problems.append('Neste tutorial, use mv para mover rascunho.txt para plano.txt, preservando seu conteúdo.')\n\nif problems:\n    print('\\n'.join(problems))\n    raise SystemExit(1)\nprint('OK')\nCHECK_RESULT",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "mv"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "mv",
+                    "operandId": "source"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "mv",
+                    "operandId": "destination"
+                }
+            ]
+        },
+        {
+            "id": "14_organizar",
+            "title": "Treino — Organizando os logs",
+            "summary": "Organize dois logs sem modificar os demais arquivos.",
+            "fullGuideHtml": "<h1>Organizando os logs</h1><p>No diretório inicial <code>/home/aluno</code> estão <code>erro.log</code>, <code>acesso.log</code>, <code>imagem.png</code> e <code>script.sh</code>. A pasta <code>logs</code> ainda não existe.</p><p>Monte um script que deixe os dois logs dentro de <code>logs</code>, com seus nomes e conteúdos intactos. Eles não devem permanecer na origem. Os arquivos <code>imagem.png</code> e <code>script.sh</code> devem permanecer intactos no diretório inicial.</p>",
+            "verificationScript": "python3 - <<'CHECK_RESULT'\nfrom pathlib import Path\nimport os\nhome = Path('/home/aluno')\nproblems = []\nif not (home / 'logs').is_dir():\n    problems.append('logs deve existir como diretório.')\npath = home / 'logs/erro.log'\nif not path.is_file():\n    problems.append('logs/erro.log deve existir como arquivo.')\nelif path.read_bytes() != b'Falha de acesso.\\n':\n    problems.append('logs/erro.log não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\npath = home / 'logs/acesso.log'\nif not path.is_file():\n    problems.append('logs/acesso.log deve existir como arquivo.')\nelif path.read_bytes() != b'Acesso autorizado.\\n':\n    problems.append('logs/acesso.log não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\npath = home / 'imagem.png'\nif not path.is_file():\n    problems.append('imagem.png deve existir como arquivo.')\nelif path.read_bytes() != b'Imagem de referencia.\\n':\n    problems.append('imagem.png não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\npath = home / 'script.sh'\nif not path.is_file():\n    problems.append('script.sh deve existir como arquivo.')\nelif path.read_bytes() != b'Programa de referencia.\\n':\n    problems.append('script.sh não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\nif os.path.lexists(home / 'erro.log'):\n    problems.append('erro.log não deve permanecer no diretório inicial.')\nif os.path.lexists(home / 'acesso.log'):\n    problems.append('acesso.log não deve permanecer no diretório inicial.')\nif problems:\n    print('\\n'.join(problems))\n    raise SystemExit(1)\nprint('OK')\nCHECK_RESULT",
+            "difficulty": "training",
+            "setupScript": "python3 - <<'PREPARE_FILES'\nfrom pathlib import Path\nPath('erro.log').write_bytes(b'Falha de acesso.\\n')\nPath('acesso.log').write_bytes(b'Acesso autorizado.\\n')\nPath('imagem.png').write_bytes(b'Imagem de referencia.\\n')\nPath('script.sh').write_bytes(b'Programa de referencia.\\n')\nPREPARE_FILES"
+        },
+        {
+            "id": "15_limpeza",
+            "title": "Remover somente o necessário",
+            "summary": "Aprenda a remover um arquivo preservando os demais.",
+            "fullGuideHtml": "<h1>Remover somente o necessário</h1><p>O comando <strong>rm</strong> (Remove) apaga o arquivo informado no operando <strong>Alvos</strong>. Ele não o envia à lixeira do Blockly: essa lixeira remove blocos, não arquivos do ambiente de execução.</p><h3>Sua Missão</h3><p>O diretório inicial contém <code>senhas_antigas.txt</code>, <code>notas.txt</code> e <code>todo_list.md</code>. Use <strong>rm</strong> com o alvo <code>senhas_antigas.txt</code>. Ao terminar, esse arquivo deve estar ausente e os outros dois devem permanecer intactos.</p><p>Confira o alvo antes de executar. Não é necessário listar os arquivos neste script.</p>",
+            "verificationScript": "python3 - <<'CHECK_RESULT'\nfrom pathlib import Path\nimport os\nhome = Path('/home/aluno')\nproblems = []\npath = home / 'notas.txt'\nif not path.is_file():\n    problems.append('notas.txt deve existir como arquivo.')\nelif path.read_bytes() != b'Anotacoes da equipe.\\n':\n    problems.append('notas.txt não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\npath = home / 'todo_list.md'\nif not path.is_file():\n    problems.append('todo_list.md deve existir como arquivo.')\nelif path.read_bytes() != b'Tarefas em andamento.\\n':\n    problems.append('todo_list.md não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\nif os.path.lexists(home / 'senhas_antigas.txt'):\n    problems.append('senhas_antigas.txt não deve permanecer no diretório inicial.')\nimport shlex\n\n# Tokenize command invocations, not mentions in comments or string arguments.\nsource = Path(os.environ['SHELLBLOCKS_USER_SCRIPT_FILE']).read_text()\nlexer = shlex.shlex(source, posix=True, punctuation_chars=';&|()<>\\n')\nlexer.whitespace = ' \\t\\r'\nlexer.whitespace_split = True\ncommands = []\ncommand = []\ntry:\n    for token in lexer:\n        if token and all(character in ';&|()<>\\n' for character in token):\n            if command:\n                commands.append(command)\n                command = []\n        else:\n            command.append(token)\nexcept ValueError:\n    problems.append('Neste tutorial, use rm para remover senhas_antigas.txt, preservando os outros arquivos.')\nif command:\n    commands.append(command)\n\ncwd = home\nused_tool = False\nfor command in commands:\n    executable, *arguments = command\n    if executable == 'cd' and len(arguments) == 1:\n        cwd = Path(os.path.abspath(cwd / arguments[0]))\n        continue\n    if executable not in ('rm', '/bin/rm', '/usr/bin/rm'):\n        continue\n    arguments = [argument for argument in arguments if not argument.startswith('-')]\n    paths = [Path(os.path.abspath(cwd / argument)) for argument in arguments]\n    if home / 'senhas_antigas.txt' in paths:\n        used_tool = True\nif not used_tool:\n    problems.append('Neste tutorial, use rm para remover senhas_antigas.txt, preservando os outros arquivos.')\n\nif problems:\n    print('\\n'.join(problems))\n    raise SystemExit(1)\nprint('OK')\nCHECK_RESULT",
+            "difficulty": "tutorial",
+            "setupScript": "python3 - <<'PREPARE_FILES'\nfrom pathlib import Path\nPath('notas.txt').write_bytes(b'Anotacoes da equipe.\\n')\nPath('todo_list.md').write_bytes(b'Tarefas em andamento.\\n')\nPath('senhas_antigas.txt').write_bytes(b'admin:12345\\n')\nPREPARE_FILES",
+            "toolboxGuidance": [
+                {
+                    "entity": "command",
+                    "commandId": "rm"
+                },
+                {
+                    "entity": "operand",
+                    "commandId": "rm",
+                    "operandId": "target"
+                }
+            ]
+        },
+        {
+            "id": "backup_cleanup",
+            "title": "Treino — Backup e limpeza",
+            "summary": "Preserve um documento e remova somente o temporário.",
+            "difficulty": "training",
+            "fullGuideHtml": "<h1>Backup e limpeza</h1><p>O diretório inicial contém <code>plano.txt</code>, <code>cache.tmp</code> e <code>leia-me.txt</code>. O arquivo <code>backup.txt</code> ainda não existe.</p><p>Monte um script completo que crie <code>backup.txt</code> com uma cópia integral do conteúdo inicial de <code>plano.txt</code> e remova somente <code>cache.tmp</code>. Tanto <code>plano.txt</code> quanto <code>leia-me.txt</code> devem permanecer intactos.</p>",
+            "setupScript": "python3 - <<'PREPARE_FILES'\nfrom pathlib import Path\nPath('plano.txt').write_bytes(b'Configuracao da equipe.\\nResponsavel: Ana.\\n')\nPath('cache.tmp').write_bytes(b'Dados temporarios.\\n')\nPath('leia-me.txt').write_bytes(b'Preserve este documento.\\n')\nPREPARE_FILES",
+            "verificationScript": "python3 - <<'CHECK_RESULT'\nfrom pathlib import Path\nimport os\nhome = Path('/home/aluno')\nproblems = []\npath = home / 'plano.txt'\nif not path.is_file():\n    problems.append('plano.txt deve existir como arquivo.')\nelif path.read_bytes() != b'Configuracao da equipe.\\nResponsavel: Ana.\\n':\n    problems.append('plano.txt não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\npath = home / 'backup.txt'\nif not path.is_file():\n    problems.append('backup.txt deve existir como arquivo.')\nelif path.read_bytes() != b'Configuracao da equipe.\\nResponsavel: Ana.\\n':\n    problems.append('backup.txt não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\npath = home / 'leia-me.txt'\nif not path.is_file():\n    problems.append('leia-me.txt deve existir como arquivo.')\nelif path.read_bytes() != b'Preserve este documento.\\n':\n    problems.append('leia-me.txt não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\nif os.path.lexists(home / 'cache.tmp'):\n    problems.append('cache.tmp não deve permanecer no diretório inicial.')\nif problems:\n    print('\\n'.join(problems))\n    raise SystemExit(1)\nprint('OK')\nCHECK_RESULT"
+        },
+        {
             "id": "06_cat",
-            "title": "Lendo Arquivos",
+            "title": "Lendo conteúdo",
             "summary": "Descubra o que está escrito no arquivo secreto.",
-            "fullGuideHtml": "<h1>Arquivos têm Conteúdo</h1><p>Até agora, os arquivos eram apenas nomes na lista. Mas eles guardam informações.</p><h3>O Comando cat</h3><p>O nome vem de <em>Concatenate</em> (Concatenar). Ele pega todo o texto de um arquivo e joga na tela.</p><h3>Sua Missão</h3><p>Interceptamos uma mensagem. Use o bloco <strong>cat</strong> para ler o arquivo <code>mensagem_secreta.txt</code> e descobrir a senha.</p>",
+            "fullGuideHtml": "<h1>Arquivos têm Conteúdo</h1><p>Até agora, os arquivos eram apenas nomes na lista. Mas eles guardam informações.</p><h3>O Comando cat</h3><p>O nome vem de <em>Concatenate</em> (Concatenar). Ele pega todo o texto de um arquivo e joga na tela.</p><p>O cat também aceita vários operandos de arquivo: encadeie-os na ordem desejada. Ele mostra o conteúdo do primeiro, depois o do segundo, sem acrescentar nomes de arquivos ou separadores.</p><h3>Sua Missão</h3><p>Interceptamos uma mensagem. Use o bloco <strong>cat</strong> para ler o arquivo <code>mensagem_secreta.txt</code> e descobrir a senha.</p>",
             "verificationScript": "if grep -q 'BATATA-123' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then echo 'OK'; exit 0; else echo 'O conteúdo da mensagem não apareceu na tela. Você leu o arquivo certo?'; exit 1; fi",
             "difficulty": "tutorial",
             "setupScript": "rm -rf * &&\necho 'A senha do cofre é: BATATA-123' > mensagem_secreta.txt &&\ntouch lixo.txt",
@@ -150,7 +228,7 @@
             "id": "08_redirect",
             "title": "Salvando Resultados (>)",
             "summary": "Grave a lista de arquivos dentro de um novo arquivo.",
-            "fullGuideHtml": "<h1>Persistência de Dados</h1><p>Normalmente, o resultado de um comando aparece na tela e desaparece logo depois. E se quisermos salvar essa resposta?</p><h3>O Operador Maior Que (>)</h3><p>Esse símbolo pega o resultado do comando encaixado no lado esquerdo e <strong>salva dentro do arquivo</strong> indicado à direita.</p><div class=\"terminal-display\">$ ls > inventario.txt</div><h3>Sua Missão</h3><ol><li>Abra a categoria <strong>Fluxo</strong> e coloque o operador <strong>&gt; (Redirecionar)</strong> no Script Principal.</li><li>Encaixe o comando <strong>ls</strong> dentro do primeiro espaço do operador (slot A).</li><li>No campo de texto ao lado de <code>&gt;</code>, digite o destino <code>inventario.txt</code>.</li><li>Execute para salvar a lista de arquivos!</li></ol>",
+            "fullGuideHtml": "<h1>Persistência de Dados</h1><p>Normalmente, o resultado de um comando aparece na tela e desaparece logo depois. E se quisermos salvar essa resposta?</p><h3>O Operador Maior Que (>)</h3><p>Esse símbolo pega o resultado do comando encaixado no lado esquerdo e <strong>salva dentro do arquivo</strong> indicado à direita.</p><p>O destino é criado se ainda não existir. Se já existir, <code>&gt;</code> substitui seu conteúdo anterior pelo novo resultado.</p><div class=\"terminal-display\">$ ls > inventario.txt</div><h3>Sua Missão</h3><ol><li>Abra a categoria <strong>Fluxo</strong> e coloque o operador <strong>&gt; (Redirecionar)</strong> no Script Principal.</li><li>Encaixe o comando <strong>ls</strong> dentro do primeiro espaço do operador (slot A).</li><li>No campo de texto ao lado de <code>&gt;</code>, digite o destino <code>inventario.txt</code>.</li><li>Execute para salvar a lista de arquivos!</li></ol>",
             "verificationScript": "if [ ! -f inventario.txt ]; then\n    echo 'O arquivo inventario.txt não foi criado.'; exit 1\nfi\nfor arquivo in caixa_A.doc caixa_B.doc; do\n    if ! awk -v arquivo=\"$arquivo\" '{ for (i = 1; i <= NF; i++) if ($i == arquivo) found = 1 } END { exit !found }' inventario.txt; then\n        echo \"A listagem em inventario.txt deve incluir $arquivo.\"; exit 1\n    fi\ndone\necho 'OK'",
             "difficulty": "tutorial",
             "setupScript": "rm -rf * &&\ntouch caixa_A.doc &&\ntouch caixa_B.doc",
@@ -162,10 +240,19 @@
             ]
         },
         {
+            "id": "16_processamento",
+            "title": "Treino — Preservando os erros",
+            "summary": "Guarde todos os registros críticos antes de remover o log.",
+            "fullGuideHtml": "<h1>Preservando os erros</h1><p>O arquivo <code>servidor.log</code> contém registros INFO, WARN e CRITICO. O arquivo <code>erros.txt</code> ainda não existe.</p><p>Ao terminar seu script, <code>erros.txt</code> deve conter <strong>todas e somente</strong> as linhas de servidor.log com <code>CRITICO</code>. Preserve o texto completo, a ordem e as repetições; não acrescente títulos, nomes de arquivos ou numeração. O arquivo <code>servidor.log</code> deve ter sido removido.</p><p>Planeje como preservar a informação necessária antes de descartar a origem.</p>",
+            "verificationScript": "python3 - <<'CHECK_RESULT'\nfrom pathlib import Path\nimport os\nhome = Path('/home/aluno')\nproblems = []\npath = home / 'erros.txt'\nif not path.is_file():\n    problems.append('erros.txt deve existir como arquivo.')\nelif path.read_bytes() != b'CRITICO: Banco de dados caiu\\nCRITICO: Disco indisponivel\\nCRITICO: Banco de dados caiu\\n':\n    problems.append('erros.txt não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\nif os.path.lexists(home / 'servidor.log'):\n    problems.append('servidor.log não deve permanecer no diretório inicial.')\nif problems:\n    print('\\n'.join(problems))\n    raise SystemExit(1)\nprint('OK')\nCHECK_RESULT",
+            "difficulty": "training",
+            "setupScript": "python3 - <<'PREPARE_FILES'\nfrom pathlib import Path\nPath('servidor.log').write_bytes(b'INFO: Tudo ok\\nCRITICO: Banco de dados caiu\\nWARN: Memoria cheia\\nCRITICO: Disco indisponivel\\nINFO: Reiniciando\\nCRITICO: Banco de dados caiu\\n')\nPREPARE_FILES"
+        },
+        {
             "id": "09_pipe",
             "title": "Conectando Comandos (|)",
             "summary": "Use a saída de um comando como entrada de outro.",
-            "fullGuideHtml": "<h1>Encanamento de Dados (|)</h1><p>No terminal, você pode conectar comandos para criar soluções poderosas usando o <strong>| (Pipe)</strong>.</p><h3>Como o Pipe funciona?</h3><p>Ele funciona como um cano invisível: conecta a saída de um comando à entrada de outro. Assim, o segundo comando pode trabalhar com o texto recebido sem que você precise salvá-lo antes em um arquivo intermediário. Essa composição também funciona com outros comandos que produzem texto.</p><div class=\"terminal-display\">$ cat nomes.txt | grep Ana</div><h3>Sua Missão</h3><ol><li>Abra a categoria <strong>Fluxo</strong> e coloque o operador <strong>| (Pipe)</strong> no Script Principal.</li><li>No slot A, à esquerda, encaixe <strong>cat</strong> com o operando <code>nomes.txt</code>.</li><li>No slot B, à direita de <code>|</code>, encaixe <strong>grep</strong> apenas com o padrão <code>Ana</code>. O texto de entrada chegará pelo pipe, portanto não adicione um arquivo ao grep.</li><li>Execute para ver somente os nomes que contêm Ana.</li></ol>",
+            "fullGuideHtml": "<h1>Encanamento de Dados (|)</h1><p>No terminal, você pode conectar comandos para criar soluções poderosas usando o <strong>| (Pipe)</strong>.</p><h3>Como o Pipe funciona?</h3><p>Ele funciona como um cano invisível: conecta a saída de um comando à entrada de outro. Assim, o segundo comando pode trabalhar com o texto recebido sem que você precise salvá-lo antes em um arquivo intermediário. Essa composição também funciona com outros comandos que produzem texto.</p><div class=\"terminal-display\">$ cat nomes.txt | grep Ana</div><h3>Sua Missão</h3><ol><li>Abra a categoria <strong>Fluxo</strong> e coloque o operador <strong>| (Pipe)</strong> no Script Principal.</li><li>No slot A, à esquerda, encaixe <strong>cat</strong> com o operando <code>nomes.txt</code>.</li><li>No slot B, à direita de <code>|</code>, encaixe <strong>grep</strong> apenas com o padrão <code>Ana</code>. O texto de entrada chegará pelo pipe, portanto não adicione um arquivo ao grep.</li><li>Execute para ver somente os nomes que contêm Ana.</li></ol><p>Para salvar o resultado de uma composição, o bloco inteiro do pipe pode ocupar o slot A de um redirecionamento <code>&gt;</code>. O destino recebe a saída do último comando da composição.</p>",
             "verificationScript": "python3 - <<'CHECK_PIPE'\nimport os\nfrom pathlib import Path\nimport shlex\nimport sys\n\nsource = Path(os.environ['SHELLBLOCKS_USER_SCRIPT_FILE']).read_text()\nlexer = shlex.shlex(source, posix=True, punctuation_chars='|;&()<>\\n')\nlexer.whitespace = ' \\t\\r'\nlexer.whitespace_split = True\ntry:\n    tokens = list(lexer)\nexcept ValueError:\n    print('Monte um pipe entre cat nomes.txt e grep com um padrão de busca.')\n    sys.exit(1)\n\n# Check the composition without requiring one spelling of the entire script.\nboundaries = set('|;&()<>\\n')\ndef boundary(token):\n    return all(character in boundaries for character in token)\n\ndef names_file(argument):\n    return os.path.abspath(argument) == '/home/aluno/nomes.txt'\n\nhas_pipe = False\nfor index, token in enumerate(tokens):\n    if token != '|':\n        continue\n    start, end = index, index + 1\n    while start > 0 and not boundary(tokens[start - 1]):\n        start -= 1\n    while end < len(tokens) and not boundary(tokens[end]):\n        end += 1\n    left, right = tokens[start:index], tokens[index + 1:end]\n    if not left or not right or left[0] != 'cat' or right[0] != 'grep':\n        continue\n    arguments = [argument for argument in right[1:] if not argument.startswith('-')]\n    if any(names_file(argument) for argument in left[1:]) and len(arguments) == 1:\n        has_pipe = True\n        break\nif not has_pipe:\n    print('Use cat para ler nomes.txt e envie sua saída pelo pipe ao grep, sem dar um arquivo ao grep.')\n    sys.exit(1)\nCHECK_PIPE\nif [ \"$?\" -ne 0 ]; then exit 1; fi\nresultado=$(sed -E 's/^[0-9]+://; s/^[[:blank:]]*[0-9]+[[:blank:]]+//' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\")\nif [ \"$resultado\" = \"$(printf 'Ana Maria\\nAna Paula')\" ]; then\n    echo 'OK'; exit 0\nfi\necho 'O pipe deve mostrar somente as duas linhas que contêm Ana.'\nexit 1",
             "difficulty": "tutorial",
             "setupScript": "rm -rf * &&\necho 'Carlos' > nomes.txt &&\necho 'Ana Maria' >> nomes.txt &&\necho 'Pedro' >> nomes.txt &&\necho 'Ana Paula' >> nomes.txt",
@@ -177,38 +264,22 @@
             ]
         },
         {
-            "id": "10_ping",
-            "title": "Sonar de Rede (Ping)",
-            "summary": "Verifique se um endereço de rede está ativo.",
-            "fullGuideHtml": "<h1>O Infinito e Além</h1><p>No Linux, o comando <strong>ping</strong> roda para sempre! Se você não limitá-lo, ele nunca para.</p><h3>A Opção de Contagem (-c)</h3><p>Para evitar que o terminal fique preso eternamente, usamos a opção <strong>-c</strong> (count) para definir quantas vezes queremos testar.</p><h3>Sua Missão</h3><p>Use o bloco <strong>ping</strong>:</p><ol><li>Encaixe a opção <strong>-c</strong> no comando <strong>ping</strong> e preencha seu argumento <strong>contagem</strong> com <strong>4</strong>.</li><li>No operando <strong>Endereço</strong>, digite <code>127.0.0.1</code>.</li></ol>",
-            "verificationScript": "respostas=$(grep -c '^64 bytes from 127\\.0\\.0\\.1:' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\")\nif [ \"$respostas\" = 4 ] && grep -Eq '^4 packets transmitted, 4 received,' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then\n    echo 'OK'; exit 0\nfi\necho 'Use a contagem 4 para enviar quatro solicitações a 127.0.0.1 e receber as quatro respostas.'\nexit 1",
-            "difficulty": "tutorial",
-            "setupScript": "rm -rf *",
-            "toolboxGuidance": [
-                {
-                    "entity": "command",
-                    "commandId": "ping"
-                },
-                {
-                    "entity": "option",
-                    "commandId": "ping",
-                    "flag": "-c"
-                },
-                {
-                    "entity": "operand",
-                    "commandId": "ping",
-                    "operandId": "host"
-                }
-            ]
+            "id": "two_shift_report",
+            "title": "Treino — Relatório de dois turnos",
+            "summary": "Reúna os erros de dois turnos em um único relatório.",
+            "difficulty": "training",
+            "fullGuideHtml": "<h1>Relatório de dois turnos</h1><p>O diretório inicial contém <code>turno_a.log</code> e <code>turno_b.log</code>, com registros INFO, WARN e ERRO. O arquivo <code>erros.txt</code> ainda não existe.</p><p>Produza um arquivo <code>erros.txt</code> contendo <strong>todas e somente</strong> as linhas com <code>ERRO</code>: primeiro as do turno A, depois as do turno B. Preserve o texto completo, a ordem interna de cada turno e todas as repetições. Não acrescente títulos, nomes de arquivos ou numeração.</p><p>Os dois logs devem permanecer intactos. Monte o script completo escolhendo como combinar as ferramentas que conhece. Arquivos intermediários são permitidos.</p>",
+            "setupScript": "python3 - <<'PREPARE_FILES'\nfrom pathlib import Path\nPath('turno_a.log').write_bytes(b'INFO: Turno A iniciado\\nERRO: Pedido 103 recusado\\nWARN: Resposta lenta\\nERRO: Pedido 103 recusado\\n')\nPath('turno_b.log').write_bytes(b'INFO: Turno B iniciado\\nERRO: Recibo nao enviado\\nERRO: Pedido 103 recusado\\nINFO: Turno B encerrado\\n')\nPREPARE_FILES",
+            "verificationScript": "python3 - <<'CHECK_RESULT'\nfrom pathlib import Path\nimport os\nhome = Path('/home/aluno')\nproblems = []\npath = home / 'erros.txt'\nif not path.is_file():\n    problems.append('erros.txt deve existir como arquivo.')\nelif path.read_bytes() != b'ERRO: Pedido 103 recusado\\nERRO: Pedido 103 recusado\\nERRO: Recibo nao enviado\\nERRO: Pedido 103 recusado\\n':\n    problems.append('erros.txt não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\npath = home / 'turno_a.log'\nif not path.is_file():\n    problems.append('turno_a.log deve existir como arquivo.')\nelif path.read_bytes() != b'INFO: Turno A iniciado\\nERRO: Pedido 103 recusado\\nWARN: Resposta lenta\\nERRO: Pedido 103 recusado\\n':\n    problems.append('turno_a.log não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\npath = home / 'turno_b.log'\nif not path.is_file():\n    problems.append('turno_b.log deve existir como arquivo.')\nelif path.read_bytes() != b'INFO: Turno B iniciado\\nERRO: Recibo nao enviado\\nERRO: Pedido 103 recusado\\nINFO: Turno B encerrado\\n':\n    problems.append('turno_b.log não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\nif problems:\n    print('\\n'.join(problems))\n    raise SystemExit(1)\nprint('OK')\nCHECK_RESULT"
         },
         {
             "id": "11_curl",
             "title": "Buscando Dados (Curl)",
             "summary": "Obtenha o conteúdo de uma página ou arquivo na rede.",
             "fullGuideHtml": "<h1>O Navegador em Texto</h1><p>O comando <strong>curl</strong> busca o conteúdo de endereços (URLs) e mostra na tela.</p><h3>Sua Missão</h3><p>Existe um mini-servidor rodando neste computador na porta 8000. Use o <strong>curl</strong> para ler o conteúdo deste endereço:</p><code>http://127.0.0.1:8000/sucesso.txt</code>",
-            "verificationScript": "if grep -Fxq 'PARABENS! VOCE COMPLETOU O TUTORIAL!' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then\n    echo 'OK'; exit 0\nfi\necho 'O conteúdo esperado não apareceu na saída. Confira a URL solicitada e a resposta do curl.'\nexit 1",
+            "verificationScript": "if grep -Fxq 'Servico local disponivel.' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then\n    echo 'OK'; exit 0\nfi\necho 'O conteúdo esperado não apareceu na saída. Confira a URL solicitada e a resposta do curl.'\nexit 1",
             "difficulty": "tutorial",
-            "setupScript": "pkill -9 -f http.server || true &&\necho 'PARABENS! VOCE COMPLETOU O TUTORIAL!' > sucesso.txt &&\n(python3 -m http.server 8000 --bind 127.0.0.1 > /dev/null 2>&1 & true) &&\nsleep 3",
+            "setupScript": "python3 - <<'PREPARE_ENVIRONMENT'\nfrom pathlib import Path\nimport subprocess\nimport time\nimport urllib.error\nimport urllib.request\n\nsource = Path('/tmp/shellblocks-level-11-source')\nsource.mkdir()\ncontent = b'Servico local disponivel.\\n'\n(source / 'sucesso.txt').write_bytes(content)\n\nserver = subprocess.Popen(\n    ['python3', '-m', 'http.server', '8000', '--bind', '127.0.0.1', '--directory', str(source)],\n    stdout=subprocess.DEVNULL,\n    stderr=subprocess.DEVNULL,\n    start_new_session=True,\n)\ndeadline = time.monotonic() + 5\nwhile time.monotonic() < deadline:\n    if server.poll() is not None:\n        raise SystemExit('Não foi possível iniciar o serviço HTTP da missão.')\n    try:\n        with urllib.request.urlopen('http://127.0.0.1:8000/sucesso.txt', timeout=0.2) as response:\n            if response.read() == content:\n                break\n    except urllib.error.URLError:\n        pass\n    time.sleep(0.05)\nelse:\n    server.terminate()\n    raise SystemExit('O serviço HTTP da missão não ficou disponível no prazo esperado.')\nPREPARE_ENVIRONMENT",
             "toolboxGuidance": [
                 {
                     "entity": "command",
@@ -222,75 +293,13 @@
             ]
         },
         {
-            "id": "12_ps",
-            "title": "Visualizando Processos",
-            "summary": "Veja o que está rodando no sistema agora.",
-            "fullGuideHtml": "<h1>O Sistema está Vivo</h1><p>Mesmo quando você não digita nada, o computador está rodando vários programas invisíveis.</p><h3>O Comando ps</h3><p>O comando <strong>ps</strong> (Process Status) lista os programas que estão ativos no momento. É como o Gerenciador de Tarefas do Windows.</p><h3>Sua Missão</h3><p>Existe um processo chamado <code>servidor_oculto</code> rodando agora. Use o comando <strong>ps</strong> para encontrá-lo na lista de processos ativos.</p>",
-            "verificationScript": "pid=$(cat /tmp/shellblocks-level-12.pid)\nif awk -v pid=\"$pid\" '$1 == pid && /(^|[[:space:]])servidor_oculto([[:space:]]|$)/ { found = 1 } END { exit !found }' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then\n    echo 'OK'; exit 0\nfi\necho 'A listagem deve mostrar o processo servidor_oculto e seu PID. Use ps para encontrá-lo.'\nexit 1",
-            "difficulty": "tutorial",
-            "setupScript": "pkill -f servidor_oculto || true\nrm -rf *\nsh -c 'sleep 200; :' servidor_oculto > /dev/null 2>&1 &\npid=$!\nprintf '%s\\n' \"$pid\" > /tmp/shellblocks-level-12.pid\nfor tentativa in $(seq 1 100); do\n    if tr '\\0' ' ' < \"/proc/$pid/cmdline\" 2>/dev/null | grep -q servidor_oculto; then\n        exit 0\n    fi\n    sleep 0.01\ndone\necho 'Não foi possível preparar o processo servidor_oculto.' >&2\nexit 1",
-            "toolboxGuidance": [
-                {
-                    "entity": "command",
-                    "commandId": "ps"
-                },
-                {
-                    "entity": "option",
-                    "commandId": "ps",
-                    "flag": "aux"
-                }
-            ]
-        },
-        {
-            "id": "13_background",
-            "title": "Multitarefa (&)",
-            "summary": "Execute comandos em segundo plano.",
-            "fullGuideHtml": "<h1>Multitarefa (&)</h1><p>Alguns comandos demoram muito ou nunca param de rodar (como o <code>ping</code>). Para não travar o terminal, podemos enviá-los para o segundo plano.</p><h3>O Operador E-Comercial (&)</h3><p>O operador acrescenta <code>&</code> ao comando colocado dentro dele e pede ao sistema que o execute em segundo plano.</p><h3>Sua Missão</h3><ol><li>Abra a categoria <strong>Fluxo</strong> e coloque o operador <strong>background (&)</strong> no Script Principal.</li><li>Configure o comando <code>ping</code> com o destino <code>127.0.0.1</code>.</li><li>Encaixe esse comando dentro do slot A do operador de background.</li><li>Execute. O sistema vai confirmar que o processo começou a rodar em segundo plano!</li></ol>",
-            "verificationScript": "for status in /proc/[0-9]*/status; do\n    diretorio=${status%/status}\n    if grep -qx ping \"$diretorio/comm\" 2>/dev/null &&\n       awk '$1 == \"State:\" && $2 != \"Z\" { active = 1 } END { exit !active }' \"$status\" 2>/dev/null &&\n       tr '\\0' '\\n' < \"$diretorio/cmdline\" 2>/dev/null | grep -Fxq '127.0.0.1'; then\n        echo 'OK'; exit 0\n    fi\ndone\necho 'Não há um ping ativo para 127.0.0.1 após o script. Execute-o em segundo plano; uma contagem muito curta pode fazê-lo terminar antes da verificação.'\nexit 1",
-            "difficulty": "training",
-            "setupScript": "rm -rf *",
-            "toolboxGuidance": [
-                {
-                    "entity": "operator",
-                    "operatorId": "background"
-                }
-            ]
-        },
-        {
-            "id": "14_organizar",
-            "title": "Arrumando a Casa",
-            "summary": "Organize os arquivos soltos em diretórios.",
-            "fullGuideHtml": "<h1>Caos no Servidor</h1><p>Alguém (provavelmente o estagiário) deixou vários arquivos de log espalhados no diretório atual. Precisamos organizar isso.</p><h3>Sua Missão</h3><ol><li>Crie um diretório chamado <code>logs</code>.</li><li>Use o comando <strong>mv</strong> para mover os arquivos <code>erro.log</code> e <code>acesso.log</code> para dentro dessa nova pasta.</li></ol>",
-            "verificationScript": "if [ ! -d logs ] || [ ! -f logs/erro.log ] || [ ! -f logs/acesso.log ]; then\n    echo 'Os dois arquivos de log devem estar dentro da pasta logs.'; exit 1\nfi\nif [ -e erro.log ] || [ -e acesso.log ]; then\n    echo 'Mova os dois logs: nenhum deles deve permanecer no diretório original.'; exit 1\nfi\necho 'OK'",
-            "difficulty": "training",
-            "setupScript": "rm -rf * &&\ntouch erro.log &&\ntouch acesso.log &&\ntouch imagem.png &&\ntouch script.sh"
-        },
-        {
-            "id": "15_limpeza",
-            "title": "Treino: Protocolo de Segurança",
-            "summary": "Remova arquivos sensíveis expostos.",
-            "fullGuideHtml": "<h1>Vazamento de Dados</h1><p>Um arquivo contendo senhas antigas foi deixado acidentalmente no servidor público. Isso é uma violação de segurança grave.</p><h3>Sua Missão</h3><p>Identifique o arquivo <code>senhas_antigas.txt</code> usando <strong>ls</strong> e remova-o imediatamente usando o comando <strong>rm</strong>.</p><p><em>Dica: O script deve listar os arquivos para confirmar o nome antes de apagar.</em></p>",
-            "verificationScript": "if [ -e senhas_antigas.txt ]; then\n    echo 'O arquivo de senhas ainda existe.'; exit 1\nfi\nif ! grep -Eq '(^|[[:space:]])senhas_antigas\\.txt$' \"$SHELLBLOCKS_LAST_CMD_OUT_FILE\"; then\n    echo 'Liste senhas_antigas.txt com ls antes de removê-lo. Uma mensagem de arquivo inexistente não confirma sua listagem.'; exit 1\nfi\necho 'OK'",
-            "difficulty": "training",
-            "setupScript": "rm -rf * &&\ntouch notas.txt &&\necho 'admin:12345' > senhas_antigas.txt &&\ntouch todo_list.md"
-        },
-        {
-            "id": "16_processamento",
-            "title": "Rotação de Logs",
-            "summary": "Filtre erros críticos e limpe o arquivo original.",
-            "fullGuideHtml": "<h1>Gerenciamento de Espaço</h1><p>O arquivo <code>servidor.log</code> ficou gigante e está ocupando todo o disco. Precisamos salvar apenas os erros e apagar o resto.</p><h3>Sua Missão</h3><ol><li>Use <strong>grep</strong> para filtrar as linhas com a palavra <strong>CRITICO</strong> do arquivo <code>servidor.log</code>.</li><li>Salve o resultado em um novo arquivo chamado <code>erros.txt</code>.</li><li>Após salvar, remova o arquivo original <code>servidor.log</code> para liberar espaço.</li></ol>",
-            "verificationScript": "if [ ! -f erros.txt ]; then\n    echo 'O arquivo erros.txt não foi criado.'; exit 1\nfi\nresultado=$(sed -E 's/^[0-9]+://' erros.txt)\nif [ \"$resultado\" != 'CRITICO: Banco de dados caiu' ]; then\n    echo 'erros.txt deve conter somente a linha completa com CRITICO, sem INFO ou WARN.'; exit 1\nfi\nif [ -e servidor.log ]; then\n    echo 'Após salvar os erros, remova o arquivo original servidor.log.'; exit 1\nfi\necho 'OK'",
-            "difficulty": "training",
-            "setupScript": "rm -rf * &&\necho 'INFO: Tudo ok' > servidor.log &&\necho 'WARN: Memoria cheia' >> servidor.log &&\necho 'CRITICO: Banco de dados caiu' >> servidor.log &&\necho 'INFO: Reiniciando' >> servidor.log"
-        },
-        {
             "id": "17_deploy",
-            "title": "Treino: Download e Deploy",
-            "summary": "Baixe um programa da rede e instale-o na pasta correta.",
-            "fullGuideHtml": "<h1>Instalação Manual</h1><p>Você precisa instalar o novo sistema de vendas que está no servidor central.</p><h3>O Processo de Deploy</h3><p>Nesta missão, a preparação consiste em baixar o programa e colocá-lo na pasta correta.</p><h3>Sua Missão</h3><ol><li>Crie um diretório chamado <code>app</code> para organizar o sistema.</li><li>Use o <strong>curl</strong> para ler a URL <code>http://127.0.0.1:8000/vendas.py</code>.</li><li><strong>Importante:</strong> Use o operador <strong>&gt;</strong> para salvar o resultado desse curl num arquivo chamado <code>vendas.py</code>.</li><li>Por fim, use o <strong>mv</strong> para mover esse arquivo para dentro da nova pasta <code>app</code> que você mesmo vai criar.</li></ol>",
-            "verificationScript": "if [ ! -d app ]; then echo 'A pasta app não foi criada.'; exit 1; fi; if [ ! -f app/vendas.py ]; then echo 'O arquivo vendas.py não foi encontrado dentro da pasta app.'; exit 1; fi; if [ ! -s app/vendas.py ]; then echo 'O arquivo app/vendas.py está vazio.'; exit 1; fi; if [ \"$(cat app/vendas.py)\" = 'print(\"Sistema de Vendas v2.0\")' ]; then echo 'OK'; exit 0; else echo 'O conteúdo de app/vendas.py não corresponde ao programa servido.'; exit 1; fi",
+            "title": "Treino — Preparando uma aplicação",
+            "summary": "Instale o programa disponível no serviço local.",
+            "fullGuideHtml": "<h1>Preparando uma aplicação</h1><p>O serviço local disponibiliza um programa em:</p><code>http://127.0.0.1:8000/vendas.py</code><p>A pasta <code>app</code> ainda não existe no diretório inicial <code>/home/aluno</code>. Ao terminar seu script completo, ela deve conter o arquivo <code>vendas.py</code> com o conteúdo integral do programa servido.</p><p>Escolha como obter e organizar o arquivo. Arquivos intermediários são permitidos. Não é necessário executar o programa.</p>",
+            "verificationScript": "python3 - <<'CHECK_RESULT'\nfrom pathlib import Path\nimport os\nhome = Path('/home/aluno')\nproblems = []\nif not (home / 'app').is_dir():\n    problems.append('app deve existir como diretório.')\npath = home / 'app/vendas.py'\nif not path.is_file():\n    problems.append('app/vendas.py deve existir como arquivo.')\nelif path.read_bytes() != b'print(\"Sistema de Vendas v2.0\")\\n':\n    problems.append('app/vendas.py não contém o conteúdo completo esperado. Preserve texto, ordem e repetições, sem acrescentar numeração ou títulos.')\nif problems:\n    print('\\n'.join(problems))\n    raise SystemExit(1)\nprint('OK')\nCHECK_RESULT",
             "difficulty": "training",
-            "setupScript": "rm -rf * &&\npkill -9 -f http.server || true &&\nmkdir -p /tmp/shellblocks-level-17-source &&\necho 'print(\"Sistema de Vendas v2.0\")' > /tmp/shellblocks-level-17-source/vendas.py &&\n(python3 -m http.server 8000 --bind 127.0.0.1 --directory /tmp/shellblocks-level-17-source > /dev/null 2>&1 & true) &&\nsleep 2"
+            "setupScript": "python3 - <<'PREPARE_ENVIRONMENT'\nfrom pathlib import Path\nimport subprocess\nimport time\nimport urllib.error\nimport urllib.request\n\nsource = Path('/tmp/shellblocks-level-17-source')\nsource.mkdir()\ncontent = b'print(\"Sistema de Vendas v2.0\")\\n'\n(source / 'vendas.py').write_bytes(content)\n\nserver = subprocess.Popen(\n    ['python3', '-m', 'http.server', '8000', '--bind', '127.0.0.1', '--directory', str(source)],\n    stdout=subprocess.DEVNULL,\n    stderr=subprocess.DEVNULL,\n    start_new_session=True,\n)\ndeadline = time.monotonic() + 5\nwhile time.monotonic() < deadline:\n    if server.poll() is not None:\n        raise SystemExit('Não foi possível iniciar o serviço HTTP da missão.')\n    try:\n        with urllib.request.urlopen('http://127.0.0.1:8000/vendas.py', timeout=0.2) as response:\n            if response.read() == content:\n                break\n    except urllib.error.URLError:\n        pass\n    time.sleep(0.05)\nelse:\n    server.terminate()\n    raise SystemExit('O serviço HTTP da missão não ficou disponível no prazo esperado.')\nPREPARE_ENVIRONMENT"
         },
         {
             "id": "18_challenge_security",
@@ -315,19 +324,20 @@
         "01_ls_basics",
         "02_ls_options",
         "03_mkdir",
+        "10_ping",
         "04_cd",
         "05_cp",
+        "mv_basics",
+        "14_organizar",
+        "15_limpeza",
+        "backup_cleanup",
         "06_cat",
         "07_grep",
         "08_redirect",
-        "09_pipe",
-        "10_ping",
-        "11_curl",
-        "12_ps",
-        "13_background",
-        "14_organizar",
-        "15_limpeza",
         "16_processamento",
+        "09_pipe",
+        "two_shift_report",
+        "11_curl",
         "17_deploy",
         "18_challenge_security",
         "19_challenge_deploy"

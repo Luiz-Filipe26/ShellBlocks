@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import * as BlockIDs from "@/core/shellblocks/constants/blockIds";
 import { generateShellScript } from "@/core/shellblocks/generation/scriptGenerator";
 import { serializeWorkspaceToAST } from "@/core/shellblocks/serialization/serializer";
-import { createBlock, connectInput, createHeadlessWorkspace } from "../helpers/blockly";
+import { createBlock, connectInput, connectNext, createHeadlessWorkspace } from "../helpers/blockly";
 import { validDefinitions } from "../helpers/cliFixtures";
 import officialDefinitions from "@/assets/data/cli_definitions.json";
 import { parseCliDefinitions } from "@/core/shellblocks/definitions/cliDefinitionsParser";
@@ -18,9 +18,85 @@ function serialize(workspace: Blockly.Workspace): string {
 
 describe("Blockly → AST → Shell", () => {
     it.each([
-        { level: 9, sourceId: "cat", value: "nomes.txt", pattern: "Ana", destination: "", expected: "cat nomes.txt | grep Ana" },
-        { level: 18, sourceId: "curl", value: "http://127.0.0.1:8000/boletim.txt", pattern: "ERRO", destination: "incidentes.txt", expected: "curl 'http://127.0.0.1:8000/boletim.txt' | grep ERRO > incidentes.txt" },
-        { level: 19, sourceId: "cat", value: "operacao.log", pattern: "ERRO", destination: "relatorios/erros.txt", expected: "cat operacao.log | grep ERRO > relatorios/erros.txt" },
+        { commands: [{ id: "mv", values: ["rascunho.txt", "plano.txt"] }], expected: "mv rascunho.txt plano.txt" },
+        { commands: [{ id: "cp", values: ["plano.txt", "backup.txt"] }, { id: "rm", values: ["cache.tmp"] }], expected: "cp plano.txt backup.txt\nrm cache.tmp" },
+        { commands: [{ id: "mkdir", values: ["logs"] }, { id: "mv", values: ["erro.log", "acesso.log", "logs"] }], expected: "mkdir logs\nmv erro.log acesso.log logs" },
+    ])("representa as composições de arquivos do percurso: $expected", ({ commands, expected }) => {
+        const definitions = parseCliDefinitions(officialDefinitions).definitions;
+        const workspace = createHeadlessWorkspace(definitions);
+        try {
+            const root = createBlock(workspace, BlockIDs.ROOT_BLOCK_TYPE);
+            let previous: Blockly.Block | undefined;
+            for (const { id, values } of commands) {
+                const definition = definitions.commands.find((command) => command.id === id)!;
+                const block = createBlock(workspace, BlockIDs.commandBlockType(definition));
+                let lastOperand: Blockly.Block | undefined;
+                const operands = values.map((value, index) => {
+                    const operandDefinition = definition.operands[Math.min(index, definition.operands.length - 1)];
+                    // mv has multiple sources followed by exactly one destination.
+                    const selected = id === "mv" ? definition.operands[index === values.length - 1 ? 1 : 0] : operandDefinition;
+                    const operand = createBlock(workspace, BlockIDs.commandOperandBlockType(definition, selected));
+                    operand.setFieldValue(value, BlockIDs.FIELDS.VALUE);
+                    if (lastOperand) connectNext(lastOperand, operand);
+                    else connectInput(block, BlockIDs.INPUTS.OPERANDS, operand);
+                    lastOperand = operand;
+                    return operand;
+                });
+                validateCardinality(block, definition, operands);
+                validateOperandSyntax(block, definition, operands);
+                expect(getErrors(block)).toEqual([]);
+                for (const operand of operands) expect(getErrors(operand)).toEqual([]);
+                if (previous) connectNext(previous, block);
+                else connectInput(root, BlockIDs.INPUTS.STACK, block);
+                previous = block;
+            }
+            expect(serialize(workspace)).toBe(expected);
+        } finally {
+            workspace.dispose();
+        }
+    });
+
+    it("compõe o relatório de dois turnos com múltiplos operandos de cat e grep recebendo texto", () => {
+        const definitions = parseCliDefinitions(officialDefinitions).definitions;
+        const workspace = createHeadlessWorkspace(definitions);
+        try {
+            const root = createBlock(workspace, BlockIDs.ROOT_BLOCK_TYPE);
+            const redirect = createBlock(workspace, "operator:redirect_out");
+            const pipe = createBlock(workspace, "operator:pipe");
+            const cat = createBlock(workspace, "command:cat");
+            const grep = createBlock(workspace, "command:grep");
+            const first = createBlock(workspace, "operand:cat:file");
+            const second = createBlock(workspace, "operand:cat:file");
+            const pattern = createBlock(workspace, "operand:grep:pattern");
+            first.setFieldValue("turno_a.log", BlockIDs.FIELDS.VALUE);
+            second.setFieldValue("turno_b.log", BlockIDs.FIELDS.VALUE);
+            pattern.setFieldValue("ERRO", BlockIDs.FIELDS.VALUE);
+            redirect.setFieldValue("erros.txt", "B");
+            connectInput(root, BlockIDs.INPUTS.STACK, redirect);
+            connectInput(redirect, "A", pipe);
+            connectInput(pipe, "A", cat);
+            connectInput(pipe, "B", grep);
+            connectInput(cat, BlockIDs.INPUTS.OPERANDS, first);
+            connectNext(first, second);
+            connectInput(grep, BlockIDs.INPUTS.OPERANDS, pattern);
+            const catDefinition = definitions.commands.find((command) => command.id === "cat")!;
+            const grepDefinition = definitions.commands.find((command) => command.id === "grep")!;
+            validateCardinality(cat, catDefinition, [first, second]);
+            validateOperandSyntax(cat, catDefinition, [first, second]);
+            validateCardinality(grep, grepDefinition, [pattern]);
+            validateOperandSyntax(grep, grepDefinition, [pattern]);
+            expect(getErrors(cat)).toEqual([]);
+            expect(getErrors(grep)).toEqual([]);
+            expect(serialize(workspace)).toBe("cat turno_a.log turno_b.log | grep ERRO > erros.txt");
+        } finally {
+            workspace.dispose();
+        }
+    });
+
+    it.each([
+        { level: 15, sourceId: "cat", value: "nomes.txt", pattern: "Ana", destination: "", expected: "cat nomes.txt | grep Ana" },
+        { level: 19, sourceId: "curl", value: "http://127.0.0.1:8000/boletim.txt", pattern: "ERRO", destination: "incidentes.txt", expected: "curl 'http://127.0.0.1:8000/boletim.txt' | grep ERRO > incidentes.txt" },
+        { level: 20, sourceId: "cat", value: "operacao.log", pattern: "ERRO", destination: "relatorios/erros.txt", expected: "cat operacao.log | grep ERRO > relatorios/erros.txt" },
     ])("permite a composição do nível $level com as definições oficiais, sem arquivo no grep", ({ sourceId, value, pattern, destination, expected }) => {
         const definitions = parseCliDefinitions(officialDefinitions).definitions;
         const sourceDefinition = definitions.commands.find((command) => command.id === sourceId)!;

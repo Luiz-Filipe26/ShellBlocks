@@ -5,6 +5,8 @@ import { createSelectorDependencies, MemoryStorage, selectContext, TestElement }
 import { createBlock, createHeadlessWorkspace, connectInput } from "../helpers/blockly";
 import { validDefinitions } from "../helpers/cliFixtures";
 import * as BlockIDs from "@/core/shellblocks/constants/blockIds";
+import officialLevels from "@/assets/data/levels.json";
+import { parseGameData } from "@/pages/features/session/gameDataParser";
 
 const game: GameData = {
     levels: [
@@ -29,6 +31,29 @@ describe("contexto e conclusão das atividades", () => {
         ui = createSelectorDependencies();
     });
     afterEach(() => vi.unstubAllGlobals());
+
+    it("numera os 20 níveis pela ordem oficial e avança até os dois desafios finais", () => {
+        const course = parseGameData(officialLevels);
+        loader.setupLevelSelector(course, ui.deps, false);
+        const options = ui.elements.levelSelect.options.filter((option) => option.value !== "sandbox");
+        expect(options.map((option) => option.value)).toEqual(course.levelOrder);
+        expect(options).toHaveLength(20);
+        expect(options[3].text).toBe("Nível 4: Opções que recebem valores");
+        expect(options[18].text).toBe("Nível 19: Desafio — Relatório de incidentes");
+        expect(options[19].text).toBe("Nível 20: Desafio final — Atualização com backup");
+        for (const [index, id] of course.levelOrder.entries()) {
+            selectContext(ui.elements.levelSelect, id);
+            expect(ui.elements.progressLabel.textContent).toBe(`Nível ${index + 1}/20`);
+            loader.markLevelCompleted(id, ui.deps, false);
+            if (index < 19) {
+                ui.elements.continueBtn.click();
+                expect(loader.getCurrentLevelId()).toBe(course.levelOrder[index + 1]);
+            } else {
+                expect(ui.elements.continueBtn.hidden).toBe(true);
+                expect(ui.elements.missionCompletionText.textContent).toContain("Percurso concluído");
+            }
+        }
+    });
 
     it.each([false, true])("sucesso desbloqueia separadamente e Continuar navega uma vez (experimento=%s)", (experiment) => {
         loader.setupLevelSelector(game, ui.deps, experiment);

@@ -16,6 +16,14 @@
 
 A ordem dos objetos em `levels` não define a progressão.
 
+O percurso oficial contém 20 níveis: introduções guiadas intercaladas com treinos
+de arquivos e composição de dados, seguidos por dois desafios autônomos.
+`toolboxGuidance` orienta a descoberta nos tutoriais; treinos e desafios deixam a
+escolha das ferramentas ao aluno. Processos e background continuam disponíveis
+na ferramenta, mas não fazem parte deste percurso.
+
+A numeração apresentada deriva de `levelOrder`, não do prefixo dos IDs.
+
 ## Níveis
 
 Cada item de `levels` possui a seguinte estrutura:
