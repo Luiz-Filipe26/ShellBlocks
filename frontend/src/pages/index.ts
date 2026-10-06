@@ -1,3 +1,5 @@
+import { setupTheme } from "./features/ui/theme";
+import { applyWorkspaceTheme } from "@/core/shellblocks/workspace/workspaceTheme";
 import { setupCompactLayout } from "./features/ui/compactLayout";
 import { setupToolboxGuidance } from "./features/ui/toolboxGuidanceController";
 import { OverlayToolbox } from "@/core/shellblocks/workspace/overlayToolbox";
@@ -76,6 +78,9 @@ async function start(): Promise<void> {
         );
         return;
     }
+
+    const theme = setupTheme(pageElements.themeControl, mode => applyWorkspaceTheme(workspace, mode));
+    window.addEventListener("pagehide", event => { if (!event.persisted) theme.dispose(); });
 
     if (IS_EXPERIMENT_MODE) {
         enforceExperimentRestrictions();

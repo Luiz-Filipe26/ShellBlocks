@@ -139,7 +139,7 @@ function getBlocklyOptions(
         grid: {
             spacing: 20,
             length: 3,
-            colour: "#ccc",
+            colour: "var(--color-workspace-grid, #ccc)",
             snap: true,
         },
     };

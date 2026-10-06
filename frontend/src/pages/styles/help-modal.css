@@ -1,5 +1,5 @@
 .help-modal__header {
-    background-color: var(--color-brand-primary);
+    background-color: var(--color-accent);
 }
 
 .help-modal {
@@ -10,17 +10,16 @@
 .help-modal summary {
     cursor: pointer;
     font-weight: 600;
-    color: var(--color-brand-primary);
+    color: var(--color-accent);
 }
 
 .help-modal__header-icon {
-    filter: brightness(0) invert(1);
 }
 
 .help-modal__body {
     padding: 20px;
     line-height: 1.6;
-    color: #333;
+    color: var(--color-text-primary);
 }
 
 .help-modal__section {
@@ -28,50 +27,50 @@
 }
 
 .help-modal__section h3 {
-    color: var(--color-brand-primary);
+    color: var(--color-accent);
     margin-bottom: 6px;
 }
 
 .help-modal__code {
-    background-color: #f1f3f5;
+    background-color: var(--color-control-disabled);
     padding: 10px;
     border-radius: 6px;
     font-family: var(--font-mono);
     font-weight: bold;
-    color: #495057;
+    color: var(--color-text-secondary);
     text-align: center;
     margin: 10px 0;
 }
 
 .help-modal__formula {
-    background-color: #f1f3f5;
+    background-color: var(--color-control-disabled);
     padding: 10px;
     border-radius: 6px;
     text-align: center;
     font-family: var(--font-mono);
     font-weight: bold;
-    color: #495057;
+    color: var(--color-text-secondary);
     margin: 10px 0;
 }
 
 .help-modal__tip {
     margin-top: 25px;
-    background-color: #fff3cd;
-    border-left: 4px solid #ffc107;
+    background-color: var(--color-warning-surface);
+    border-left: 4px solid var(--color-warning-border);
     padding: 15px;
     border-radius: 4px;
 }
 
 .help-modal__tip h4 {
     margin-top: 0;
-    color: #856404;
+    color: var(--color-warning-text);
     font-size: 1rem;
 }
 
 .help-modal__tip ul {
     margin: 0;
     padding-left: 20px;
-    color: #856404;
+    color: var(--color-warning-text);
 }
 
 .help-modal__footer {
@@ -79,12 +78,12 @@
 }
 
 .help-modal__close-btn {
-    background-color: var(--color-brand-primary);
+    background-color: var(--color-accent);
 }
 
 .btn-close-modal {
-    background-color: #6c757d;
-    color: white;
+    background-color: var(--color-button-secondary);
+    color: var(--color-text-on-accent);
     border: none;
     padding: 8px 16px;
     border-radius: 5px;
@@ -94,7 +93,7 @@
 }
 
 .btn-close-modal:hover {
-    background-color: #5a6268;
+    background-color: var(--color-button-secondary-hover);
 }
 
 .help-modal[open] {

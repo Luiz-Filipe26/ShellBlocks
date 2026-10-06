@@ -1,10 +1,10 @@
 /* These classes are owned by ShellBlocks, not Blockly's warning implementation. */
 .shellblocks-placeholder {
-  fill: #8b929b !important;
+  fill: var(--color-placeholder) !important;
   font-style: italic;
 }
 .shellblocks-value-editor::placeholder {
-  color: #8b929b;
+  color: var(--color-placeholder);
   opacity: 1;
 }
 .shellblocks-problem-icon {
@@ -18,40 +18,40 @@
 /* Keep native controls and their geometry; change only their outer appearance. */
 .blocklyZoom {
   opacity: 1;
-  filter: brightness(0.55) contrast(1.3);
+  filter: var(--blockly-control-filter);
 }
 .blocklyTrash {
   opacity: 1 !important;
-  filter: brightness(0.7) contrast(1.2);
+  filter: var(--blockly-trash-filter);
 }
 
 /* Surface alpha only: category colours, text and blocks remain fully opaque. */
 .shellblocks-toolbox-overlay {
-  background-color: rgb(226 232 240 / 82%) !important;
+  background-color: var(--color-toolbox-surface) !important;
   /* Painted edge keeps geometry unchanged and opens into the 48px side tab. */
   background-image: linear-gradient(to bottom,
-    rgb(71 85 105 / 60%) calc(50% - 24px),
+    var(--color-toolbox-border) calc(50% - 24px),
     transparent calc(50% - 24px),
     transparent calc(50% + 24px),
-    rgb(71 85 105 / 60%) calc(50% + 24px));
+    var(--color-toolbox-border) calc(50% + 24px));
   background-size: 1px 100%;
   background-position: right top;
   background-repeat: no-repeat;
   border-radius: 0 0 0 4px;
-  box-shadow: inset 0 1px rgb(71 85 105 / 60%), inset 0 -1px rgb(71 85 105 / 60%), 3px 0 8px rgb(15 23 42 / 14%);
+  box-shadow: inset 0 1px var(--color-toolbox-border), inset 0 -1px var(--color-toolbox-border), 3px 0 8px var(--shadow-colour);
   max-width: calc(100% - 24px);
   overflow-x: auto;
   z-index: 70;
 }
 .shellblocks-toolbox-surface > .blocklyToolboxFlyout .blocklyFlyoutBackground {
-  fill: rgb(241 245 249 / 88%);
+  fill: var(--color-flyout-surface);
   fill-opacity: 1;
-  stroke: rgb(71 85 105 / 60%);
+  stroke: var(--color-toolbox-border);
   stroke-width: 1px;
   vector-effect: non-scaling-stroke;
 }
 .shellblocks-toolbox-surface > .blocklyToolboxFlyout {
-  box-shadow: 3px 2px 8px rgb(15 23 42 / 14%);
+  box-shadow: 3px 2px 8px var(--shadow-colour);
 }
 .shellblocks-toolbox-handle {
   position: absolute;
@@ -60,22 +60,22 @@
   width: var(--toolbox-handle-width);
   height: 48px;
   padding: 0 3px 3px 0;
-  border: 1px solid rgb(71 85 105 / 60%);
+  border: 1px solid var(--color-toolbox-border);
   border-left: 0;
   border-radius: 0 24px 24px 0;
-  background: rgb(226 232 240 / 88%);
-  box-shadow: 3px 0 8px rgb(15 23 42 / 12%);
-  color: #334155;
+  background: var(--color-handle-surface);
+  box-shadow: 3px 0 8px var(--shadow-colour);
+  color: var(--color-text-secondary);
   font: 32px/1 sans-serif;
   cursor: pointer;
   /* Keep the explicit control reachable even if a bubble overlaps this edge. */
   z-index: 85;
 }
 .shellblocks-toolbox-handle:hover {
-  background: rgb(226 232 240 / 85%);
+  background: var(--color-handle-hover);
 }
 .shellblocks-toolbox-handle:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 /* SVG paint order keeps native balloons above this HTML/SVG toolbox layer. */
@@ -138,7 +138,7 @@
   left: 5px;
   right: 5px;
   font: 10px/1 sans-serif;
-  color: #475569;
+  color: var(--color-text-secondary);
   pointer-events: none;
 }
 .compact-layout .shellblocks-toolbox-handle[data-scroll-above]::before {
@@ -163,3 +163,25 @@
 
 .shellblocks-problem-hitarea { pointer-events: none; }
 @media (pointer: coarse) { .shellblocks-problem-hitarea { pointer-events: all; } }
+
+/* Public Blockly UI classes: surfaces outside the workspace inherit the page palette. */
+.blocklyDropDownDiv, .blocklyMenu, .blocklyTooltipDiv {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border-default) !important;
+}
+.blocklyDropDownArrow { background-color: var(--color-surface) !important; }
+.blocklyMenuItem { color: var(--color-text-primary); }
+.blocklyMenuItemDisabled { color: var(--color-text-muted); }
+.blocklyMenuItemHighlight, .blocklyMenuItem:hover {
+  background-color: var(--color-control-hover);
+}
+.blocklyHtmlInput {
+  background: var(--color-control) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-control-border) !important;
+}
+.blocklyTextInputField > .blocklyFieldRect { fill: var(--color-control) !important; }
+.blocklyTextInputField > .blocklyText:not(.shellblocks-placeholder) { fill: var(--color-text-primary) !important; }
+.blocklyToolboxCategoryIcon { filter: var(--blockly-checkbox-filter); }
+.blocklyMenuItemSelected .blocklyMenuItemCheckbox { filter: var(--blockly-checkbox-filter); }

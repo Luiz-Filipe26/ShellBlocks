@@ -5,14 +5,15 @@ function getElement<T extends HTMLElement>(id: string): T {
 }
 
 const pageElements = {
+    themeControl: getElement<HTMLFieldSetElement>("theme-control"),
     compactControls: getElement<HTMLElement>("compact-controls"),
     btnCompactInstructions: getElement<HTMLButtonElement>("btn-compact-instructions"),
     btnCompactResults: getElement<HTMLButtonElement>("btn-compact-results"),
     btnCloseInstructions: getElement<HTMLButtonElement>("btn-close-instructions"),
     blocklyArea: getElement<HTMLDivElement>("blockly-area"),
     btnMaximizeWorkspace: getElement<HTMLButtonElement>("btn-maximize-workspace"),
-    workspaceMaximizeIcon: getElement<HTMLImageElement>("workspace-maximize-icon"),
-    workspaceMinimizeIcon: getElement<HTMLImageElement>("workspace-minimize-icon"),
+    workspaceMaximizeIcon: getElement<HTMLElement>("workspace-maximize-icon"),
+    workspaceMinimizeIcon: getElement<HTMLElement>("workspace-minimize-icon"),
     editorToolbar: getElement<HTMLElement>("editor-toolbar"),
     btnDownloadShell: getElement<HTMLButtonElement>("btn-download-shell"),
     codeOutput: getElement<HTMLPreElement>("code-output"),

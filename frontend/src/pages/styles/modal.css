@@ -1,7 +1,7 @@
 .validation-dialog {
     border: none;
     border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 25px var(--shadow-dialog-colour);
     padding: 0;
     margin: auto;
     max-width: 500px;
@@ -10,7 +10,7 @@
 }
 
 .validation-dialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: var(--color-backdrop);
     backdrop-filter: blur(2px);
 }
 
@@ -21,7 +21,7 @@
 
 .modal-header {
     background-color: var(--color-danger);
-    color: white;
+    color: var(--color-text-on-accent);
     padding: 15px 20px;
 }
 
@@ -41,14 +41,13 @@
 .modal-header .icon-inline {
     width: 24px;
     height: 24px;
-    filter: brightness(0) invert(1);
 }
 
 .modal-body {
     padding: 20px;
-    background-color: #fff;
+    background-color: var(--color-surface);
     font-size: 1rem;
-    color: #333;
+    color: var(--color-text-primary);
 }
 
 .validation-list {
@@ -65,7 +64,7 @@
 }
 
 .validation-list strong {
-    color: #333;
+    color: var(--color-text-primary);
     font-weight: bold;
 }
 

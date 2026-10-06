@@ -1,18 +1,18 @@
 .app-header {
     display: flex;
     flex-direction: column;
-    background: white;
+    background: var(--color-surface);
     border-bottom: 1px solid var(--color-border-default);
     height: auto;
     min-height: var(--header-height-collapsed);
     flex-shrink: 0;
     z-index: 20;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px var(--shadow-soft-colour);
 }
 
 .header-brand {
     background-color: var(--color-brand-primary);
-    color: white;
+    color: var(--color-text-on-accent);
     padding: 0 20px;
     height: var(--header-brand-height);
     display: flex;
@@ -49,7 +49,7 @@
 .progress-bar-track {
     width: 120px;
     height: 8px;
-    background-color: #ccc;
+    background-color: var(--color-border-default);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -71,7 +71,7 @@
     gap: 20px;
 
     border: 2px solid var(--color-border-default);
-    background-color: #e9ecef;
+    background-color: var(--color-surface-muted);
     min-width: 0;
     overflow: hidden;
 }
@@ -84,7 +84,7 @@
 
 .btn-guide-urgent {
     background-color: var(--color-danger) !important;
-    color: white !important;
+    color: var(--color-text-on-accent) !important;
     border: none;
     animation: attention-pulse 2s infinite;
     margin-right: auto;
@@ -126,7 +126,7 @@
 .input-label {
     font-weight: 600;
     font-size: 0.9rem;
-    color: #555;
+    color: var(--color-text-secondary);
     white-space: nowrap;
 }
 
@@ -136,7 +136,7 @@
     border-radius: 4px;
     flex: 0 1 200px;
     max-width: 250px;
-    background-color: #fff;
+    background-color: var(--color-surface);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -148,10 +148,10 @@
     gap: 10px;
     flex: 1;
     overflow: hidden;
-    color: #444;
+    color: var(--color-text-secondary);
     padding: 8px 12px;
-    background-color: #f0f7ff;
-    border: 1px solid #c0d8f0;
+    background-color: var(--color-info-surface);
+    border: 1px solid var(--color-info-border);
     border-radius: 4px;
 }
 
@@ -183,3 +183,44 @@
         display: none !important;
     }
 }
+
+.theme-control {
+    display: flex;
+    flex-shrink: 0;
+    border: 1px solid var(--color-control-border);
+    border-radius: 6px;
+    padding: 2px;
+    margin-left: auto;
+    background: var(--color-control);
+    color: var(--color-text-secondary);
+    gap: 2px;
+}
+.theme-control label { position: relative; cursor: pointer; }
+.theme-control input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+.theme-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--control-size);
+    min-height: var(--control-size);
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: .8rem;
+    font-weight: 600;
+}
+.theme-control input:checked + .theme-segment {
+    background: var(--color-info-surface);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+.theme-control input:focus-visible + .theme-segment {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+.theme-control label:hover .theme-segment { background: var(--color-control-hover); }

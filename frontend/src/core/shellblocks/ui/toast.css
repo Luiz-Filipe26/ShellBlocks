@@ -8,11 +8,11 @@
     gap: 10px;
 
     padding: 8px 12px;
-    background-color: #333;
-    color: #fff;
+    background-color: var(--color-toast);
+    color: var(--color-toast-text);
     border-radius: 4px;
 
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 6px var(--shadow-colour);
     font-family: monospace;
 
     opacity: 0;

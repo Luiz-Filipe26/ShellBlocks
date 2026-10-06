@@ -1,0 +1,25 @@
+/* Only monochromatic interface assets use masks; semantic colour assets stay intact. */
+.ui-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    background-color: currentColor;
+    mask: var(--icon) center / contain no-repeat;
+}
+.ui-icon[hidden] { display: none; }
+.icon-circle-chevron-right { --icon: url("../../assets/icons/lucid/circle-chevron-right.svg"); }
+.icon-circle-question-mark { --icon: url("../../assets/icons/lucid/circle-question-mark.svg"); }
+.icon-folder-open { --icon: url("../../assets/icons/lucid/folder-open.svg"); }
+.icon-gamepad-2 { --icon: url("../../assets/icons/lucid/gamepad-2.svg"); }
+.icon-info { --icon: url("../../assets/icons/lucid/info.svg"); }
+.icon-maximize { --icon: url("../../assets/icons/lucid/maximize.svg"); }
+.icon-minimize { --icon: url("../../assets/icons/lucid/minimize.svg"); }
+.icon-moon { --icon: url("../../assets/icons/lucid/moon.svg"); }
+.icon-puzzle { --icon: url("../../assets/icons/lucid/puzzle.svg"); }
+.icon-rotate-ccw { --icon: url("../../assets/icons/lucid/rotate-ccw.svg"); }
+.icon-save { --icon: url("../../assets/icons/lucid/save.svg"); }
+.icon-settings { --icon: url("../../assets/icons/lucid/settings.svg"); }
+.icon-sun { --icon: url("../../assets/icons/lucid/sun.svg"); }
+.icon-trash { --icon: url("../../assets/icons/lucid/trash.svg"); }
+.icon-triangle-alert { --icon: url("../../assets/icons/lucid/triangle-alert.svg"); }

@@ -20,21 +20,21 @@
 .compact-layout .instructions-sidebar, .compact-layout .sidebar {
     display: none; position: absolute; bottom: var(--compact-bar-height); left: 0; right: 0;
     width: 100% !important; min-width: 0 !important; max-width: none; z-index: 150;
-    box-shadow: 0 -4px 16px #0003; transition: none; border: 1px solid #94a3b8;
+    box-shadow: 0 -4px 16px var(--shadow-colour); transition: none; border: 1px solid var(--color-border-strong);
 }
 .compact-instructions-open .instructions-sidebar { display: flex; height: var(--compact-panel-size); }
 .compact-results-open .sidebar { display: flex; height: var(--compact-panel-size); padding: 8px; cursor: auto; overflow: auto; }
 .compact-layout .instructions-sidebar .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; }
 .compact-layout #btn-close-instructions { display: block; min-height: var(--control-size); padding: 0 12px; }
-.compact-layout .sidebar .btn-sidebar-toggle { position: sticky; align-self: flex-end; top: 0; right: 0; width: var(--control-size); height: var(--control-size); flex-shrink: 0; transform: none; background: #fff; }
+.compact-layout .sidebar .btn-sidebar-toggle { position: sticky; align-self: flex-end; top: 0; right: 0; width: var(--control-size); height: var(--control-size); flex-shrink: 0; transform: none; background: var(--color-surface); }
 .compact-layout .sidebar.is-collapsed .panel>* { display: revert !important; }
 .compact-layout .sidebar.is-collapsed .panel { display: flex !important; padding: 8px; }
 .compact-layout .sidebar .panel-expand { min-height: 80px; flex: 1 0 auto; }
 .compact-layout .sidebar .panel:first-of-type { flex: 0 0 auto; }
 .compact-layout #code-output { max-height: 90px; overflow: auto; }
-.compact-layout .compact-controls { display: flex; position: absolute; bottom: 0; left: 0; right: 0; height: var(--compact-bar-height); align-items: center; gap: 6px; padding: 4px 8px; background: #e9ecef; z-index: 160; }
-.compact-controls button { flex: 1; min-width: 0; min-height: var(--control-size); border: 1px solid #94a3b8; border-radius: 5px; background: #fff; font-weight: 600; }
-.compact-controls #run-btn { background: #218838; color: #fff; }
+.compact-layout .compact-controls { display: flex; position: absolute; bottom: 0; left: 0; right: 0; height: var(--compact-bar-height); align-items: center; gap: 6px; padding: 4px 8px; background: var(--color-surface-muted); z-index: 160; }
+.compact-controls button { flex: 1; min-width: 0; min-height: var(--control-size); border: 1px solid var(--color-border-strong); border-radius: 5px; background: var(--color-surface); font-weight: 600; }
+.compact-controls #run-btn { background: var(--color-success-hover); color: var(--color-text-on-accent); }
 .compact-controls button[disabled] { opacity: .6; }
 .compact-controls button:focus-visible, #btn-close-instructions:focus-visible { outline: 3px solid var(--color-accent); }
 .compact-layout .sidebar-resizer-gutter { display: none; position: absolute; left: 0; right: 0; width: 100%; height: 6px; cursor: row-resize; z-index: 155; }
@@ -54,4 +54,15 @@
 .compact-close-label { display: none; }
 .compact-layout .compact-close-label { display: inline; }
 .compact-layout .sidebar .btn-sidebar-toggle { width: auto; min-width: var(--control-size); padding: 0 12px; font-weight: 600; }
-.compact-layout .sidebar .btn-sidebar-toggle img { display: none; }
+.compact-layout .sidebar .btn-sidebar-toggle .ui-icon { display: none; }
+
+/* One theme control remains present even when low height hides the branding. */
+.compact-layout .app-header { display: grid; grid-template-columns: 1fr auto; }
+.compact-layout .header-brand { display: contents; }
+.compact-layout .header-brand .logo-area { padding: 4px 8px; color: var(--color-text-primary); }
+.compact-layout .theme-control { margin: 4px 8px 4px 0; }
+.compact-layout .header-context { grid-column: 1 / -1; }
+@media (max-height: 500px) {
+    .compact-layout .header-brand .logo-area { display: none; }
+    .compact-layout .theme-control { grid-column: 2; }
+}

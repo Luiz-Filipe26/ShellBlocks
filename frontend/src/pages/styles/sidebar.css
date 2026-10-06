@@ -2,7 +2,7 @@
     width: var(--sidebar-width);
     min-width: 250px;
     max-width: 70vw;
-    background-color: #e9ecef;
+    background-color: var(--color-surface-muted);
     padding: 10px;
     display: flex;
     flex-direction: column;
@@ -25,7 +25,7 @@ body.layout-drag-resizing .sidebar {
     padding: 10px 6px;
     overflow: hidden;
     cursor: pointer;
-    background-color: #dee2e6;
+    background-color: var(--color-border-soft);
 }
 
 .sidebar.is-collapsed .panel>*,
@@ -36,7 +36,7 @@ body.layout-drag-resizing .sidebar {
 .sidebar.is-collapsed .panel {
     display: flex !important;
     padding: 0;
-    background-color: #fff;
+    background-color: var(--color-surface);
     box-shadow: none;
     border-radius: 4px;
     min-height: 32px;
@@ -45,7 +45,7 @@ body.layout-drag-resizing .sidebar {
 .sidebar.is-collapsed .action-buttons-panel {
     display: flex !important;
     min-height: 40px;
-    background-color: rgba(255, 255, 255, 0.4);
+    background-color: var(--color-control);
     border-radius: 4px;
 }
 
@@ -70,10 +70,10 @@ body.layout-drag-resizing .sidebar {
 }
 
 .btn-sidebar-toggle:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: var(--shadow-soft-colour);
 }
 
-.btn-sidebar-toggle img {
+.btn-sidebar-toggle .ui-icon {
     width: 100%;
     height: 100%;
     opacity: 0.8;
@@ -86,10 +86,10 @@ body.layout-drag-resizing .sidebar {
 }
 
 .sidebar .panel {
-    background-color: #fff;
+    background-color: var(--color-surface);
     border-radius: 8px;
     padding: 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px var(--shadow-colour);
     display: flex;
     flex-direction: column;
     flex: 0 0 auto;
@@ -103,7 +103,7 @@ body.layout-drag-resizing .sidebar {
 .sidebar .panel h2 {
     font-size: 0.95em;
     font-weight: 600;
-    color: #555;
+    color: var(--color-text-secondary);
     text-transform: uppercase;
     margin: 0;
     height: 32px;
@@ -132,19 +132,19 @@ body.layout-drag-resizing .sidebar {
 }
 
 .sidebar .btn-run {
-    background-color: #28a745;
-    color: white;
+    background-color: var(--color-success);
+    color: var(--color-text-on-accent);
 }
 
 .sidebar .btn-run:hover {
-    background-color: #218838;
+    background-color: var(--color-success-hover);
 }
 
 .sidebar .btn-clear {
-    background-color: #dc3545;
-    color: white;
+    background-color: var(--color-danger);
+    color: var(--color-text-on-accent);
 }
 
 .sidebar .btn-clear:hover {
-    background-color: #c82333;
+    background-color: var(--color-danger-hover);
 }

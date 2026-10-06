@@ -32,6 +32,7 @@ vi.mock("@/pages/features/ui/toolboxGuidanceController", async (original) => {
     return { ...actual, setupToolboxGuidance: vi.fn(actual.setupToolboxGuidance) };
 });
 vi.mock("@/pages/features/ui/SidebarResizer", () => ({ SidebarResizer: class { start() {} } }));
+vi.mock("@/pages/features/ui/theme", () => ({ setupTheme: () => ({ dispose: vi.fn() }) }));
 vi.mock("@/pages/features/ui/compactLayout", () => ({ setupCompactLayout: vi.fn() }));
 vi.mock("@/pages/features/ui/sidebarController", () => ({ setupSidebarToggle: vi.fn() }));
 vi.mock("@/pages/features/ui/systemLogger", () => ({ initSystemLogger: vi.fn(), log: vi.fn() }));

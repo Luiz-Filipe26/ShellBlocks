@@ -27,12 +27,12 @@
     font-size: 1.1rem;
     line-height: 1.6;
     font-weight: 600;
-    color: #24354b;
-    background: #fff4ce;
-    border: 2px solid #9c6500;
+    color: var(--color-warning-text);
+    background: var(--color-warning-surface);
+    border: 2px solid var(--color-warning-border);
     border-radius: 12px;
     padding: 22px;
-    box-shadow: 0 6px 24px #0003;
+    box-shadow: 0 6px 24px var(--shadow-colour);
 }
 
 .onboarding-notice:empty {
@@ -45,9 +45,9 @@
 
 #btn-help-guide.onboarding-help-highlight {
     animation: none;
-    outline: 4px solid #9c6500;
+    outline: 4px solid var(--color-warning-border);
     outline-offset: 4px;
-    box-shadow: 0 0 0 8px #fff4ce;
+    box-shadow: 0 0 0 8px var(--color-warning-surface);
 }
 
 @media (prefers-reduced-motion: reduce) {

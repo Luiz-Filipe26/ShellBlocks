@@ -3,11 +3,11 @@
         <div class="toolbar-group">
             <button id="btn-download-shell" class="btn-tool" type="button"
                 title="Baixar Shell gerado (.sh)" aria-label="Baixar Shell gerado">
-                <img src="../assets/icons/lucid/puzzle.svg" class="btn-icon" alt="" />
+                <span class="ui-icon icon-puzzle btn-icon" aria-hidden="true"></span>
                 Baixar Shell
             </button>
             <button id="btn-clear-assembly" class="btn-tool" title="Remover os blocos e manter o Script Principal">
-                <img src="../assets/icons/lucid/trash.svg" class="btn-icon" alt="" />
+                <span class="ui-icon icon-trash btn-icon" aria-hidden="true"></span>
                 Limpar montagem
             </button>
         </div>
@@ -17,23 +17,23 @@
         <summary>Arquivos e configurações avançadas</summary>
         <div class="advanced-controls__actions">
             <button id="btn-save-script" class="btn-tool" title="Baixar script atual (.json)">
-                <img src="../assets/icons/lucid/save.svg" class="btn-icon" alt="" />
+                <span class="ui-icon icon-save btn-icon" aria-hidden="true"></span>
                 Salvar Workspace
             </button>
             <button id="btn-load-script" class="btn-tool" title="Carregar script (.json)">
-                <img src="../assets/icons/lucid/folder-open.svg" class="btn-icon" alt="" />
+                <span class="ui-icon icon-folder-open btn-icon" aria-hidden="true"></span>
                 Carregar Workspace
             </button>
             <button id="btn-load-defs" class="btn-tool" title="Carregar novas definições (cli_definitions.json)">
-                <img src="../assets/icons/lucid/settings.svg" class="btn-icon" alt="" />
+                <span class="ui-icon icon-settings btn-icon" aria-hidden="true"></span>
                 Carregar Definições
             </button>
             <button id="btn-load-game" class="btn-tool" title="Carregar novos níveis (game_data.json)">
-                <img src="../assets/icons/lucid/gamepad-2.svg" class="btn-icon" alt="" />
+                <span class="ui-icon icon-gamepad-2 btn-icon" aria-hidden="true"></span>
                 Carregar Níveis
             </button>
             <button id="btn-reset-defs" class="btn-tool btn-tool-danger" title="Voltar para as configurações padrão de fábrica">
-                <img src="../assets/icons/lucid/rotate-ccw.svg" class="btn-icon" alt="" />
+                <span class="ui-icon icon-rotate-ccw btn-icon" aria-hidden="true"></span>
                 Resetar Fábrica
             </button>
         </div>
@@ -42,8 +42,8 @@
     <div id="blockly-area" class="blockly-workspace-area">
         <button id="btn-maximize-workspace" class="workspace-maximize-button" type="button"
             aria-label="Maximizar workspace" title="Maximizar workspace" aria-pressed="false">
-            <img id="workspace-maximize-icon" src="../assets/icons/lucid/maximize.svg" alt="" />
-            <img id="workspace-minimize-icon" src="../assets/icons/lucid/minimize.svg" alt="" hidden />
+            <span id="workspace-maximize-icon" class="ui-icon icon-maximize" aria-hidden="true"></span>
+            <span id="workspace-minimize-icon" hidden class="ui-icon icon-minimize" aria-hidden="true"></span>
         </button>
         <div id="onboarding-interceptor" class="onboarding-interceptor" role="button" tabindex="0" aria-label="Montagem indisponível: conclua Explicar Ferramenta para começar as Atividades guiadas" hidden></div>
         <div id="onboarding-notice" class="onboarding-notice" role="status" aria-live="polite" aria-atomic="true"></div>

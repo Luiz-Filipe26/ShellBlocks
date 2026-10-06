@@ -7,20 +7,20 @@
 .level-full-details h1 {
     font-size: 1.3em;
     margin: 6px 0 4px 0;
-    color: #2c3e50;
+    color: var(--color-text-code);
 }
 
 .level-full-details h2 {
     font-size: 1.15em;
     margin: 6px 0 4px 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--color-border-soft);
     padding-bottom: 5px;
 }
 
 .level-full-details h3 {
     font-size: 1.05em;
     margin: 6px 0 4px 0;
-    color: #444;
+    color: var(--color-text-secondary);
 }
 
 .level-full-details h4 {
@@ -45,11 +45,11 @@
 }
 
 .level-full-details code {
-    background-color: #f1f3f5;
+    background-color: var(--color-control-disabled);
     padding: 2px 4px;
     border-radius: 3px;
     font-family: var(--font-mono);
-    color: #d63384;
+    color: var(--color-text-code-accent);
     font-size: 0.9em;
     line-height: 1.1;
 }

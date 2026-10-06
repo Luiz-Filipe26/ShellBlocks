@@ -5,6 +5,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>ShellBlocks - Ambiente Interativo de Aprendizado CLI</title>
         <link rel="icon" href="../assets/favicon.svg?inline" type="image/svg+xml" />
+        <script>
+            (() => {
+                let preference = null;
+                try { preference = localStorage.getItem("shellblocks_theme_preference"); } catch {}
+                const theme = preference === "light" || preference === "dark"
+                    ? preference : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                document.documentElement.dataset.theme = theme;
+                document.documentElement.style.colorScheme = theme;
+            })();
+        </script>
         <link href="./index.css" rel="stylesheet" />
         <script type="module" src="./index.ts"></script>
     </head>

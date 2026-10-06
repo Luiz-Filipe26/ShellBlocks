@@ -19,25 +19,25 @@
 }
 
 .badge-sandbox {
-    background-color: #f7f7f7;
-    color: #6c757d;
-    border: 1px solid #dee2e6;
+    background-color: var(--color-surface-muted);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border-soft);
 }
 
 .badge-tutorial {
-    background-color: #dcfce7;
-    color: #14532d;
-    border: 1px solid #bbf7d0;
+    background-color: var(--color-success-surface);
+    color: var(--color-success-text);
+    border: 1px solid var(--color-success-border);
 }
 
 .badge-training {
-    background-color: #e0f2fe;
-    color: var(--color-brand-primary);
-    border: 1px solid #bae6fd;
+    background-color: var(--color-info-surface);
+    color: var(--color-accent);
+    border: 1px solid var(--color-info-border);
 }
 
 .badge-challenge {
-    background-color: #fee2e2;
+    background-color: var(--color-danger-surface);
     color: var(--color-danger-hover);
-    border: 1px solid #fecaca;
+    border: 1px solid var(--color-danger-border);
 }

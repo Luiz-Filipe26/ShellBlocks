@@ -1,10 +1,10 @@
 .help-balloon {
     position: absolute;
-    background-color: #ffffff;
-    border: 1px solid var(--color-border-default, #ccc);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-default);
     border-radius: 6px;
     padding: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 15px var(--shadow-colour);
     z-index: 2000;
     max-width: 320px;
     width: 320px;
@@ -13,7 +13,7 @@
     overflow: auto;
     overscroll-behavior: contain;
     font-family: var(--font-sans, sans-serif);
-    color: #333;
+    color: var(--color-text-primary);
     font-size: 14px;
     line-height: 1.5;
     pointer-events: auto;
@@ -22,7 +22,7 @@
 
 .help-balloon code {
     font-family: var(--font-mono) !important;
-    color: #2c3e50 !important;
+    color: var(--color-text-code) !important;
     font-size: 0.95em !important;
     font-weight: 600 !important;
 }
@@ -32,20 +32,20 @@
     padding-bottom: 6px;
     font-size: 1.1em;
     font-weight: 700;
-    color: #2c3e50;
-    border-bottom: 2px solid #eaeaea;
+    color: var(--color-text-code);
+    border-bottom: 2px solid var(--color-border-soft);
 }
 
 .help-balloon__desc {
     margin-bottom: 10px;
-    color: #555;
+    color: var(--color-text-secondary);
 }
 
 .help-balloon__subtitle {
     display: block;
     margin-top: 12px;
     margin-bottom: 4px;
-    color: #444;
+    color: var(--color-text-secondary);
     font-size: 0.95em;
 }
 
@@ -60,13 +60,13 @@
 }
 
 .help-balloon code {
-    background-color: #f3f3f3;
-    color: #d63384;
+    background-color: var(--color-control-disabled);
+    color: var(--color-text-code-accent);
     padding: 2px 5px;
     border-radius: 4px;
     font-family: "Courier New", monospace;
     font-size: 0.9em;
-    border: 1px solid #e1e1e1;
+    border: 1px solid var(--color-border-soft);
 }
 
 @keyframes fadeIn {

@@ -5,17 +5,25 @@
             <span class="brand-divider">|</span>
             <span class="brand-tagline">Ambiente Interativo para Aprendizado de CLI</span>
         </div>
+        <fieldset id="theme-control" class="theme-control" aria-label="Tema">
+            <label title="Claro"><input type="radio" name="theme" value="light" aria-label="Claro" />
+                <span class="theme-segment"><span class="ui-icon icon-sun" aria-hidden="true"></span></span></label>
+            <label><input type="radio" name="theme" value="system" aria-label="Sistema" checked />
+                <span class="theme-segment">Sistema</span></label>
+            <label title="Escuro"><input type="radio" name="theme" value="dark" aria-label="Escuro" />
+                <span class="theme-segment"><span class="ui-icon icon-moon" aria-hidden="true"></span></span></label>
+        </fieldset>
     </div>
 
     <div class="header-context">
         <button id="btn-help-guide" class="btn-tool btn-guide-urgent">
-            <img src="../assets/icons/lucid/circle-question-mark.svg" class="btn-icon" alt="" />
+            <span class="ui-icon icon-circle-question-mark btn-icon" aria-hidden="true"></span>
             Explicar Ferramenta
         </button>
 
         <div class="context-controls">
             <div class="context-summary">
-                <img src="../assets/icons/lucid/info.svg" class="icon-inline" alt="" />
+                <span class="ui-icon icon-info icon-inline" aria-hidden="true"></span>
                 <p id="level-summary-text" class="summary-text"></p>
             </div>
             <div class="progress-bar-container">
