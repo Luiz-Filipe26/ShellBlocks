@@ -44,7 +44,7 @@
   z-index: 70;
 }
 .shellblocks-toolbox-surface > .blocklyToolboxFlyout .blocklyFlyoutBackground {
-  fill: var(--color-flyout-surface);
+  fill: var(--color-flyout-surface) !important;
   fill-opacity: 1;
   stroke: var(--color-toolbox-border);
   stroke-width: 1px;

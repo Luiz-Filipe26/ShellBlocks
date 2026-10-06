@@ -152,9 +152,9 @@
     --color-workspace: #171e28;
     --color-workspace-grid: #445063;
     --color-toolbox: #263241;
-    --color-toolbox-surface: rgb(38 50 65 / 94%);
+    --color-toolbox-surface: rgb(38 50 65 / 82%);
     --color-flyout: #202b39;
-    --color-flyout-surface: rgb(32 43 57 / 96%);
+    --color-flyout-surface: rgb(32 43 57 / 88%);
     --color-toolbox-border: rgb(148 163 184 / 65%);
     --color-handle-surface: rgb(38 50 65 / 96%);
     --color-handle-hover: rgb(53 68 86 / 96%);
